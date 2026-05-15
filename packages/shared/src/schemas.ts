@@ -122,6 +122,11 @@ export const SelfModelSchema = z.object({
   bid_responsiveness_baseline: z.number().min(0).max(1),
   action_id_asymmetry: z.number(),
   recurring_templates: z.array(RelationalTemplateSchema),
+  jo_context: z.object({
+    recent_calendar_summary: z.string(),
+    mood_indicators: z.array(z.string()),
+    contextualized_at: z.number(),
+  }).nullable().optional(),
   updated_at: z.string().datetime(),
 });
 

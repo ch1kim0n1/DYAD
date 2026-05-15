@@ -67,6 +67,16 @@ export class SelfModelUpdater {
     return { ...this.model };
   }
 
+  /**
+   * Attach (or clear) Jo's life-context summary. Stored on the model so
+   * brief generators and Mirror view can surface it; updaters do not use
+   * it for numeric computations.
+   */
+  setJoContext(ctx: SelfModel['jo_context'] | null): void {
+    this.model.jo_context = ctx ?? null;
+    this.model.updated_at = new Date().toISOString();
+  }
+
   /** Persist to `~/.dyad/self-model.json`. */
   save(): void {
     const dir = path.dirname(this.storagePath);

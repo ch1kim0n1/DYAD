@@ -105,6 +105,12 @@ export interface SelfModel {
   bid_responsiveness_baseline: number;
   action_id_asymmetry: number;           // Vallacher-Wegner signature
   recurring_templates: RelationalTemplate[];
+  /** Optional Jo-provided life-context summary used to contextualise patterns. */
+  jo_context?: {
+    recent_calendar_summary: string;
+    mood_indicators: string[];
+    contextualized_at: number;
+  } | null;
   updated_at: string;
 }
 

@@ -69,6 +69,17 @@ export async function waitForSidecar(timeoutMs: number = 20_000): Promise<boolea
   return false;
 }
 
+export async function loadMessages(
+  chatId?: string,
+  since?: number
+): Promise<{ messages: NormalizedMessage[]; error?: string }> {
+  const resp = await post<{ messages: NormalizedMessage[]; error?: string }>(
+    '/load-messages',
+    { chatId, since }
+  );
+  return resp ?? { messages: [] };
+}
+
 export async function runAnalysis(
   messages: NormalizedMessage[],
   features?: FeatureVector[]

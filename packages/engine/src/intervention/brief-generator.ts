@@ -37,20 +37,30 @@ export class BriefGenerator {
     this.maxTokens = options.maxTokens ?? DEFAULT_MAX_TOKENS;
   }
 
+  /**
+   * `enrichmentContext` (optional) is prepended verbatim to the prompt as
+   * additional system context. Used by the sidecar to thread Hog (partner
+   * context) and Jo (user life context) summaries through.
+   */
   async generate(
     detectorType: DetectorType,
     result: OrchestratorResult,
-    recentMessages: NormalizedMessage[]
+    recentMessages: NormalizedMessage[],
+    enrichmentContext?: string
   ): Promise<string | null> {
-    const key = this.cacheKey(detectorType, result);
+    const key = this.cacheKey(detectorType, result, enrichmentContext);
     const cached = this.cache.get(key);
     if (cached) return cached;
 
     try {
+      const prompt = buildBriefPrompt(detectorType, result, recentMessages);
+      const fullPrompt = enrichmentContext
+        ? `${enrichmentContext}\n\n${prompt}`
+        : prompt;
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: this.maxTokens,
-        messages: [{ role: 'user', content: buildBriefPrompt(detectorType, result, recentMessages) }],
+        messages: [{ role: 'user', content: fullPrompt }],
       });
       const block = response.content[0];
       const text = block.type === 'text' ? block.text.trim() : '';
@@ -62,18 +72,30 @@ export class BriefGenerator {
     }
   }
 
-  getCached(detectorType: DetectorType, result: OrchestratorResult): string | undefined {
-    return this.cache.get(this.cacheKey(detectorType, result));
+  getCached(
+    detectorType: DetectorType,
+    result: OrchestratorResult,
+    enrichmentContext?: string
+  ): string | undefined {
+    return this.cache.get(this.cacheKey(detectorType, result, enrichmentContext));
   }
 
   clearCache(): void {
     this.cache.clear();
   }
 
-  private cacheKey(detectorType: DetectorType, result: OrchestratorResult): string {
+  private cacheKey(
+    detectorType: DetectorType,
+    result: OrchestratorResult,
+    enrichmentContext?: string
+  ): string {
     return crypto
       .createHash('md5')
-      .update(JSON.stringify({ detectorType, result: this.relevant(detectorType, result) }))
+      .update(JSON.stringify({
+        detectorType,
+        result: this.relevant(detectorType, result),
+        enrichmentContext: enrichmentContext ?? null,
+      }))
       .digest('hex');
   }
 

@@ -9,10 +9,11 @@ import {
   Tooltip,
   ReferenceDot,
 } from 'recharts';
-import type { FeatureVector, OrchestratorResult } from '@dyad/shared';
+import type { FeatureVector, NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 
 interface MapViewProps {
   vectors: FeatureVector[];
+  messages: NormalizedMessage[];
   detectorResult: OrchestratorResult | null;
   onMarkerClick: (messageId: string) => void;
 }
@@ -22,19 +23,18 @@ interface ChartRow {
   message_id: string;
   self?: number;
   partner?: number;
-  detector?: string;
 }
 
 const MAX_POINTS = 50;
 
-export function MapView({ vectors, detectorResult, onMarkerClick }: MapViewProps) {
+export function MapView({ vectors, messages, detectorResult, onMarkerClick }: MapViewProps) {
+  const messageById = useMemo(() => new Map(messages.map(m => [m.message_id, m])), [messages]);
+
   const data: ChartRow[] = useMemo(() => {
     const slice = vectors.slice(-MAX_POINTS);
     return slice.map((v, i) => {
-      // Alternate-side display: we don't have is_from_me here, so use parity
-      // as a visual placeholder. Real wiring sets one of `self` / `partner`
-      // based on the matching NormalizedMessage in the store.
-      const isSelf = i % 2 === 0;
+      const msg = messageById.get(v.message_id);
+      const isSelf = msg?.is_from_me ?? false;
       return {
         index: i,
         message_id: v.message_id,
@@ -42,7 +42,7 @@ export function MapView({ vectors, detectorResult, onMarkerClick }: MapViewProps
         partner: isSelf ? undefined : v.afinn_valence,
       };
     });
-  }, [vectors]);
+  }, [vectors, messageById]);
 
   if (vectors.length < 5) {
     return (

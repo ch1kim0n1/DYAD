@@ -40,17 +40,20 @@ export class ReframeGenerator {
     detectorType: DetectorType,
     result: OrchestratorResult,
     brief: string,
-    recentMessages: NormalizedMessage[]
+    recentMessages: NormalizedMessage[],
+    enrichmentContext?: string
   ): Promise<string | null> {
-    const key = this.cacheKey(detectorType, result, brief);
+    const key = this.cacheKey(detectorType, result, brief, enrichmentContext);
     const cached = this.cache.get(key);
     if (cached) return cached;
 
     try {
+      const prompt = buildReframePrompt(detectorType, result, brief, recentMessages);
+      const fullPrompt = enrichmentContext ? `${enrichmentContext}\n\n${prompt}` : prompt;
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: this.maxTokens,
-        messages: [{ role: 'user', content: buildReframePrompt(detectorType, result, brief, recentMessages) }],
+        messages: [{ role: 'user', content: fullPrompt }],
       });
       const block = response.content[0];
       const text = block.type === 'text' ? block.text.trim() : '';
@@ -62,18 +65,33 @@ export class ReframeGenerator {
     }
   }
 
-  getCached(detectorType: DetectorType, result: OrchestratorResult, brief: string): string | undefined {
-    return this.cache.get(this.cacheKey(detectorType, result, brief));
+  getCached(
+    detectorType: DetectorType,
+    result: OrchestratorResult,
+    brief: string,
+    enrichmentContext?: string
+  ): string | undefined {
+    return this.cache.get(this.cacheKey(detectorType, result, brief, enrichmentContext));
   }
 
   clearCache(): void {
     this.cache.clear();
   }
 
-  private cacheKey(detectorType: DetectorType, result: OrchestratorResult, brief: string): string {
+  private cacheKey(
+    detectorType: DetectorType,
+    result: OrchestratorResult,
+    brief: string,
+    enrichmentContext?: string
+  ): string {
     return crypto
       .createHash('md5')
-      .update(JSON.stringify({ detectorType, brief, payload: this.relevant(detectorType, result) }))
+      .update(JSON.stringify({
+        detectorType,
+        brief,
+        payload: this.relevant(detectorType, result),
+        enrichmentContext: enrichmentContext ?? null,
+      }))
       .digest('hex');
   }
 
