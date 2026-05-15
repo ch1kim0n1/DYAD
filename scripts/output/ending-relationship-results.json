@@ -1,0 +1,237 @@
+{
+  "fixture": "scripts/fixtures/public-figures/ending-relationship.json",
+  "message_count": 14,
+  "models": {
+    "self": {
+      "user_id": "demo-user",
+      "attachment_indicators": {
+        "secure": 0.20161290322580644,
+        "anxious": 0.32258064516129037,
+        "avoidant": 0.27419354838709675,
+        "disorganized": 0.20161290322580644,
+        "confidence": 0.32258064516129037
+      },
+      "horseman_profile": {
+        "criticism": 0.05314410000000001,
+        "contempt": 0.059049000000000004,
+        "defensiveness": 0,
+        "stonewalling": 0.08999999999999998
+      },
+      "bid_responsiveness_baseline": 0.45,
+      "action_id_asymmetry": 0.33914845000000005,
+      "recurring_templates": [],
+      "updated_at": "2026-05-15T18:05:05.412Z"
+    },
+    "partner": {
+      "dyad_id": "demo-dyad",
+      "partner_id": "demo-partner",
+      "communication_fingerprint": {
+        "avg_response_time_ms": 0,
+        "message_length_mean": 0,
+        "emoji_usage_rate": 0,
+        "question_frequency": 0
+      },
+      "attachment_inference": {
+        "secure": 0.2015214872285757,
+        "anxious": 0.2710464003224344,
+        "avoidant": 0.32591062522041414,
+        "disorganized": 0.2015214872285757,
+        "confidence": 0.32591062522041414
+      },
+      "external_context_bundle": [],
+      "trigger_profile": [],
+      "bid_signature": {
+        "bid_types": {},
+        "response_quality_distribution": {
+          "missed": 3
+        }
+      },
+      "updated_at": "2026-05-15T18:05:05.413Z"
+    },
+    "relationship": {
+      "dyad_id": "demo-dyad",
+      "ppr_bidirectional": {
+        "user_to_partner": 0.5,
+        "partner_to_user": 0.5
+      },
+      "five_to_one_ratio": 0.08333333333333333,
+      "bid_response_rate": {
+        "user_response_rate": 0.5,
+        "partner_response_rate": 0.5
+      },
+      "repair_labor_index": 0,
+      "mirroring_index": -0.1292466440920951,
+      "gottman_status": "warning",
+      "open_loops": [],
+      "rupture_repair_ledger": [
+        {
+          "event_id": "rupture-1778868305414-ear3z1",
+          "type": "rupture",
+          "timestamp": "2026-05-15T18:05:05.414Z",
+          "status": "open",
+          "source_message_ids": [
+            "pf-0006",
+            "pf-0010",
+            "pf-0011",
+            "pf-0012",
+            "pf-0014"
+          ],
+          "confidence": 0.5
+        }
+      ],
+      "updated_at": "2026-05-15T18:05:05.414Z"
+    }
+  },
+  "detectors": {
+    "bid_asymmetry": {
+      "detected": false,
+      "user_response_rate": 0,
+      "partner_response_rate": 0,
+      "self_rate": 0,
+      "partner_rate": 0,
+      "gap": 0,
+      "asymmetry_score": 0,
+      "bid_count": 0,
+      "severity": "low",
+      "gottman_threshold_stable": 0.86,
+      "gottman_threshold_failing": 0.33,
+      "sample_size": 0,
+      "confidence": 0.5
+    },
+    "predictive_divergence": {
+      "detected": false,
+      "self_trend": -0.05,
+      "partner_trend": -0.7166666666666668,
+      "divergence_score": 0.6666666666666667,
+      "window_size": 5
+    },
+    "phantom_third_party": {
+      "detected": false,
+      "third_person_rate": 0,
+      "first_second_person_rate": 0.1606349206349206,
+      "ratio": 0,
+      "message_window": 10
+    }
+  },
+  "orchestrator": {
+    "result_id": "demo-dyad-1778868305414",
+    "dyad_id": "demo-dyad",
+    "generated_at": "2026-05-15T18:05:05.414Z",
+    "analyzed_at": 1778868305414,
+    "ethical_refusal": {
+      "safe": true,
+      "should_refuse": false,
+      "triggers": [],
+      "category": null,
+      "confidence": 0,
+      "referral_resources": [],
+      "crisis_resources": []
+    },
+    "detectors": {
+      "ethical_refusal": {
+        "safe": true,
+        "should_refuse": false,
+        "triggers": [],
+        "category": null,
+        "confidence": 0,
+        "referral_resources": [],
+        "crisis_resources": []
+      },
+      "bid_asymmetry": {
+        "detected": false,
+        "user_response_rate": 0,
+        "partner_response_rate": 0,
+        "self_rate": 0,
+        "partner_rate": 0,
+        "gap": 0,
+        "asymmetry_score": 0,
+        "bid_count": 0,
+        "severity": "low",
+        "gottman_threshold_stable": 0.86,
+        "gottman_threshold_failing": 0.33,
+        "sample_size": 0,
+        "confidence": 0.5
+      },
+      "predictive_divergence": {
+        "detected": false,
+        "self_trend": -0.05,
+        "partner_trend": -0.7166666666666668,
+        "divergence_score": 0.6666666666666667,
+        "window_size": 5
+      },
+      "phantom_third_party": {
+        "detected": false,
+        "third_person_rate": 0,
+        "first_second_person_rate": 0.1606349206349206,
+        "ratio": 0,
+        "message_window": 10
+      }
+    },
+    "summary": "No notable patterns detected.",
+    "recommended_actions": [],
+    "citations": [],
+    "confidence": 0.5,
+    "bid_asymmetry": {
+      "detected": false,
+      "user_response_rate": 0,
+      "partner_response_rate": 0,
+      "self_rate": 0,
+      "partner_rate": 0,
+      "gap": 0,
+      "asymmetry_score": 0,
+      "bid_count": 0,
+      "severity": "low",
+      "gottman_threshold_stable": 0.86,
+      "gottman_threshold_failing": 0.33,
+      "sample_size": 0,
+      "confidence": 0.5
+    },
+    "predictive_divergence": {
+      "detected": false,
+      "self_trend": -0.05,
+      "partner_trend": -0.7166666666666668,
+      "divergence_score": 0.6666666666666667,
+      "window_size": 5
+    },
+    "phantom_third_party": {
+      "detected": false,
+      "third_person_rate": 0,
+      "first_second_person_rate": 0.1606349206349206,
+      "ratio": 0,
+      "message_window": 10
+    },
+    "relationship_model": {
+      "dyad_id": "demo-dyad",
+      "ppr_bidirectional": {
+        "user_to_partner": 0.5,
+        "partner_to_user": 0.5
+      },
+      "five_to_one_ratio": 0.08333333333333333,
+      "bid_response_rate": {
+        "user_response_rate": 0.5,
+        "partner_response_rate": 0.5
+      },
+      "repair_labor_index": 0,
+      "mirroring_index": -0.1292466440920951,
+      "gottman_status": "warning",
+      "open_loops": [],
+      "rupture_repair_ledger": [
+        {
+          "event_id": "rupture-1778868305414-ear3z1",
+          "type": "rupture",
+          "timestamp": "2026-05-15T18:05:05.414Z",
+          "status": "open",
+          "source_message_ids": [
+            "pf-0006",
+            "pf-0010",
+            "pf-0011",
+            "pf-0012",
+            "pf-0014"
+          ],
+          "confidence": 0.5
+        }
+      ],
+      "updated_at": "2026-05-15T18:05:05.414Z"
+    }
+  }
+}

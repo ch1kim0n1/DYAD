@@ -89,9 +89,10 @@ export class DetectorOrchestrator {
       this.runSafely('primary_secondary', () => this.runPrimarySecondary(input)),
     ]);
 
-    const [bid, divergence, phantom, primarySecondary] = settled.map(r =>
-      r.status === 'fulfilled' ? r.value : null
-    );
+    const bid = settled[0].status === 'fulfilled' ? settled[0].value as ReturnType<BidAsymmetryDetector['detect']> : null;
+    const divergence = settled[1].status === 'fulfilled' ? settled[1].value as ReturnType<PredictiveDivergenceDetector['detect']> : null;
+    const phantom = settled[2].status === 'fulfilled' ? settled[2].value as ReturnType<PhantomThirdPartyDetector['detect']> : null;
+    const primarySecondary = settled[3].status === 'fulfilled' ? settled[3].value as Awaited<ReturnType<PrimarySecondaryDetector['detect']>> : null;
 
     const merged: OrchestratorResult = {
       ...base,

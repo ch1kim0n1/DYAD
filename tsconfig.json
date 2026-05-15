@@ -16,6 +16,7 @@
     "sourceMap": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
+    "types": ["node", "bun-types"],
     "baseUrl": ".",
     "paths": {
       "@dyad/shared": ["packages/shared/src/index.ts"],
@@ -30,5 +31,6 @@
       "@dyad/prompts/*": ["packages/prompts/src/*"]
     }
   },
-  "exclude": ["node_modules", "**/dist", "**/build"]
+  "include": ["packages/*/src/**/*", "packages/*/tests/**/*", "scripts/**/*"],
+  "exclude": ["node_modules", "**/dist", "**/build", "apps", "scripts/fixtures/build-fixtures.mjs", "packages/lexicons/scripts"]
 }

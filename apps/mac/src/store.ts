@@ -8,7 +8,7 @@ import type {
   OrchestratorResult,
 } from '@dyad/shared';
 
-export type ActiveView = 'map' | 'atlas' | 'mirror';
+export type ActiveView = 'map' | 'atlas' | 'mirror' | 'divergence';
 
 interface DyadStore {
   // Data
@@ -20,6 +20,7 @@ interface DyadStore {
   detectorResult: OrchestratorResult | null;
   currentBrief: string | null;
   currentReframe: string | null;
+  isLoadingReframe: boolean;
 
   // UI state
   isLoading: boolean;
@@ -35,6 +36,7 @@ interface DyadStore {
   setDetectorResult: (result: OrchestratorResult | null) => void;
   setBrief: (brief: string | null) => void;
   setReframe: (reframe: string | null) => void;
+  setLoadingReframe: (loading: boolean) => void;
   setActiveView: (view: ActiveView) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -50,6 +52,7 @@ const initialState = {
   detectorResult: null,
   currentBrief: null,
   currentReframe: null,
+  isLoadingReframe: false,
   isLoading: false,
   error: null,
   activeView: 'map' as ActiveView,
@@ -65,6 +68,7 @@ export const useDyadStore = create<DyadStore>((set) => ({
   setDetectorResult: (detectorResult) => set({ detectorResult }),
   setBrief: (currentBrief) => set({ currentBrief }),
   setReframe: (currentReframe) => set({ currentReframe }),
+  setLoadingReframe: (isLoadingReframe) => set({ isLoadingReframe }),
   setActiveView: (activeView) => set({ activeView }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),

@@ -1,0 +1,354 @@
+[
+  {
+    "message_id": "msg-0001",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "good morning love. how did you sleep?",
+    "timestamp": "2025-05-12T08:00:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0002",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "really well, thank you for asking. that new pillow is wonderful",
+    "timestamp": "2025-05-12T08:02:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0003",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "great. you deserve great sleep. coffee on me tonight to celebrate",
+    "timestamp": "2025-05-12T08:03:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0004",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "lovely, thank you. how is your morning going?",
+    "timestamp": "2025-05-12T08:06:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0005",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "busy but good. first stand up was actually productive and fun",
+    "timestamp": "2025-05-12T08:10:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0006",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "amazing! love hearing that. you have been working so hard",
+    "timestamp": "2025-05-12T08:12:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0007",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "thank you, that means a lot. how is the new project going for you?",
+    "timestamp": "2025-05-12T08:13:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0008",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "it is challenging but I am learning so much. I really love it",
+    "timestamp": "2025-05-12T08:18:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0009",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "that sounds wonderful and exciting. tell me more about it tonight?",
+    "timestamp": "2025-05-12T08:21:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0010",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "absolutely. I really appreciate you wanting to know",
+    "timestamp": "2025-05-12T08:23:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0011",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "home in 10. what should we cook?",
+    "timestamp": "2025-05-12T19:00:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0012",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "we have salmon. want to try that lovely new recipe?",
+    "timestamp": "2025-05-12T19:02:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0013",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "perfect, you are amazing. I will grab good wine on the way",
+    "timestamp": "2025-05-12T19:03:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0014",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "thank you sweetie. dinner with you is my favorite part of the day",
+    "timestamp": "2025-05-12T19:06:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0015",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "me too. lucky us. truly grateful",
+    "timestamp": "2025-05-12T19:07:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0016",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "thank you for last night. that talk about your project was helpful and lovely",
+    "timestamp": "2025-05-13T08:30:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0017",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "I loved it too. felt good to slow down and really connect",
+    "timestamp": "2025-05-13T08:34:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0018",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "so true. we should do that more often. it makes me happy",
+    "timestamp": "2025-05-13T08:36:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0019",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "agreed. what would help you feel more supported and loved this week?",
+    "timestamp": "2025-05-13T08:37:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0020",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "honestly just check ins like this. it means a lot that you ask",
+    "timestamp": "2025-05-13T08:42:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0021",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "done. I will check in every morning, I promise",
+    "timestamp": "2025-05-13T08:44:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0022",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "I love that. and I will do the same for you",
+    "timestamp": "2025-05-13T08:45:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0023",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "emergency: I forgot which leftover container has the curry",
+    "timestamp": "2025-05-13T18:00:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0024",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "the one with the smiley face haha",
+    "timestamp": "2025-05-13T18:02:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0025",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "saved by you again. marry me",
+    "timestamp": "2025-05-13T18:03:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0026",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "we are already married you goof. love you",
+    "timestamp": "2025-05-13T18:04:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0027",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "right. marry me again then",
+    "timestamp": "2025-05-13T18:05:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0028",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "yes always. happily",
+    "timestamp": "2025-05-13T18:06:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0029",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "thinking about that hike on saturday. excited - still up for it?",
+    "timestamp": "2025-05-14T09:00:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0030",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "yes! I have been looking forward to it. love hikes with you",
+    "timestamp": "2025-05-14T09:03:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0031",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "me too. can you grab snacks if I get the trail map?",
+    "timestamp": "2025-05-14T09:05:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0032",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "on it. I will check the weather too. amazing teamwork",
+    "timestamp": "2025-05-14T09:06:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0033",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "thank you, perfect teamwork as always. so grateful for you",
+    "timestamp": "2025-05-14T09:10:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0034",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "we are pretty good at this together",
+    "timestamp": "2025-05-14T09:11:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0035",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "I appreciated how you handled that thing today. so much grace",
+    "timestamp": "2025-05-14T20:30:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0036",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "really? that means so much. it was hard but I felt your support and love",
+    "timestamp": "2025-05-14T20:33:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0037",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "always. you handled it beautifully and with so much grace",
+    "timestamp": "2025-05-14T20:35:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0038",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "thank you for noticing. I love you so much",
+    "timestamp": "2025-05-14T20:36:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0039",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "I love you more. truly grateful and happy",
+    "timestamp": "2025-05-14T20:37:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0040",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "impossible. love love love",
+    "timestamp": "2025-05-14T20:38:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0041",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "saw a beautiful heron on my walk and thought of you",
+    "timestamp": "2025-05-15T07:30:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0042",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "you always notice the good stuff. picture please?",
+    "timestamp": "2025-05-15T07:32:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0043",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "sending now. it was just standing perfectly still. lovely",
+    "timestamp": "2025-05-15T07:33:00.000Z",
+    "chat_id": "demo"
+  },
+  {
+    "message_id": "msg-0044",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "beautiful. thank you for sharing that with me. love you",
+    "timestamp": "2025-05-15T07:36:00.000Z",
+    "chat_id": "demo"
+  }
+]

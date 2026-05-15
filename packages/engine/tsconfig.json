@@ -11,11 +11,12 @@
     "declaration": true,
     "declarationMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
       "@dyad/shared": ["../shared/src/index.ts"],
-      "@dyad/shared/*": ["../shared/src/*"]
+      "@dyad/shared/*": ["../shared/src/*"],
+      "@dyad/lexicons": ["../lexicons/src/index.ts"],
+      "@dyad/prompts": ["../prompts/src/index.ts"]
     }
   },
   "include": ["src/**/*"],

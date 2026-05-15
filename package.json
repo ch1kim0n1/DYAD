@@ -16,8 +16,9 @@
     "lexicons:build": "node packages/lexicons/scripts/build-nrc-lexicon.mjs"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "bun-types": "^1.3.14",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "bun": ">=1.0.0"

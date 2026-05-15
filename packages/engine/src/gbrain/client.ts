@@ -47,7 +47,7 @@ export class GBrainClient {
       throw new Error(`GBrain upsert failed: ${response.statusText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<GBrainPage>;
   }
 
   /**
@@ -72,7 +72,7 @@ export class GBrainClient {
       throw new Error(`GBrain get failed: ${response.statusText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<GBrainPage | null>;
   }
 
   /**
@@ -105,7 +105,7 @@ export class GBrainClient {
       throw new Error(`GBrain search failed: ${response.statusText}`);
     }
 
-    return response.json();
+    return response.json() as Promise<GBrainPage[]>;
   }
 
   /**

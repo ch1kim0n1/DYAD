@@ -9,6 +9,14 @@
     "devUrl": "http://localhost:1420",
     "frontendDist": "../dist"
   },
+  "plugins": {
+    "shell": {
+      "sidecar": true,
+      "scope": [
+        { "name": "binaries/dyad-engine", "sidecar": true, "args": true }
+      ]
+    }
+  },
   "app": {
     "windows": [
       {

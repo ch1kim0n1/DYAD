@@ -1,0 +1,207 @@
+{
+  "fixture": "scripts/fixtures/public-figures/stable-long-marriage.json",
+  "message_count": 18,
+  "models": {
+    "self": {
+      "user_id": "demo-user",
+      "attachment_indicators": {
+        "secure": 0.25,
+        "anxious": 0.25,
+        "avoidant": 0.25,
+        "disorganized": 0.25,
+        "confidence": 0.25
+      },
+      "horseman_profile": {
+        "criticism": 0,
+        "contempt": 0,
+        "defensiveness": 0,
+        "stonewalling": 0
+      },
+      "bid_responsiveness_baseline": 0.5,
+      "action_id_asymmetry": 0.37471024450000007,
+      "recurring_templates": [],
+      "updated_at": "2026-05-15T18:05:04.963Z"
+    },
+    "partner": {
+      "dyad_id": "demo-dyad",
+      "partner_id": "demo-partner",
+      "communication_fingerprint": {
+        "avg_response_time_ms": 0,
+        "message_length_mean": 0.17224834453125012,
+        "emoji_usage_rate": 0.09262500000000008,
+        "question_frequency": 0
+      },
+      "attachment_inference": {
+        "secure": 0.25,
+        "anxious": 0.25,
+        "avoidant": 0.25,
+        "disorganized": 0.25,
+        "confidence": 0.25
+      },
+      "external_context_bundle": [],
+      "trigger_profile": [],
+      "bid_signature": {
+        "bid_types": {},
+        "response_quality_distribution": {
+          "engaged": 3
+        }
+      },
+      "updated_at": "2026-05-15T18:05:04.963Z"
+    },
+    "relationship": {
+      "dyad_id": "demo-dyad",
+      "ppr_bidirectional": {
+        "user_to_partner": 0.5,
+        "partner_to_user": 0.5
+      },
+      "five_to_one_ratio": 14,
+      "bid_response_rate": {
+        "user_response_rate": 0.5,
+        "partner_response_rate": 1
+      },
+      "repair_labor_index": 0,
+      "mirroring_index": 0.7976416398959977,
+      "gottman_status": "stable",
+      "open_loops": [],
+      "rupture_repair_ledger": [],
+      "updated_at": "2026-05-15T18:05:04.964Z"
+    }
+  },
+  "detectors": {
+    "bid_asymmetry": {
+      "detected": false,
+      "user_response_rate": 0,
+      "partner_response_rate": 1,
+      "self_rate": 0,
+      "partner_rate": 1,
+      "gap": 1,
+      "asymmetry_score": -1,
+      "bid_count": 3,
+      "severity": "high",
+      "gottman_threshold_stable": 0.86,
+      "gottman_threshold_failing": 0.33,
+      "sample_size": 3,
+      "confidence": 0.5
+    },
+    "predictive_divergence": {
+      "detected": false,
+      "self_trend": 0.8833333333333332,
+      "partner_trend": 0.25,
+      "divergence_score": 0.6333333333333332,
+      "window_size": 5
+    },
+    "phantom_third_party": {
+      "detected": false,
+      "third_person_rate": 0,
+      "first_second_person_rate": 0.19337662337662337,
+      "ratio": 0,
+      "message_window": 10
+    }
+  },
+  "orchestrator": {
+    "result_id": "demo-dyad-1778868304964",
+    "dyad_id": "demo-dyad",
+    "generated_at": "2026-05-15T18:05:04.964Z",
+    "analyzed_at": 1778868304964,
+    "ethical_refusal": {
+      "safe": true,
+      "should_refuse": false,
+      "triggers": [],
+      "category": null,
+      "confidence": 0,
+      "referral_resources": [],
+      "crisis_resources": []
+    },
+    "detectors": {
+      "ethical_refusal": {
+        "safe": true,
+        "should_refuse": false,
+        "triggers": [],
+        "category": null,
+        "confidence": 0,
+        "referral_resources": [],
+        "crisis_resources": []
+      },
+      "bid_asymmetry": {
+        "detected": false,
+        "user_response_rate": 0,
+        "partner_response_rate": 1,
+        "self_rate": 0,
+        "partner_rate": 1,
+        "gap": 1,
+        "asymmetry_score": -1,
+        "bid_count": 3,
+        "severity": "high",
+        "gottman_threshold_stable": 0.86,
+        "gottman_threshold_failing": 0.33,
+        "sample_size": 3,
+        "confidence": 0.5
+      },
+      "predictive_divergence": {
+        "detected": false,
+        "self_trend": 0.8833333333333332,
+        "partner_trend": 0.25,
+        "divergence_score": 0.6333333333333332,
+        "window_size": 5
+      },
+      "phantom_third_party": {
+        "detected": false,
+        "third_person_rate": 0,
+        "first_second_person_rate": 0.19337662337662337,
+        "ratio": 0,
+        "message_window": 10
+      }
+    },
+    "summary": "No notable patterns detected.",
+    "recommended_actions": [],
+    "citations": [],
+    "confidence": 0.5,
+    "bid_asymmetry": {
+      "detected": false,
+      "user_response_rate": 0,
+      "partner_response_rate": 1,
+      "self_rate": 0,
+      "partner_rate": 1,
+      "gap": 1,
+      "asymmetry_score": -1,
+      "bid_count": 3,
+      "severity": "high",
+      "gottman_threshold_stable": 0.86,
+      "gottman_threshold_failing": 0.33,
+      "sample_size": 3,
+      "confidence": 0.5
+    },
+    "predictive_divergence": {
+      "detected": false,
+      "self_trend": 0.8833333333333332,
+      "partner_trend": 0.25,
+      "divergence_score": 0.6333333333333332,
+      "window_size": 5
+    },
+    "phantom_third_party": {
+      "detected": false,
+      "third_person_rate": 0,
+      "first_second_person_rate": 0.19337662337662337,
+      "ratio": 0,
+      "message_window": 10
+    },
+    "relationship_model": {
+      "dyad_id": "demo-dyad",
+      "ppr_bidirectional": {
+        "user_to_partner": 0.5,
+        "partner_to_user": 0.5
+      },
+      "five_to_one_ratio": 14,
+      "bid_response_rate": {
+        "user_response_rate": 0.5,
+        "partner_response_rate": 1
+      },
+      "repair_labor_index": 0,
+      "mirroring_index": 0.7976416398959977,
+      "gottman_status": "stable",
+      "open_loops": [],
+      "rupture_repair_ledger": [],
+      "updated_at": "2026-05-15T18:05:04.964Z"
+    }
+  }
+}

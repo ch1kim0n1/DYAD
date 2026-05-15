@@ -2,12 +2,15 @@ import { useDyadStore, type ActiveView } from './store.js';
 import { MapView } from './views/MapView.js';
 import { AtlasView } from './views/AtlasView.js';
 import { MirrorView } from './views/MirrorView.js';
+import { DivergenceView } from './views/DivergenceView.js';
 import { CrisisBanner } from './components/CrisisBanner.js';
+import { requestReframe } from './lib/gbrain-bridge.js';
 
 const VIEWS: { id: ActiveView; label: string }[] = [
   { id: 'map', label: 'The Map' },
   { id: 'atlas', label: 'The Atlas' },
   { id: 'mirror', label: 'The Mirror' },
+  { id: 'divergence', label: 'Divergence' },
 ];
 
 export function App() {
@@ -45,6 +48,7 @@ export function App() {
         {activeView === 'map' && <MapViewContainer />}
         {activeView === 'atlas' && <AtlasViewContainer />}
         {activeView === 'mirror' && <MirrorViewContainer />}
+        {activeView === 'divergence' && <DivergenceViewContainer />}
       </main>
     </div>
   );
@@ -78,6 +82,35 @@ function MirrorViewContainer() {
       selfModel={selfModel}
       recentVectors={features.slice(-20)}
       primarySecondaryResult={result?.primary_secondary ?? null}
+    />
+  );
+}
+
+function DivergenceViewContainer() {
+  const result = useDyadStore((s) => s.detectorResult);
+  const brief = useDyadStore((s) => s.currentBrief);
+  const reframe = useDyadStore((s) => s.currentReframe);
+  const isLoadingReframe = useDyadStore((s) => s.isLoadingReframe);
+  const setReframe = useDyadStore((s) => s.setReframe);
+  const setLoading = useDyadStore((s) => s.setLoadingReframe);
+  const messages = useDyadStore((s) => s.messages);
+
+  return (
+    <DivergenceView
+      result={result?.predictive_divergence ?? null}
+      brief={brief}
+      reframe={reframe}
+      isLoadingReframe={isLoadingReframe}
+      onRequestReframe={async () => {
+        if (!result || !brief) return;
+        setLoading(true);
+        try {
+          const text = await requestReframe('predictive_divergence', result, brief, messages.slice(-6));
+          setReframe(text);
+        } finally {
+          setLoading(false);
+        }
+      }}
     />
   );
 }

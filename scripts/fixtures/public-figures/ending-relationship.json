@@ -1,0 +1,114 @@
+[
+  {
+    "message_id": "pf-0001",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "you always do this. you never listen to me",
+    "timestamp": "2025-01-01T09:00:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0002",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "it is not my fault you cannot communicate normally",
+    "timestamp": "2025-01-01T09:02:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0003",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "this is ridiculous. you are being absolutely pathetic right now",
+    "timestamp": "2025-01-01T09:04:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0004",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "whatever. I am done",
+    "timestamp": "2025-01-01T09:06:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0005",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "typical. you are overreacting again. nothing is ever your fault",
+    "timestamp": "2025-01-01T09:08:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0006",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "fine",
+    "timestamp": "2025-01-01T09:10:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0007",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "I hate when you do this. you make everything horrible and awful",
+    "timestamp": "2025-01-01T09:12:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0008",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "I am tired and miserable. I cannot deal with you right now",
+    "timestamp": "2025-01-01T09:14:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0009",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "perfect. ignore me again like always",
+    "timestamp": "2025-01-01T09:16:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0010",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "what is wrong with you. terrible attitude. just terrible",
+    "timestamp": "2025-01-01T09:18:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0011",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "nothing. I am done. fine",
+    "timestamp": "2025-01-01T09:20:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0012",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "ridiculous. pathetic. awful",
+    "timestamp": "2025-01-01T09:22:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0013",
+    "participant_id": "self",
+    "is_from_me": true,
+    "text": "I hate this. miserable. depressed. horrible relationship",
+    "timestamp": "2025-01-01T09:24:00.000Z",
+    "chat_id": "public-figure"
+  },
+  {
+    "message_id": "pf-0014",
+    "participant_id": "partner",
+    "is_from_me": false,
+    "text": "leave me alone. I am done. nothing",
+    "timestamp": "2025-01-01T09:26:00.000Z",
+    "chat_id": "public-figure"
+  }
+]
