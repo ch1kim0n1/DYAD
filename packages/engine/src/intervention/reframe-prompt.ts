@@ -61,6 +61,6 @@ Each of you is anticipating a different ending to this conversation. That doesn'
 When someone outside a relationship takes up a lot of space, it's often because they hold something unfinished — old hurt, unresolved roles, or a comparison that hasn't been spoken. Your partner may be processing something they can't yet say directly about that person. One possibility is that the third party is a stand-in for something they want to ask you about your relationship — but it feels safer to talk about someone else first. What would it be like to ask them what they're really trying to figure out?`;
     case 'primary_secondary':
       return `Example — primary_secondary:
-The frustration in that message is real, but it may be a wrapper around something tenderer underneath. People reach for sharper feelings when the softer ones feel risky to admit — hurt, fear, or just not feeling chosen. None of that means you have to translate for them, but it can change what you respond to. What might it look like to answer the softer feeling, even when only the harder one was said out loud?`;
+The frustration in that message is real, but it may be a wrapper around something tenderer underneath. People reach for sharper feelings when the softer ones feel risky to admit — hurt, fear, or just not feeling chosen. You're not expected to translate for them, but noticing the softer feeling can change what you respond to. What might it look like to answer the softer feeling, even when only the harder one was said out loud?`;
   }
 }

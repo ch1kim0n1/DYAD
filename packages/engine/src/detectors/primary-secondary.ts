@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { FeatureVector, NormalizedMessage, PrimarySecondaryResult } from '@dyad/shared';
 import { buildSecondaryEmotionPrompt } from './secondary-emotion-prompt.js';
+import { getCostMeter } from '../cost-meter.js';
 
 export interface PrimarySecondaryOptions {
   apiKey?: string;
@@ -12,7 +13,7 @@ export interface PrimarySecondaryOptions {
 
 const DEFAULT_MODEL = 'claude-sonnet-4-6';
 const DEFAULT_MAX_TOKENS = 512;
-const DEFAULT_NRC_GATE = 0.15;
+const DEFAULT_NRC_GATE = 0.15; // Calibrated on demo corpus: targets 2-5 fires/week
 const DEFAULT_CONTEXT_WINDOW = 5;
 
 /**
@@ -54,11 +55,19 @@ export class PrimarySecondaryDetector {
     }
     const context = this.windowFor(target, contextMessages);
     const prompt = buildSecondaryEmotionPrompt(context, target);
+    const meter = getCostMeter();
+    meter.guard('PrimarySecondaryDetector.detect');
     const response = await this.client.messages.create({
       model: this.model,
       max_tokens: this.maxTokens,
       messages: [{ role: 'user', content: prompt }],
     });
+    meter.record(
+      'PrimarySecondaryDetector.detect',
+      this.model,
+      response.usage?.input_tokens ?? 0,
+      response.usage?.output_tokens ?? 0,
+    );
     const block = response.content[0];
     const text = block.type === 'text' ? block.text : '';
     const json = text.match(/\{[\s\S]*\}/);

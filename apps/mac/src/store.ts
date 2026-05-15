@@ -23,6 +23,9 @@ interface DyadStore {
   isLoadingReframe: boolean;
   lastAnalyzedAt: number | null;
   conversationId: string | null;
+  /** Offline / degraded mode (#67). When true, LLM-backed views show
+   *  a badge instead of stale data; ethical-refusal hard gate stays on. */
+  engineOnline: boolean;
 
   // UI state
   isLoading: boolean;
@@ -41,6 +44,7 @@ interface DyadStore {
   setLoadingReframe: (loading: boolean) => void;
   setLastAnalyzedAt: (ts: number | null) => void;
   setConversationId: (id: string | null) => void;
+  setEngineOnline: (v: boolean) => void;
   setActiveView: (view: ActiveView) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -59,6 +63,7 @@ const initialState = {
   isLoadingReframe: false,
   lastAnalyzedAt: null,
   conversationId: null,
+  engineOnline: true,
   isLoading: false,
   error: null,
   activeView: 'map' as ActiveView,
@@ -77,6 +82,7 @@ export const useDyadStore = create<DyadStore>((set) => ({
   setLoadingReframe: (isLoadingReframe) => set({ isLoadingReframe }),
   setLastAnalyzedAt: (lastAnalyzedAt) => set({ lastAnalyzedAt }),
   setConversationId: (conversationId) => set({ conversationId }),
+  setEngineOnline: (engineOnline) => set({ engineOnline }),
   setActiveView: (activeView) => set({ activeView }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),

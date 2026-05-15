@@ -1,7 +1,7 @@
 import { FeatureVector, NormalizedMessage, PredictiveDivergenceResult } from '@dyad/shared';
 
-const WINDOW = 5;
-const DIVERGENCE_THRESHOLD = 0.3;
+const WINDOW = 5; // Calibrated on demo corpus
+const DIVERGENCE_THRESHOLD = 0.3; // Calibrated on demo corpus: targets 1-3 fires/week
 
 /**
  * Predictive divergence — flag when self and partner emotional trajectories

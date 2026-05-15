@@ -10,6 +10,7 @@ import {
 } from '@dyad/shared';
 import { computeRepairLaborIndex } from './repair-labor.js';
 import { computeMirroringIndex } from './mirroring-index.js';
+import { secureWriteFile } from '../secure-fs.js';
 
 const DEFAULT_DIR = path.join(os.homedir(), '.dyad');
 
@@ -53,11 +54,9 @@ export class RelationshipModelUpdater {
     return { ...this.model };
   }
 
-  /** Persist to `~/.dyad/relationship-model.json`. */
+  /** Persist to `~/.dyad/relationship-model.json` with 0600 / 0700 perms. */
   save(): void {
-    const dir = path.dirname(this.storagePath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(this.storagePath, JSON.stringify(this.model, null, 2), 'utf8');
+    secureWriteFile(this.storagePath, JSON.stringify(this.model, null, 2));
   }
 
   createEmpty(dyadId: string): RelationshipModel {

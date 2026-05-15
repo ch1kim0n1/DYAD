@@ -86,7 +86,7 @@ export class BidAsymmetryDetector {
     const partnerRate = model.bid_response_rate.partner_response_rate;
     const asymmetry = userRate - partnerRate;
     const severity = this.severity(Math.abs(asymmetry));
-    const detected = bidCount >= MIN_BID_COUNT && partnerRate < 0.50 && userRate > 0.70;
+    const detected = bidCount >= MIN_BID_COUNT && partnerRate < 0.50 && userRate > 0.70; // Calibrated on demo corpus
     return {
       detected,
       user_response_rate: userRate,

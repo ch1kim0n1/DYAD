@@ -5,6 +5,9 @@
  * Falls back to the engine's reachable URL via `VITE_DYAD_SIDECAR_URL`
  * (override for dev). Each function returns null on transport error and
  * surfaces the original error message via console.error.
+ *
+ * Offline/degraded mode: briefs and reframes are cached in localStorage
+ * for fallback when the sidecar is unavailable.
  */
 import type {
   FeatureVector,
@@ -16,6 +19,37 @@ import type { DetectorType } from '@dyad/engine';
 const BASE_URL =
   (import.meta as unknown as { env?: { VITE_DYAD_SIDECAR_URL?: string } })
     .env?.VITE_DYAD_SIDECAR_URL ?? 'http://localhost:7432';
+
+// LocalStorage cache keys
+const CACHE_PREFIX = 'dyad_cache_';
+const BRIEF_CACHE_KEY = (detectorType: DetectorType, conversationId: string) =>
+  `${CACHE_PREFIX}brief_${detectorType}_${conversationId}`;
+const REFRAME_CACHE_KEY = (detectorType: DetectorType, conversationId: string) =>
+  `${CACHE_PREFIX}reframe_${detectorType}_${conversationId}`;
+
+function getCached<T>(key: string): T | null {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item) return null;
+    const { value, timestamp } = JSON.parse(item);
+    // Cache expires after 24 hours
+    if (Date.now() - timestamp > 24 * 60 * 60 * 1000) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+function setCached<T>(key: string, value: T): void {
+  try {
+    localStorage.setItem(key, JSON.stringify({ value, timestamp: Date.now() }));
+  } catch {
+    // Ignore storage errors (e.g., quota exceeded)
+  }
+}
 
 async function post<T>(path: string, body: unknown): Promise<T | null> {
   try {
@@ -80,6 +114,17 @@ export async function loadMessages(
   return resp ?? { messages: [] };
 }
 
+export interface ChatSummary { chat_id: string; message_count: number }
+export async function getChatSummary(): Promise<ChatSummary[]> {
+  const r = await get<{ conversations: ChatSummary[] }>('/chat-summary');
+  return r?.conversations ?? [];
+}
+
+export async function checkFullDiskAccess(): Promise<{ granted: boolean; error?: string }> {
+  const r = await get<{ granted: boolean; error?: string }>('/permissions/full-disk-access');
+  return r ?? { granted: false, error: 'sidecar unreachable' };
+}
+
 export async function runAnalysis(
   messages: NormalizedMessage[],
   features?: FeatureVector[]
@@ -90,27 +135,55 @@ export async function runAnalysis(
 export async function requestBrief(
   detectorType: DetectorType,
   result: OrchestratorResult,
-  messages: NormalizedMessage[]
+  messages: NormalizedMessage[],
+  conversationId?: string
 ): Promise<string | null> {
+  // Check cache first for offline/degraded mode
+  if (conversationId) {
+    const cached = getCached<string>(BRIEF_CACHE_KEY(detectorType, conversationId));
+    if (cached) return cached;
+  }
+
   const resp = await post<{ brief: string | null }>('/brief', {
     detectorType,
     result,
     messages,
   });
-  return resp?.brief ?? null;
+  const brief = resp?.brief ?? null;
+  
+  // Cache successful briefs
+  if (brief && conversationId) {
+    setCached(BRIEF_CACHE_KEY(detectorType, conversationId), brief);
+  }
+  
+  return brief;
 }
 
 export async function requestReframe(
   detectorType: DetectorType,
   result: OrchestratorResult,
   brief: string,
-  messages: NormalizedMessage[]
+  messages: NormalizedMessage[],
+  conversationId?: string
 ): Promise<string | null> {
+  // Check cache first for offline/degraded mode
+  if (conversationId) {
+    const cached = getCached<string>(REFRAME_CACHE_KEY(detectorType, conversationId));
+    if (cached) return cached;
+  }
+
   const resp = await post<{ reframe: string | null }>('/reframe', {
     detectorType,
     result,
     brief,
     messages,
   });
-  return resp?.reframe ?? null;
+  const reframe = resp?.reframe ?? null;
+  
+  // Cache successful reframes
+  if (reframe && conversationId) {
+    setCached(REFRAME_CACHE_KEY(detectorType, conversationId), reframe);
+  }
+  
+  return reframe;
 }

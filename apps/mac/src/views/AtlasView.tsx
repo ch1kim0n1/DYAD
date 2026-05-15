@@ -1,4 +1,5 @@
 import type { RelationshipModel, SelfModel, PartnerModel } from '@dyad/shared';
+import { OfflineBadge } from '../components/OfflineBadge.js';
 
 interface AtlasViewProps {
   model: RelationshipModel | null;
@@ -13,9 +14,12 @@ export function AtlasView({ model, selfModel, partnerModel }: AtlasViewProps) {
 
   return (
     <div className="atlas">
-      <div className={`gottman-badge ${model.gottman_status}`}>
-        <span style={{ fontSize: 24 }}>●</span>
-        <span>Gottman status: {model.gottman_status.toUpperCase()}</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className={`gottman-badge ${model.gottman_status}`}>
+          <span style={{ fontSize: 24 }}>●</span>
+          <span>Gottman status: {model.gottman_status.toUpperCase()}</span>
+        </div>
+        <OfflineBadge reason="metrics from cache" />
       </div>
 
       <div className="atlas-grid">

@@ -1,6 +1,7 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { NormalizedMessage } from '@dyad/shared';
 import { LLM_EXTRACTION_PROMPT_FALLBACK } from '@dyad/prompts';
+import { getCostMeter } from './cost-meter.js';
 
 export interface LLMExtractionResult {
   bid_classification: {
@@ -78,12 +79,20 @@ export class LlmExtractor {
 
   async extract(message: NormalizedMessage): Promise<LLMExtractionResult> {
     const prompt = this.buildPrompt(message);
+    const meter = getCostMeter();
+    meter.guard('LlmExtractor.extract');
     try {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: this.maxTokens,
         messages: [{ role: 'user', content: prompt }],
       });
+      meter.record(
+        'LlmExtractor.extract',
+        this.model,
+        response.usage?.input_tokens ?? 0,
+        response.usage?.output_tokens ?? 0,
+      );
       const block = response.content[0];
       const text = block.type === 'text' ? block.text : '';
       return this.parseResponse(text);

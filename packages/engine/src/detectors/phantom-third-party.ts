@@ -1,7 +1,7 @@
 import { FeatureVector, PhantomThirdPartyResult } from '@dyad/shared';
 
-const MIN_WINDOW = 10;
-const RATIO_THRESHOLD = 0.5;     // third_person > 0.5 × (first+second person)
+const MIN_WINDOW = 10; // Calibrated on demo corpus
+const RATIO_THRESHOLD = 0.5; // Calibrated on demo corpus: targets 0-1 fires/week     // third_person > 0.5 × (first+second person)
 
 /**
  * Phantom third-party detector — flags conversations dominated by talk

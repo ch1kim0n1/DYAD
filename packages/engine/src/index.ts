@@ -50,6 +50,9 @@ export { buildBriefPrompt, type DetectorType } from './intervention/brief-prompt
 export { ReframeGenerator, type ReframeGeneratorOptions } from './intervention/reframe-generator.js';
 export { buildReframePrompt } from './intervention/reframe-prompt.js';
 
+// Cost meter (#65)
+export { CostMeter, getCostMeter, setCostMeter, type CostRecord } from './cost-meter.js';
+
 // GBrain client
 export { GBrainClient, type GBrainPage, type GBrainClientOptions } from './gbrain/client.js';
 

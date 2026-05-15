@@ -3,6 +3,7 @@ import * as crypto from 'node:crypto';
 import { NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 import { buildReframePrompt } from './reframe-prompt.js';
 import { DetectorType } from './brief-prompt.js';
+import { getCostMeter } from '../cost-meter.js';
 
 export interface ReframeGeneratorOptions {
   apiKey?: string;
@@ -47,7 +48,9 @@ export class ReframeGenerator {
     const cached = this.cache.get(key);
     if (cached) return cached;
 
+    const meter = getCostMeter();
     try {
+      meter.guard('ReframeGenerator.generate');
       const prompt = buildReframePrompt(detectorType, result, brief, recentMessages);
       const fullPrompt = enrichmentContext ? `${enrichmentContext}\n\n${prompt}` : prompt;
       const response = await this.client.messages.create({
@@ -55,6 +58,12 @@ export class ReframeGenerator {
         max_tokens: this.maxTokens,
         messages: [{ role: 'user', content: fullPrompt }],
       });
+      meter.record(
+        'ReframeGenerator.generate',
+        this.model,
+        response.usage?.input_tokens ?? 0,
+        response.usage?.output_tokens ?? 0,
+      );
       const block = response.content[0];
       const text = block.type === 'text' ? block.text.trim() : '';
       if (text) this.cache.set(key, text);

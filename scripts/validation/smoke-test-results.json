@@ -1,0 +1,28 @@
+{
+  "timestamp": "2026-05-15T23:19:12.248Z",
+  "totalDuration": 2264,
+  "passed": true,
+  "summary": "4/4 tests passed",
+  "results": [
+    {
+      "name": "Adversarial Tests",
+      "passed": true,
+      "duration": 116
+    },
+    {
+      "name": "Accuracy Audit",
+      "passed": true,
+      "duration": 130
+    },
+    {
+      "name": "Unit Tests",
+      "passed": true,
+      "duration": 189
+    },
+    {
+      "name": "TypeScript Compilation",
+      "passed": true,
+      "duration": 1829
+    }
+  ]
+}

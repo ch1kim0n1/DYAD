@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { pingSidecar, type SidecarStatus } from '../lib/gbrain-bridge.js';
+import { useDyadStore } from '../store.js';
 
 export type Connection = 'connected' | 'loading' | 'disconnected';
 
@@ -18,14 +19,17 @@ export function StatusIndicator({ pollIntervalMs = 5000 }: Props) {
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setInterval> | null = null;
+    const setEngineOnline = useDyadStore.getState().setEngineOnline;
     const tick = async () => {
       const r = await pingSidecar();
       if (cancelled) return;
       if (r?.ok) {
         setConnection('connected');
         setDetails(r);
+        setEngineOnline(true);
       } else {
         setConnection('disconnected');
+        setEngineOnline(false);
       }
     };
     tick();

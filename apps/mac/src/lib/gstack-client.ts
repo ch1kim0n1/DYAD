@@ -11,6 +11,7 @@
  * returns `null` / `false`. Callers fall back to `~/.dyad/*.json`.
  */
 import type { RelationshipModel, SelfModel, PartnerModel } from '@dyad/shared';
+import { APIError } from './errors.js';
 
 export interface GStackSession {
   session_id: string;
@@ -105,7 +106,7 @@ export class GStackClient {
         body: body !== undefined ? JSON.stringify(body) : undefined,
       });
       if (!res.ok) {
-        if (this.strict) throw new Error(`GStack ${method} ${path} failed: ${res.status}`);
+        if (this.strict) throw new APIError(res.status, path);
         return null;
       }
       return (await res.json()) as T;

@@ -6,6 +6,7 @@ import {
   FeatureVector,
   NormalizedMessage,
 } from '@dyad/shared';
+import { getCostMeter } from '../cost-meter.js';
 
 export interface EthicalRefusalOptions {
   apiKey?: string;
@@ -133,12 +134,20 @@ Respond with ONLY valid JSON: {
   "rationale": "≤ 20 words"
 }`;
 
+    const meter = getCostMeter();
     try {
+      meter.guard('EthicalRefusalClassifier.classify');
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: this.maxTokens,
         messages: [{ role: 'user', content: prompt }],
       });
+      meter.record(
+        'EthicalRefusalClassifier.classify',
+        this.model,
+        response.usage?.input_tokens ?? 0,
+        response.usage?.output_tokens ?? 0,
+      );
       const block = response.content[0];
       const text = block.type === 'text' ? block.text : '';
       const json = text.match(/\{[\s\S]*\}/);

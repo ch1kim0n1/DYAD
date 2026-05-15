@@ -2,6 +2,7 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as os from 'node:os';
 import { FeatureVector, NormalizedMessage, SelfModel } from '@dyad/shared';
+import { secureWriteFile } from '../secure-fs.js';
 
 const DEFAULT_DIR = path.join(os.homedir(), '.dyad');
 
@@ -77,11 +78,9 @@ export class SelfModelUpdater {
     this.model.updated_at = new Date().toISOString();
   }
 
-  /** Persist to `~/.dyad/self-model.json`. */
+  /** Persist to `~/.dyad/self-model.json` with 0600 / 0700 perms. */
   save(): void {
-    const dir = path.dirname(this.storagePath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(this.storagePath, JSON.stringify(this.model, null, 2), 'utf8');
+    secureWriteFile(this.storagePath, JSON.stringify(this.model, null, 2));
   }
 
   createEmpty(userId: string): SelfModel {

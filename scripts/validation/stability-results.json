@@ -1,0 +1,61 @@
+{
+  "args": {
+    "minutes": 1,
+    "sampleSec": 10,
+    "thresholdMb": 30
+  },
+  "baseline": {
+    "rss": 73666560,
+    "heapTotal": 2348032,
+    "heapUsed": 2337313,
+    "external": 645713,
+    "arrayBuffers": 0
+  },
+  "samples": [
+    {
+      "atMs": 10001,
+      "heapUsed": 10417868,
+      "rss": 126832640,
+      "external": 1131260,
+      "iterations": 5791
+    },
+    {
+      "atMs": 20002,
+      "heapUsed": 5985117,
+      "rss": 147066880,
+      "external": 1105917,
+      "iterations": 8877
+    },
+    {
+      "atMs": 30003,
+      "heapUsed": 11186417,
+      "rss": 141979648,
+      "external": 1108689,
+      "iterations": 11170
+    },
+    {
+      "atMs": 40003,
+      "heapUsed": 20967670,
+      "rss": 145383424,
+      "external": 1109750,
+      "iterations": 13115
+    },
+    {
+      "atMs": 50003,
+      "heapUsed": 11475801,
+      "rss": 163123200,
+      "external": 1151705,
+      "iterations": 15205
+    },
+    {
+      "atMs": 60005,
+      "heapUsed": 22513052,
+      "rss": 144338944,
+      "external": 1153788,
+      "iterations": 17235
+    }
+  ],
+  "iterations": 17235,
+  "heapGrowthMb": 8.715141296386719,
+  "pass": true
+}

@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import * as crypto from 'node:crypto';
 import { NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 import { buildBriefPrompt, DetectorType } from './brief-prompt.js';
+import { getCostMeter } from '../cost-meter.js';
 
 export interface BriefGeneratorOptions {
   apiKey?: string;
@@ -52,7 +53,9 @@ export class BriefGenerator {
     const cached = this.cache.get(key);
     if (cached) return cached;
 
+    const meter = getCostMeter();
     try {
+      meter.guard('BriefGenerator.generate');
       const prompt = buildBriefPrompt(detectorType, result, recentMessages);
       const fullPrompt = enrichmentContext
         ? `${enrichmentContext}\n\n${prompt}`
@@ -62,6 +65,12 @@ export class BriefGenerator {
         max_tokens: this.maxTokens,
         messages: [{ role: 'user', content: fullPrompt }],
       });
+      meter.record(
+        'BriefGenerator.generate',
+        this.model,
+        response.usage?.input_tokens ?? 0,
+        response.usage?.output_tokens ?? 0,
+      );
       const block = response.content[0];
       const text = block.type === 'text' ? block.text.trim() : '';
       if (text) this.cache.set(key, text);

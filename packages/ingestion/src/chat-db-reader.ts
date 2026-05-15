@@ -2,6 +2,19 @@ import Database from 'better-sqlite3';
 import { RawMessage } from '@dyad/shared';
 import * as crypto from 'crypto';
 
+interface SQLiteMessageRow {
+  rowid: number;
+  text: string | null;
+  handle_id: string | null;
+  date: number;
+  is_from_me: number;
+  chat_id: string | null;
+}
+
+interface SQLiteChatIdRow {
+  chat_id: string;
+}
+
 /**
  * Reads iMessages from ~/Library/Messages/chat.db
  */
@@ -35,13 +48,13 @@ export class ChatDbReader {
     const stmt = this.db.prepare(query);
     const rows = since ? stmt.all(chatId, since) : stmt.all(chatId);
 
-    return rows.map((row: any) => ({
+    return (rows as SQLiteMessageRow[]).map((row) => ({
       rowid: row.rowid,
       text: row.text || '',
-      handle_id: this.hashHandle(row.handle_id),
+      handle_id: this.hashHandle(row.handle_id ?? ''),
       date: row.date,
       is_from_me: Boolean(row.is_from_me),
-      chat_id: this.hashChatId(row.chat_id),
+      chat_id: this.hashChatId(row.chat_id ?? ''),
     }));
   }
 
@@ -65,13 +78,13 @@ export class ChatDbReader {
     const stmt = this.db.prepare(query);
     const rows = since ? stmt.all(since) : stmt.all();
 
-    return rows.map((row: any) => ({
+    return (rows as SQLiteMessageRow[]).map((row) => ({
       rowid: row.rowid,
       text: row.text || '',
-      handle_id: this.hashHandle(row.handle_id),
+      handle_id: this.hashHandle(row.handle_id ?? ''),
       date: row.date,
       is_from_me: Boolean(row.is_from_me),
-      chat_id: this.hashChatId(row.chat_id),
+      chat_id: this.hashChatId(row.chat_id ?? ''),
     }));
   }
 
@@ -88,7 +101,7 @@ export class ChatDbReader {
     const stmt = this.db.prepare(query);
     const rows = stmt.all();
 
-    return rows.map((row: any) => this.hashChatId(row.chat_id));
+    return (rows as SQLiteChatIdRow[]).map((row) => this.hashChatId(row.chat_id));
   }
 
   /**

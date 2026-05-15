@@ -6,7 +6,7 @@ export interface GBrainPage {
   id: string;
   kind: string;
   title: string;
-  content: any;
+  content: unknown;
   created_at: string;
   updated_at: string;
 }
@@ -78,7 +78,7 @@ export class GBrainClient {
   /**
    * Search pages by kind and metadata
    */
-  async searchPages(kind: string, query?: Record<string, any>): Promise<GBrainPage[]> {
+  async searchPages(kind: string, query?: Record<string, unknown>): Promise<GBrainPage[]> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };

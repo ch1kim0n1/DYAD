@@ -39,8 +39,13 @@ export class CheckpointPersistence {
 
   save(data: CheckpointData): void {
     const dir = path.dirname(this.checkpointPath);
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    } else {
+      try { fs.chmodSync(dir, 0o700); } catch { /* best-effort */ }
+    }
     fs.writeFileSync(this.checkpointPath, JSON.stringify(data, null, 2), 'utf8');
+    try { fs.chmodSync(this.checkpointPath, 0o600); } catch { /* best-effort */ }
   }
 
   load(): CheckpointData | null {

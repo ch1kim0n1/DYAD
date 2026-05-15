@@ -10,6 +10,7 @@ import {
   ReferenceDot,
 } from 'recharts';
 import type { FeatureVector, NormalizedMessage, OrchestratorResult } from '@dyad/shared';
+import { OfflineBadge } from '../components/OfflineBadge.js';
 
 interface MapViewProps {
   vectors: FeatureVector[];
@@ -86,6 +87,7 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
         <span><span className="legend-dot self" />Self</span>
         <span><span className="legend-dot partner" />Partner</span>
         <span>Markers = detected patterns (click for brief)</span>
+        <OfflineBadge reason="LLM detectors paused" />
       </div>
       <div style={{ flex: 1, minHeight: 320 }}>
         <ResponsiveContainer width="100%" height="100%">

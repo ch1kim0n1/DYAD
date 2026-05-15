@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useDyadStore, type ActiveView } from './store.js';
 import { MapView } from './views/MapView.js';
 import { AtlasView } from './views/AtlasView.js';
@@ -6,6 +7,9 @@ import { MirrorView } from './views/MirrorView.js';
 import { DivergenceView } from './views/DivergenceView.js';
 import { CrisisOverlay } from './components/CrisisOverlay.js';
 import { StatusIndicator } from './components/StatusIndicator.js';
+import { OnboardingFlow } from './components/OnboardingFlow.js';
+import { ErrorBoundary } from './components/ErrorBoundary.js';
+import { friendlyError } from './lib/error-messages.js';
 import {
   waitForSidecar,
   loadMessages,
@@ -47,7 +51,9 @@ export function App() {
   const error = useDyadStore((s) => s.error);
   const lastAnalyzedAt = useDyadStore((s) => s.lastAnalyzedAt);
   const conversationId = useDyadStore((s) => s.conversationId);
+  const engineOnline = useDyadStore((s) => s.engineOnline);
   const [crisisDismissed, setCrisisDismissed] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   // ── Keyboard shortcuts: Cmd+1..4 switch views ────────────────────────
   useEffect(() => {
@@ -62,6 +68,14 @@ export function App() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [setActiveView]);
+
+  // ── Check if onboarding is needed ───────────────────────────────
+  useEffect(() => {
+    const onboardingComplete = localStorage.getItem('dyad_onboarding_complete');
+    if (onboardingComplete !== 'true') {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   // ── App init flow: ping → load → analyze → populate → auto-brief ─────
   useEffect(() => {
@@ -99,7 +113,7 @@ export function App() {
         // Auto-fetch brief for the first detected pattern
         const det = activeDetector(result);
         if (det) {
-          const brief = await requestBrief(det, result, messages.slice(-8));
+          const brief = await requestBrief(det, result, messages.slice(-8), conversationId);
           if (!cancelled && brief) store.setBrief(brief);
         }
       } catch (err) {
@@ -129,6 +143,14 @@ export function App() {
 
   return (
     <div className="app">
+      {showOnboarding && (
+        <OnboardingFlow
+          onComplete={(picked) => {
+            if (picked) useDyadStore.getState().setConversationId(picked);
+            setShowOnboarding(false);
+          }}
+        />
+      )}
       <header className="app-header">
         <div className="app-brand">DYAD</div>
         <nav className="app-nav">
@@ -157,13 +179,19 @@ export function App() {
           <StatusIndicator />
         </div>
         {isLoading && <span className="status">Analyzing…</span>}
-        {error && <span className="status error">{error}</span>}
+        {error && (() => {
+          const fe = friendlyError(error);
+          return (
+            <span className="status error" title={`${fe.body}${fe.action ? '\n\n' + fe.action : ''}`}>
+              {fe.title}
+            </span>
+          );
+        })()}
       </header>
       <main className="app-main">
-        {activeView === 'map' && <MapViewContainer />}
-        {activeView === 'atlas' && <AtlasViewContainer />}
-        {activeView === 'mirror' && <MirrorViewContainer />}
-        {activeView === 'divergence' && <DivergenceViewContainer />}
+        <ErrorBoundary name={`view-${activeView}`}>
+          <AnimatedView view={activeView} />
+        </ErrorBoundary>
       </main>
       {unsafe && !crisisDismissed && detectorResult?.ethical_refusal && (
         <CrisisOverlay
@@ -209,6 +237,37 @@ function MirrorViewContainer() {
   );
 }
 
+/**
+ * AnimatedView (#80) — crossfade between the four views.
+ * Respects `prefers-reduced-motion` via framer-motion's `useReducedMotion`.
+ */
+function AnimatedView({ view }: { view: ActiveView }) {
+  const reduce = useReducedMotion();
+  const variants = reduce
+    ? { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1 } }
+    : {
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0, transition: { duration: 0.15, ease: 'easeOut' } },
+        exit:    { opacity: 0, y: -8, transition: { duration: 0.1 } },
+      };
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={view}
+        initial={variants.initial}
+        animate={variants.animate}
+        exit={variants.exit}
+        style={{ height: '100%' }}
+      >
+        {view === 'map' && <MapViewContainer />}
+        {view === 'atlas' && <AtlasViewContainer />}
+        {view === 'mirror' && <MirrorViewContainer />}
+        {view === 'divergence' && <DivergenceViewContainer />}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
 function DivergenceViewContainer() {
   const result = useDyadStore((s) => s.detectorResult);
   const brief = useDyadStore((s) => s.currentBrief);
@@ -217,6 +276,7 @@ function DivergenceViewContainer() {
   const setReframe = useDyadStore((s) => s.setReframe);
   const setLoading = useDyadStore((s) => s.setLoadingReframe);
   const messages = useDyadStore((s) => s.messages);
+  const conversationId = useDyadStore((s) => s.conversationId);
 
   return (
     <DivergenceView
@@ -228,7 +288,7 @@ function DivergenceViewContainer() {
         if (!result || !brief) return;
         setLoading(true);
         try {
-          const text = await requestReframe('predictive_divergence', result, brief, messages.slice(-6));
+          const text = await requestReframe('predictive_divergence', result, brief, messages.slice(-6), conversationId);
           setReframe(text);
         } finally {
           setLoading(false);

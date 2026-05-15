@@ -199,6 +199,9 @@ interface LoadMessagesRequest {
 
 const server = serve({
   port: PORT,
+  // Bind only to loopback (#69). Without this, Bun defaults to 0.0.0.0
+  // and the sidecar would be reachable from anyone on the LAN.
+  hostname: '127.0.0.1',
   development: false,
   async fetch(req) {
     const url = new URL(req.url);
@@ -248,6 +251,33 @@ const server = serve({
       if (url.pathname === '/jo/refresh') {
         const jo = await fetchJo();
         return json({ jo_context: jo });
+      }
+
+      // ── /chat-summary — onboarding conversation picker (#68) ─────────
+      if (url.pathname === '/chat-summary') {
+        try {
+          const reader = new ChatDbReader();
+          const chatIds = reader.getChatIds();
+          const conversations = chatIds
+            .slice(0, 25)
+            .map(id => ({ chat_id: id, message_count: reader.readMessages(id).length }))
+            .sort((a, b) => b.message_count - a.message_count);
+          reader.close();
+          return json({ conversations });
+        } catch (err) {
+          return json({ conversations: [], error: (err as Error).message }, 200);
+        }
+      }
+
+      // ── /permissions/full-disk-access — onboarding probe (#68) ───────
+      if (url.pathname === '/permissions/full-disk-access') {
+        try {
+          const reader = new ChatDbReader();
+          reader.close();
+          return json({ granted: true });
+        } catch (err) {
+          return json({ granted: false, error: (err as Error).message });
+        }
       }
 
       // ── /analyze ──────────────────────────────────────────────────────
