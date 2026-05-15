@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: bun test + tsc
+    runs-on: ubuntu-latest
+    env:
+      # Skips suites that need a real ANTHROPIC API key. The unit tests
+      # configure their own mocks; integration suites read this flag.
+      DYAD_SKIP_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies (skip native scripts)
+        run: bun install --ignore-scripts
+
+      - name: Type check
+        run: bunx tsc --noEmit
+
+      - name: Run unit tests
+        run: bun test packages apps

@@ -21,6 +21,8 @@ interface DyadStore {
   currentBrief: string | null;
   currentReframe: string | null;
   isLoadingReframe: boolean;
+  lastAnalyzedAt: number | null;
+  conversationId: string | null;
 
   // UI state
   isLoading: boolean;
@@ -37,6 +39,8 @@ interface DyadStore {
   setBrief: (brief: string | null) => void;
   setReframe: (reframe: string | null) => void;
   setLoadingReframe: (loading: boolean) => void;
+  setLastAnalyzedAt: (ts: number | null) => void;
+  setConversationId: (id: string | null) => void;
   setActiveView: (view: ActiveView) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -53,6 +57,8 @@ const initialState = {
   currentBrief: null,
   currentReframe: null,
   isLoadingReframe: false,
+  lastAnalyzedAt: null,
+  conversationId: null,
   isLoading: false,
   error: null,
   activeView: 'map' as ActiveView,
@@ -69,6 +75,8 @@ export const useDyadStore = create<DyadStore>((set) => ({
   setBrief: (currentBrief) => set({ currentBrief }),
   setReframe: (currentReframe) => set({ currentReframe }),
   setLoadingReframe: (isLoadingReframe) => set({ isLoadingReframe }),
+  setLastAnalyzedAt: (lastAnalyzedAt) => set({ lastAnalyzedAt }),
+  setConversationId: (conversationId) => set({ conversationId }),
   setActiveView: (activeView) => set({ activeView }),
   setLoading: (isLoading) => set({ isLoading }),
   setError: (error) => set({ error }),

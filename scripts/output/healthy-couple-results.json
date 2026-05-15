@@ -1,5 +1,7 @@
 {
   "fixture": "scripts/fixtures/healthy-couple.json",
+  "live": false,
+  "conversation_id": null,
   "message_count": 44,
   "models": {
     "self": {
@@ -20,7 +22,7 @@
       "bid_responsiveness_baseline": 0.6355,
       "action_id_asymmetry": 0.14118044402233185,
       "recurring_templates": [],
-      "updated_at": "2026-05-15T17:37:25.360Z"
+      "updated_at": "2026-05-15T22:14:47.050Z"
     },
     "partner": {
       "dyad_id": "demo-dyad",
@@ -48,7 +50,7 @@
           "engaged": 7
         }
       },
-      "updated_at": "2026-05-15T17:37:25.360Z"
+      "updated_at": "2026-05-15T22:14:47.051Z"
     },
     "relationship": {
       "dyad_id": "demo-dyad",
@@ -66,7 +68,7 @@
       "gottman_status": "stable",
       "open_loops": [],
       "rupture_repair_ledger": [],
-      "updated_at": "2026-05-15T17:37:25.361Z"
+      "updated_at": "2026-05-15T22:14:47.052Z"
     }
   },
   "detectors": {
@@ -101,10 +103,10 @@
     }
   },
   "orchestrator": {
-    "result_id": "demo-dyad-1778866645362",
+    "result_id": "demo-dyad-1778883287052",
     "dyad_id": "demo-dyad",
-    "generated_at": "2026-05-15T17:37:25.362Z",
-    "analyzed_at": 1778866645362,
+    "generated_at": "2026-05-15T22:14:47.052Z",
+    "analyzed_at": 1778883287052,
     "ethical_refusal": {
       "safe": true,
       "should_refuse": false,
@@ -203,7 +205,7 @@
       "gottman_status": "stable",
       "open_loops": [],
       "rupture_repair_ledger": [],
-      "updated_at": "2026-05-15T17:37:25.361Z"
+      "updated_at": "2026-05-15T22:14:47.052Z"
     }
   }
 }

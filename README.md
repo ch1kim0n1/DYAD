@@ -1,5 +1,7 @@
 # DYAD — Relational Intelligence Platform
 
+[![CI](https://github.com/ch1kim0n1/DYAD/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ch1kim0n1/DYAD/actions/workflows/ci.yml)
+
 > The first software that operates on the real machinery of the relationships you can't afford to lose.
 
 DYAD is a mobile-first relational intelligence platform. It ingests a user's real communication history with specific people in their life — partner, co-founder, parent, close friend — and produces a continuously updated, calibrated, citation-backed model of how that relationship is actually functioning. The system surfaces what is silently going wrong, in time for the user to do something about it.
