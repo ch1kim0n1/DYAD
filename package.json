@@ -1,0 +1,25 @@
+{
+  "name": "dyad",
+  "version": "0.1.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:mac": "bun run --cwd apps/mac dev",
+    "dev:phone": "bun run --cwd apps/phone start",
+    "test": "bun test",
+    "test:shared": "bun test packages/shared",
+    "test:ingestion": "bun test packages/ingestion",
+    "test:engine": "bun test packages/engine",
+    "typecheck": "tsc --noEmit",
+    "lexicons:build": "node packages/lexicons/scripts/build-nrc-lexicon.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "bun": ">=1.0.0"
+  }
+}

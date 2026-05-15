@@ -1,0 +1,70 @@
+:root {
+  --bg: #0a0a0c;
+  --fg: #e8e8ed;
+  --muted: #8a8a92;
+  --accent: #5b8def;
+  --warm: #f59e0b;
+  --self: #5b8def;
+  --partner: #f97316;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --card: #16161a;
+  --border: #26262c;
+}
+
+* { box-sizing: border-box; }
+body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif; }
+
+.app { display: flex; flex-direction: column; height: 100vh; }
+.app-header { display: flex; align-items: center; padding: 16px 24px; border-bottom: 1px solid var(--border); gap: 24px; }
+.app-brand { font-weight: 700; letter-spacing: 0.05em; }
+.app-nav { display: flex; gap: 4px; flex: 1; }
+.nav-tab { background: transparent; border: none; color: var(--muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+.nav-tab:hover { color: var(--fg); }
+.nav-tab.active { background: var(--card); color: var(--fg); }
+.status { color: var(--muted); font-size: 12px; }
+.status.error { color: var(--red); }
+
+.app-main { flex: 1; overflow: auto; padding: 24px; }
+
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.empty { color: var(--muted); text-align: center; padding: 48px 16px; }
+
+/* Atlas */
+.atlas { display: flex; flex-direction: column; gap: 24px; }
+.gottman-badge { display: inline-flex; align-items: center; gap: 12px; padding: 12px 20px; border-radius: 10px; font-weight: 600; font-size: 16px; }
+.gottman-badge.stable { background: rgba(34, 197, 94, 0.15); color: var(--green); }
+.gottman-badge.warning { background: rgba(245, 158, 11, 0.15); color: var(--amber); }
+.gottman-badge.failing { background: rgba(239, 68, 68, 0.15); color: var(--red); }
+.atlas-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.metric-card .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.metric-card .value { font-size: 28px; font-weight: 700; margin: 8px 0 4px; }
+.metric-card .sub { color: var(--muted); font-size: 12px; }
+.gauge { width: 100%; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 8px; }
+.gauge-fill { height: 100%; background: var(--accent); transition: width 0.3s ease; }
+.gauge-fill.partner { background: var(--partner); }
+.balance-bar { position: relative; height: 8px; background: var(--border); border-radius: 4px; margin-top: 8px; }
+.balance-marker { position: absolute; top: -3px; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); transform: translateX(-50%); }
+
+/* Map */
+.map-view { display: flex; flex-direction: column; gap: 12px; height: 100%; }
+.map-legend { display: flex; gap: 16px; font-size: 12px; color: var(--muted); }
+.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+.legend-dot.self { background: var(--self); }
+.legend-dot.partner { background: var(--partner); }
+
+/* Mirror */
+.mirror { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.fw-bar { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.fw-bar .name { width: 64px; color: var(--muted); font-size: 12px; }
+.fw-bar .bar { flex: 1; height: 12px; background: var(--border); border-radius: 6px; overflow: hidden; }
+.fw-bar .fill { height: 100%; background: var(--accent); }
+.tag { display: inline-block; padding: 4px 10px; margin: 4px; border-radius: 12px; background: var(--border); font-size: 12px; }
+
+/* Crisis */
+.crisis { padding: 32px; max-width: 720px; margin: 0 auto; }
+.crisis h1 { color: var(--red); }
+.crisis-resource { padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin: 12px 0; background: var(--card); }
+.crisis-resource .name { font-weight: 600; margin-bottom: 4px; }
+.crisis-resource .contact { color: var(--accent); font-family: ui-monospace, monospace; }

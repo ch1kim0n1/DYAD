@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@dyad/shared": ["packages/shared/src/index.ts"],
+      "@dyad/shared/*": ["packages/shared/src/*"],
+      "@dyad/ingestion": ["packages/ingestion/src/index.ts"],
+      "@dyad/ingestion/*": ["packages/ingestion/src/*"],
+      "@dyad/engine": ["packages/engine/src/index.ts"],
+      "@dyad/engine/*": ["packages/engine/src/*"],
+      "@dyad/lexicons": ["packages/lexicons/src/index.ts"],
+      "@dyad/lexicons/*": ["packages/lexicons/src/*"],
+      "@dyad/prompts": ["packages/prompts/src/index.ts"],
+      "@dyad/prompts/*": ["packages/prompts/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "**/dist", "**/build"]
+}
