@@ -97,6 +97,15 @@ export interface ClinicalFlag {
   confidence: number;
 }
 
+export interface LlmExtracted {
+  intent: 'question' | 'statement' | 'request' | 'complaint' | 'praise' | 'repair_attempt' | 'bid' | 'other';
+  bid_type: 'emotional' | 'practical' | 'intellectual' | 'playful' | 'none';
+  regulation_style: 'suppression' | 'expression' | 'reappraisal' | 'dysregulation' | 'neutral';
+  attachment_signals: ('anxious' | 'avoidant' | 'secure' | 'disorganized')[];
+  escalation_markers: string[];
+  repair_markers: string[];
+}
+
 // === State objects (L3, persisted in GBrain) ===
 export interface SelfModel {
   user_id: string;

@@ -1,6 +1,10 @@
 import nrcEmotionLexicon from './nrc-emotion-lexicon.json';
 import afinn111 from './afinn-111.json';
 
+// NrcEntry as specified in issue #101
+export type NrcEntry = Record<string, number>; // { fear: 1, negative: 1 }
+
+// NRCEmotionWord maintained for backward compatibility with existing code
 export type NRCEmotionWord = {
   joy?: number | boolean;
   trust?: number | boolean;

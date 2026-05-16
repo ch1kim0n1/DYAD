@@ -4,6 +4,8 @@
 
 > The first software that operates on the real machinery of the relationships you can't afford to lose.
 
+> **For contributors:** see [`docs/BUILD-ORDER.md`](docs/BUILD-ORDER.md) for the issue dependency map / build sequence, [`docs/SECURITY.md`](docs/SECURITY.md) for the security posture, and [`docs/RELEASING.md`](docs/RELEASING.md) for sign + notarize + ship.
+
 DYAD is a mobile-first relational intelligence platform. It ingests a user's real communication history with specific people in their life — partner, co-founder, parent, close friend — and produces a continuously updated, calibrated, citation-backed model of how that relationship is actually functioning. The system surfaces what is silently going wrong, in time for the user to do something about it.
 
 ---

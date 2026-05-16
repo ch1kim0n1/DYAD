@@ -50,6 +50,14 @@ export { buildBriefPrompt, type DetectorType } from './intervention/brief-prompt
 export { ReframeGenerator, type ReframeGeneratorOptions } from './intervention/reframe-generator.js';
 export { buildReframePrompt } from './intervention/reframe-prompt.js';
 
+// Main application loop (#104)
+export {
+  startAppLoop,
+  type AppLoopConfig,
+  type AppLoopHandle,
+  type AppLoopModels,
+} from './app-loop.js';
+
 // Cost meter (#65)
 export { CostMeter, getCostMeter, setCostMeter, type CostRecord } from './cost-meter.js';
 
