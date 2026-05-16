@@ -1,3 +1,5 @@
+import { motion, type Variants } from 'framer-motion';
+
 const trustControls = [
   {
     title: 'Encrypted family circle',
@@ -30,25 +32,44 @@ const trustControls = [
 ];
 
 export function CareTrustCenter() {
+  const stagger: Variants = {
+    animate: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } },
+  };
+  const fadeUp: Variants = {
+    initial: { opacity: 0, y: 14 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
+
   return (
-    <section className="care-trust-view">
-      <div className="trust-hero">
+    <motion.section className="care-trust-view" initial="initial" animate="animate" variants={stagger}>
+      <motion.div className="trust-hero" variants={fadeUp}>
         <p className="care-kicker">Trust Center</p>
         <h1>Private by default, reviewable by design</h1>
         <p>
           CareCircle helps families coordinate care without making medical claims, surveilling, or standing in for
           family members, doctors, pharmacists, or caregivers.
         </p>
-      </div>
+        <div className="brief-hero-actions">
+          <button className="care-card-button" type="button">
+            Review sharing
+          </button>
+          <button className="care-card-button secondary" type="button">
+            Export demo brief
+          </button>
+        </div>
+      </motion.div>
 
-      <div className="trust-grid">
+      <motion.div className="trust-checklist" variants={stagger}>
         {trustControls.map((control) => (
-          <article className="trust-card" key={control.title}>
-            <h2>{control.title}</h2>
-            <p>{control.body}</p>
-          </article>
+          <motion.div className="trust-check-row" key={control.title} variants={fadeUp}>
+            <span className="trust-check-icon" aria-hidden="true">OK</span>
+            <div>
+              <h2>{control.title}</h2>
+              <p>{control.body}</p>
+            </div>
+          </motion.div>
         ))}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

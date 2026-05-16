@@ -88,6 +88,17 @@ export {
   type TrendDirection,
 } from './state/trend.js';
 
+// CareCircle demo engine
+export {
+  careCircleFixture,
+  analyzeCareWeek,
+  getWhatChanged,
+  getUnresolvedLoops,
+  getTaskSplit,
+  getWhatUsuallyWorks,
+  generateMessageDrafts,
+} from './carecircle/index.js';
+
 // GBrain client
 export { GBrainClient, type GBrainPage, type GBrainClientOptions } from './gbrain/client.js';
 

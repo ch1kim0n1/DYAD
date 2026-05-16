@@ -1,3 +1,4 @@
+import { motion, type Variants } from 'framer-motion';
 import type { CareCircleGraph } from './carecircleDemo.js';
 import { evidenceText, personName } from './carecircleDemo.js';
 
@@ -16,17 +17,24 @@ const categoryLabels: Record<CareCircleGraph['events'][number]['category'], stri
 
 export function CareTimeline({ graph }: CareTimelineProps) {
   const events = [...graph.events].sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
+  const stagger: Variants = {
+    animate: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } },
+  };
+  const fadeUp: Variants = {
+    initial: { opacity: 0, y: 14 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
 
   return (
-    <section className="care-timeline-view">
-      <div className="view-heading">
+    <motion.section className="care-timeline-view" initial="initial" animate="animate" variants={stagger}>
+      <motion.div className="view-heading" variants={fadeUp}>
         <p className="care-kicker">Source-visible timeline</p>
-        <h1>What happened this week</h1>
-      </div>
+        <h1>I kept the thread of the week for you.</h1>
+      </motion.div>
 
-      <div className="timeline-list">
+      <motion.div className="timeline-list" variants={stagger}>
         {events.map((event) => (
-          <article className={`timeline-item ${event.category}`} key={event.id}>
+          <motion.article className={`timeline-item ${event.category}`} key={event.id} variants={fadeUp}>
             <div className="timeline-dot" aria-hidden="true" />
             <div className="timeline-content">
               <div className="timeline-meta">
@@ -51,9 +59,9 @@ export function CareTimeline({ graph }: CareTimelineProps) {
                 ))}
               </div>
             </div>
-          </article>
+          </motion.article>
         ))}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

@@ -298,4 +298,124 @@ export const OrchestratorResultSchema = z.object({
   confidence: z.number().min(0).max(1),
 });
 
+// === CareCircle demo schemas ===
+export const CareRoleSchema = z.enum([
+  'parent',
+  'daughter',
+  'son',
+  'sibling',
+  'doctor',
+  'pharmacist',
+  'caregiver',
+  'family',
+]);
+
+export const SensitivityLevelSchema = z.enum(['low', 'medium', 'high']);
+
+export const CarePersonSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: CareRoleSchema,
+  relationshipLabel: z.string(),
+  communicationPreference: z.string().optional(),
+  responsibilities: z.array(z.string()).optional(),
+  notes: z.array(z.string()).optional(),
+});
+
+export const CareRelationshipSchema = z.object({
+  id: z.string(),
+  fromPersonId: z.string(),
+  toPersonId: z.string(),
+  type: z.string(),
+  context: z.string(),
+  trustNotes: z.array(z.string()).optional(),
+});
+
+export const CareObservationSchema = z.object({
+  id: z.string(),
+  personId: z.string(),
+  text: z.string(),
+  timestamp: z.string().datetime(),
+  source: z.enum(['family_note', 'message', 'appointment', 'medication', 'task']),
+  tags: z.array(z.string()),
+  sensitivity: SensitivityLevelSchema,
+});
+
+export const CareEventSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  timestamp: z.string().datetime(),
+  category: z.enum(['medication', 'meal', 'appointment', 'family_call', 'symptom', 'task']),
+  relatedPersonIds: z.array(z.string()),
+  linkedObservationIds: z.array(z.string()),
+});
+
+export const CareResponsibilitySchema = z.object({
+  id: z.string(),
+  ownerPersonId: z.string(),
+  subjectPersonId: z.string(),
+  title: z.string(),
+  status: z.enum(['open', 'in_progress', 'done']),
+  priority: z.enum(['low', 'medium', 'high']),
+  due: z.string().datetime().optional(),
+  linkedObservationIds: z.array(z.string()),
+});
+
+export const CareLoopSchema = z.object({
+  id: z.string(),
+  description: z.string(),
+  status: z.enum(['open', 'resolved']),
+  relatedPersonIds: z.array(z.string()),
+  evidenceObservationIds: z.array(z.string()),
+  suggestedNextStep: z.string(),
+  openedAt: z.string().datetime(),
+});
+
+export const CareInsightSchema = z.object({
+  id: z.string(),
+  claim: z.string(),
+  confidence: z.number().min(0).max(1),
+  evidenceObservationIds: z.array(z.string()),
+  recommendedAction: z.string(),
+  safetyLevel: z.enum(['normal', 'human_review', 'medical_review']),
+});
+
+export const CareActionSchema = z.object({
+  id: z.string(),
+  ownerPersonId: z.string(),
+  title: z.string(),
+  description: z.string(),
+  status: z.enum(['suggested', 'accepted', 'done']),
+  linkedInsightIds: z.array(z.string()),
+});
+
+export const CareMessageDraftsSchema = z.object({
+  toParent: z.string(),
+  toSiblings: z.string(),
+  toDoctorOrPharmacist: z.string(),
+});
+
+export const CareBriefSchema = z.object({
+  id: z.string(),
+  generatedAt: z.string().datetime(),
+  headline: z.string(),
+  summary: z.string(),
+  whatChanged: z.array(CareInsightSchema),
+  unresolvedLoops: z.array(CareLoopSchema),
+  taskSplit: z.array(CareActionSchema),
+  whatUsuallyWorks: z.array(z.string()),
+  messageDrafts: CareMessageDraftsSchema,
+});
+
+export const CareCircleGraphSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  people: z.array(CarePersonSchema),
+  relationships: z.array(CareRelationshipSchema),
+  observations: z.array(CareObservationSchema),
+  events: z.array(CareEventSchema),
+  responsibilities: z.array(CareResponsibilitySchema),
+  loops: z.array(CareLoopSchema),
+});
+
 // Note: Type exports are in types.ts to avoid conflicts
