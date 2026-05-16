@@ -69,19 +69,23 @@ export function CareCircleDashboard({ graph, brief, onAnalyze }: CareCircleDashb
       <motion.div className="family-grid" aria-label="Family circle" variants={stagger}>
         {dashboardPeople.map((person) => (
           <motion.article className="family-card" key={person.id} variants={fadeUp}>
-            <div className="avatar-mark" aria-hidden="true">
-              {person.name.slice(0, 1)}
+            <div className="family-card-top">
+              <div className="avatar-mark" aria-hidden="true">
+                {person.name.slice(0, 1)}
+              </div>
+              <div>
+                <h2>{person.name}</h2>
+                <p>{person.relationshipLabel}</p>
+              </div>
             </div>
-            <div>
-              <h2>{person.name}</h2>
-              <p>{person.relationshipLabel}</p>
+            <div className="family-card-bottom">
+              <span className="responsibility-line">
+                {person.responsibilities?.slice(0, 1).join('') ?? personName(person.id)}
+              </span>
+              <span className={`pulse-line ${person.id === 'linda' || person.id === 'sarah' ? 'attention' : ''}`}>
+                {personPulse[person.id] ?? 'care context ready'}
+              </span>
             </div>
-            <span className="responsibility-line">
-              {person.responsibilities?.slice(0, 1).join('') ?? personName(person.id)}
-            </span>
-            <span className={`pulse-line ${person.id === 'linda' || person.id === 'sarah' ? 'attention' : ''}`}>
-              {personPulse[person.id] ?? 'care context ready'}
-            </span>
           </motion.article>
         ))}
       </motion.div>

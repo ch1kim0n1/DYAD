@@ -995,6 +995,12 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   padding: 16px;
 }
 
+.plan-step {
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+}
+
 .assistant-status {
   background: rgba(255, 253, 248, 0.82);
   border: 1px solid #e5ded1;
@@ -1074,6 +1080,16 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   margin: 16px 0 8px;
 }
 
+.plan-step p {
+  line-height: 1.45;
+  margin: 0 0 16px;
+}
+
+.plan-step .care-card-button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+
 .action-card,
 .plan-step,
 .message-card {
@@ -1107,10 +1123,40 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
 }
 
 .family-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-height: 190px;
+  padding: 14px;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.family-card:hover {
+  background: #f4faf3;
+  border-color: #b9d3bc;
+  box-shadow: 0 14px 34px rgba(47, 111, 85, 0.12);
+  transform: translateY(-2px);
+}
+
+.family-card-top {
+  align-items: flex-start;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
-  min-height: 96px;
-  padding: 14px;
+  gap: 12px;
+  min-height: 86px;
+}
+
+.family-card-bottom {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+  min-height: 76px;
 }
 
 .family-card .responsibility-line {
@@ -1119,9 +1165,13 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   color: #53675b;
   display: inline-flex;
   font-size: 12px;
-  grid-column: 1 / -1;
+  min-height: 34px;
+  align-items: center;
   line-height: 1.3;
   padding: 6px 9px;
+  transition:
+    background 0.22s ease,
+    color 0.22s ease;
   width: fit-content;
 }
 
@@ -1129,11 +1179,26 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   color: #56645c;
   font-size: 12px;
   font-weight: 800;
-  grid-column: 1 / -1;
+  line-height: 1.35;
+  min-height: 32px;
+  transition: color 0.22s ease;
+}
+
+.family-card:hover .responsibility-line {
+  background: #dfeee1;
+  color: #2f6f55;
+}
+
+.family-card:hover .pulse-line {
+  color: #2f6f55;
 }
 
 .pulse-line.attention {
   color: #9a4d2f;
+}
+
+.family-card:hover .pulse-line.attention {
+  color: #8f482e;
 }
 
 .avatar-mark {
