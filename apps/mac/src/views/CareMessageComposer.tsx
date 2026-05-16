@@ -2,12 +2,14 @@ import { useState } from 'react';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import type { CareBrief } from './carecircleDemo.js';
 import { careCircleFixture, generateMessageDrafts } from './carecircleDemo.js';
+import { OfflineBadge } from '../components/OfflineBadge.js';
 
 interface CareMessageComposerProps {
   brief: CareBrief;
+  offline?: boolean;
 }
 
-export function CareMessageComposer({ brief }: CareMessageComposerProps) {
+export function CareMessageComposer({ brief, offline = false }: CareMessageComposerProps) {
   const drafts = brief.messageDrafts ?? generateMessageDrafts(careCircleFixture);
   const [copiedTitle, setCopiedTitle] = useState<string | null>(null);
   const [queuedTitle, setQueuedTitle] = useState<string | null>(null);
@@ -108,6 +110,7 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
 
   return (
     <motion.section className="care-messages-view" initial="initial" animate="animate" variants={stagger}>
+      {offline && <OfflineBadge reason="metrics from cache" />}
       <motion.div className="view-heading messages-heading" variants={fadeUp}>
         <div>
           <p className="care-kicker">Ready when you are</p>

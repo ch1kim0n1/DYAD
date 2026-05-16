@@ -2,13 +2,16 @@ import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import type { CareAction, CareBrief } from './carecircleDemo.js';
 import { careCircleFixture, evidenceText, getWhatChanged, personName } from './carecircleDemo.js';
+import { OfflineBadge } from '../components/OfflineBadge.js';
+import { renderShareCardPng, downloadBlob } from '../lib/share-card.js';
 
 interface CareBriefViewProps {
   brief: CareBrief;
   isSynthesizing: boolean;
+  offline?: boolean;
 }
 
-export function CareBriefView({ brief, isSynthesizing }: CareBriefViewProps) {
+export function CareBriefView({ brief, isSynthesizing, offline = false }: CareBriefViewProps) {
   const [handled, setHandled] = useState<Record<string, string>>({});
   const stagger: Variants = {
     animate: {
@@ -23,6 +26,15 @@ export function CareBriefView({ brief, isSynthesizing }: CareBriefViewProps) {
     animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
   };
 
+  const handleSaveImage = async () => {
+    if (!brief) return;
+    const blob = await renderShareCardPng({
+      detectorType: 'CareCircle',
+      brief: brief.summary.slice(0, 120),
+    });
+    downloadBlob(blob, 'care-brief.png');
+  };
+
   if (isSynthesizing) {
     return <CareSynthesisView />;
   }
@@ -31,6 +43,7 @@ export function CareBriefView({ brief, isSynthesizing }: CareBriefViewProps) {
 
   return (
     <motion.section className="care-brief-view" initial="initial" animate="animate" variants={stagger}>
+      {offline && <OfflineBadge reason="metrics from cache" />}
       <motion.div className="brief-hero" variants={fadeUp}>
         <p className="care-kicker">CareCircle brief</p>
         <h1>{brief.headline}</h1>
@@ -61,6 +74,16 @@ export function CareBriefView({ brief, isSynthesizing }: CareBriefViewProps) {
           </div>
         </div>
         <div className="brief-hero-actions">
+          {brief && (
+            <button
+              className="care-secondary-button"
+              type="button"
+              onClick={handleSaveImage}
+              title="Save as 800×400 PNG"
+            >
+              Save as image
+            </button>
+          )}
           <button
             className="care-card-button"
             type="button"

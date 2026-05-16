@@ -9,6 +9,7 @@ import { PredictiveDivergenceDetector } from './predictive-divergence.js';
 import { PhantomThirdPartyDetector } from './phantom-third-party.js';
 import { PrimarySecondaryDetector } from './primary-secondary.js';
 import { EthicalRefusalClassifier } from './ethical-refusal.js';
+import { child } from '../logger.js';
 
 export interface OrchestratorOptions {
   apiKey?: string;
@@ -52,7 +53,7 @@ export class DetectorOrchestrator {
     this.ethical = options.ethical ?? new EthicalRefusalClassifier({ apiKey: options.apiKey });
     this.primarySecondary = options.primarySecondary ?? this.tryBuildPrimarySecondary(options.apiKey);
     this.onDetectorError = options.onDetectorError ?? ((name, err) => {
-      console.error(`[orchestrator] detector "${name}" failed:`, err.message);
+      child('detectors').error({ detector: name, err: err.message }, 'detector failed');
     });
   }
 

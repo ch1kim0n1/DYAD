@@ -70,6 +70,15 @@ export function CareTrustCenter() {
           </motion.div>
         ))}
       </motion.div>
+      <footer className="trust-footer">
+        <a href="docs/DATA-PRIVACY.md" target="_blank" rel="noreferrer">
+          Privacy policy
+        </a>
+        {' · '}
+        <a href="docs/RESEARCH-CITATIONS.md" target="_blank" rel="noreferrer">
+          Research citations
+        </a>
+      </footer>
     </motion.section>
   );
 }
