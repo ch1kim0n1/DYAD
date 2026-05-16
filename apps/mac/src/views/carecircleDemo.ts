@@ -1,7 +1,7 @@
 import {
   analyzeCareWeek as analyzeCareWeekFromEngine,
   careCircleFixture,
-} from '@dyad/engine';
+} from '@dyad/engine/carecircle';
 import type { CareBrief as SharedCareBrief, CareCircleGraph as SharedCareCircleGraph } from '@dyad/shared';
 
 export type CareTab = 'dashboard' | 'timeline' | 'brief' | 'messages' | 'trust';
