@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { CareBrief } from './carecircleDemo.js';
 
 interface CareMessageComposerProps {
@@ -16,38 +17,78 @@ const fallbackDrafts = {
 
 export function CareMessageComposer({ brief, onAnalyze }: CareMessageComposerProps) {
   const drafts = brief?.messageDrafts ?? fallbackDrafts;
+  const [copiedTitle, setCopiedTitle] = useState<string | null>(null);
+
+  const copyDraft = async (title: string, text: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedTitle(title);
+    window.setTimeout(() => setCopiedTitle(null), 1400);
+  };
 
   return (
     <section className="care-messages-view">
       <div className="view-heading messages-heading">
         <div>
-          <p className="care-kicker">Drafts</p>
-          <h1>Messages that keep care human</h1>
+          <p className="care-kicker">Ready when you are</p>
+          <h1>I wrote the careful parts. You decide what goes out.</h1>
         </div>
         {!brief && (
           <button className="care-secondary-button" type="button" onClick={onAnalyze}>
-            Analyze this week
+            Catch me up
           </button>
         )}
       </div>
 
       <div className="message-grid">
-        <MessageCard title="Gentle message to Mom" text={drafts.toParent} />
-        <MessageCard title="Sibling update" text={drafts.toSiblings} />
-        <MessageCard title="Doctor/pharmacist summary" text={drafts.toDoctorOrPharmacist} />
+        <MessageCard
+          title="Check-in for Mom"
+          label="gentle"
+          text={drafts.toParent}
+          copied={copiedTitle === 'Check-in for Mom'}
+          onCopy={copyDraft}
+        />
+        <MessageCard
+          title="Family update"
+          label="ready"
+          text={drafts.toSiblings}
+          copied={copiedTitle === 'Family update'}
+          onCopy={copyDraft}
+        />
+        <MessageCard
+          title="Pharmacy summary"
+          label="approve first"
+          text={drafts.toDoctorOrPharmacist}
+          copied={copiedTitle === 'Pharmacy summary'}
+          onCopy={copyDraft}
+        />
       </div>
     </section>
   );
 }
 
-function MessageCard({ title, text }: { title: string; text: string }) {
+function MessageCard({
+  title,
+  label,
+  text,
+  copied,
+  onCopy,
+}: {
+  title: string;
+  label: string;
+  text: string;
+  copied: boolean;
+  onCopy: (title: string, text: string) => void;
+}) {
   return (
     <article className="message-card">
       <div className="message-card-header">
         <h2>{title}</h2>
-        <span>draft</span>
+        <span>{label}</span>
       </div>
       <p>{text}</p>
+      <button className="copy-draft-button" type="button" onClick={() => onCopy(title, text)}>
+        {copied ? 'Copied' : 'Copy draft'}
+      </button>
     </article>
   );
 }

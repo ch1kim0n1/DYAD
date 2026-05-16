@@ -783,3 +783,373 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
     flex-direction: column;
   }
 }
+
+/* CareCircle calm light refresh */
+.care-app {
+  --bg: #f7f4ee;
+  --fg: #24302b;
+  --muted: #6e7770;
+  --accent: #c76f44;
+  --warm: #8a9b68;
+  --card: #fffdf8;
+  --border: #e5ded1;
+  --green: #6f9b7b;
+  --amber: #c76f44;
+  --red: #b85b5b;
+  background:
+    linear-gradient(180deg, rgba(239, 245, 240, 0.92) 0%, rgba(247, 244, 238, 1) 42%),
+    #f7f4ee;
+  color: var(--fg);
+}
+
+.care-header {
+  background: rgba(255, 253, 248, 0.9);
+  border-bottom: 1px solid #e7dfd2;
+  box-shadow: 0 1px 0 rgba(66, 53, 43, 0.04);
+}
+
+.care-brand {
+  color: #24302b;
+}
+
+.care-brand-block span,
+.care-meta,
+.meta-time {
+  color: #6e7770;
+}
+
+.care-nav .nav-tab {
+  color: #607067;
+}
+
+.care-nav .nav-tab:hover:not(:disabled) {
+  color: #24302b;
+}
+
+.care-nav .nav-tab.active {
+  background: #edf4ee;
+  border-color: #d4e2d5;
+  color: #24302b;
+}
+
+.care-meta .meta-pill {
+  background: #f0e6d9;
+  color: #7a4b32;
+}
+
+.care-main {
+  padding: 24px;
+}
+
+.care-hero-panel,
+.brief-hero,
+.trust-hero,
+.empty-brief {
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.98), rgba(238, 246, 239, 0.92));
+  border: 1px solid #e3dccf;
+  box-shadow: 0 18px 50px rgba(71, 57, 45, 0.08);
+}
+
+.care-hero-panel {
+  min-height: 190px;
+}
+
+.care-hero-panel h1 {
+  max-width: 780px;
+}
+
+.care-kicker {
+  color: #7b8d5d;
+}
+
+.care-hero-panel h1,
+.brief-hero h1,
+.trust-hero h1,
+.empty-brief h1,
+.view-heading h1,
+.family-card h2,
+.urgent-card strong,
+.care-panel h2,
+.message-card h2,
+.trust-card h2,
+.timeline-content h2,
+.insight-header h3,
+.loop-card h3,
+.task-row h3,
+.plan-step h2,
+.action-card h2 {
+  color: #24302b;
+}
+
+.care-hero-panel p:not(.care-kicker),
+.brief-hero p:not(.care-kicker),
+.trust-hero p:not(.care-kicker),
+.empty-brief p:not(.care-kicker),
+.family-card p,
+.urgent-card p,
+.urgent-card span,
+.timeline-content p,
+.insight-card p,
+.loop-card p,
+.task-row p,
+.message-card p,
+.trust-card p,
+.plan-step p,
+.action-card p {
+  color: #637168;
+}
+
+.care-primary-button {
+  background: #2f6f55;
+  color: #fffdf8;
+  box-shadow: 0 10px 24px rgba(47, 111, 85, 0.18);
+}
+
+.care-secondary-button {
+  background: #fffdf8;
+  border-color: #d9d0c2;
+  color: #2f6f55;
+}
+
+.care-action-grid,
+.care-plan-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.action-card,
+.plan-step {
+  background: #fffdf8;
+  border: 1px solid #e5ded1;
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(71, 57, 45, 0.06);
+  min-height: 148px;
+  padding: 16px;
+}
+
+.assistant-status {
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid #e5ded1;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+  padding: 10px;
+}
+
+.assistant-status div {
+  align-items: center;
+  background: #f8f5ee;
+  border-radius: 8px;
+  display: flex;
+  gap: 9px;
+  min-height: 42px;
+  padding: 9px 10px;
+}
+
+.assistant-status p {
+  color: #425148;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.status-dot {
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+  height: 10px;
+  width: 10px;
+}
+
+.status-dot.ready {
+  background: #2f6f55;
+}
+
+.status-dot.waiting {
+  background: #c76f44;
+}
+
+.action-card-top {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.action-card-top span,
+.plan-step span,
+.task-row span {
+  color: #2f6f55;
+  font-weight: 800;
+}
+
+.action-card-top small {
+  background: #f2e8db;
+  border-radius: 999px;
+  color: #8b5739;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
+.action-card h2,
+.plan-step h2 {
+  font-size: 19px;
+  margin: 16px 0 8px;
+}
+
+.plan-step.done {
+  border-color: #cfded0;
+}
+
+.plan-step.waiting {
+  border-color: #edcbb9;
+}
+
+.family-grid {
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.family-card,
+.urgent-card,
+.care-panel,
+.message-card,
+.trust-card,
+.timeline-content,
+.insight-card,
+.loop-card {
+  background: #fffdf8;
+  border-color: #e5ded1;
+  box-shadow: 0 10px 28px rgba(71, 57, 45, 0.05);
+}
+
+.family-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  min-height: 108px;
+  padding: 14px;
+}
+
+.family-card .responsibility-line {
+  background: #edf4ee;
+  border-radius: 999px;
+  color: #53675b;
+  display: inline-flex;
+  font-size: 12px;
+  grid-column: 1 / -1;
+  line-height: 1.3;
+  padding: 6px 9px;
+  width: fit-content;
+}
+
+.avatar-mark {
+  background: #edf4ee;
+  border-color: #cfded0;
+  color: #2f6f55;
+}
+
+.brief-hero p:not(.care-kicker) {
+  color: #34413b;
+  font-size: 19px;
+}
+
+.brief-layout {
+  grid-template-columns: minmax(0, 1.35fr) minmax(260px, 0.65fr);
+  margin-top: 14px;
+}
+
+.care-panel {
+  padding: 16px;
+}
+
+.assurance-panel {
+  background: #edf4ee;
+  border-color: #cfded0;
+}
+
+.assurance-panel p {
+  color: #425148;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.review-pill.human_review {
+  background: #ddebdc;
+  color: #2f6f55;
+}
+
+.review-pill.medical_review {
+  background: #f4dfd4;
+  color: #934b2e;
+}
+
+.evidence-chip {
+  background: #f4efe6;
+  border: 1px solid #e4d8c7;
+  color: #7b553b;
+  font-size: 11px;
+  padding: 5px 8px;
+}
+
+.timeline-list::before {
+  background: #d8dfd4;
+}
+
+.timeline-dot {
+  background: #7b8d5d;
+  border-color: #f7f4ee;
+}
+
+.timeline-meta {
+  color: #7b8d5d;
+}
+
+.message-card {
+  min-height: 245px;
+}
+
+.message-card p {
+  color: #334039;
+  font-size: 16px;
+}
+
+.copy-draft-button {
+  background: #edf4ee;
+  border: 1px solid #cfded0;
+  border-radius: 8px;
+  color: #2f6f55;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 18px;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.copy-draft-button:hover {
+  background: #dfece1;
+}
+
+.message-card-header span {
+  background: #edf4ee;
+  color: #2f6f55;
+}
+
+.trust-card {
+  min-height: 140px;
+}
+
+@media (max-width: 980px) {
+  .care-action-grid,
+  .care-plan-strip,
+  .assistant-status {
+    grid-template-columns: 1fr;
+  }
+}
