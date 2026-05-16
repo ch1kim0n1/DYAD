@@ -47,7 +47,32 @@ export function CareBriefView({ brief, isSynthesizing, offline = false }: CareBr
       <motion.div className="brief-hero" variants={fadeUp}>
         <p className="care-kicker">CareCircle brief</p>
         <h1>{brief.headline}</h1>
-        <p>{brief.summary}</p>
+        <p className="brief-lead">I found three changes and staged the next moves for the family.</p>
+        <div className="brief-care-checklist" aria-label="Care plan summary">
+          <div className="brief-check-item">
+            <span className="brief-check-box done" aria-hidden="true" />
+            <div>
+              <strong>Family update drafted</strong>
+              <p>Sarah, Arjun, and Maya each have a clear next step.</p>
+            </div>
+          </div>
+          <div className="brief-check-item">
+            <span className="brief-check-box done" aria-hidden="true" />
+            <div>
+              <strong>Appointment reminder prepared</strong>
+              <p>Arjun can confirm the date without re-reading the week.</p>
+            </div>
+          </div>
+          <div className="brief-check-item needs-review">
+            <span className="brief-check-box review" aria-hidden="true">
+              !
+            </span>
+            <div>
+              <strong>Pharmacy call needs approval</strong>
+              <p>Medication-related notes stay paused for human review.</p>
+            </div>
+          </div>
+        </div>
         <div className="brief-hero-actions">
           {brief && (
             <button
