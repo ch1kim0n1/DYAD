@@ -1,6 +1,6 @@
 # Threshold calibration (#70)
 
-Generated 2026-05-15T23:13:57.115Z by `scripts/calibrate-thresholds.ts`.
+Generated 2026-05-16T20:45:12.617Z by `scripts/calibrate-thresholds.ts`.
 
 Window: 40 messages · step: 20 messages.
 
