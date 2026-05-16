@@ -306,3 +306,122 @@ export interface OrchestratorResult {
   citations: string[];
   confidence: number;
 }
+
+// === CareCircle demo types ===
+export type CareRole =
+  | 'parent'
+  | 'daughter'
+  | 'son'
+  | 'sibling'
+  | 'doctor'
+  | 'pharmacist'
+  | 'caregiver'
+  | 'family';
+
+export type SensitivityLevel = 'low' | 'medium' | 'high';
+
+export interface CarePerson {
+  id: string;
+  name: string;
+  role: CareRole;
+  relationshipLabel: string;
+  communicationPreference?: string;
+  responsibilities?: string[];
+  notes?: string[];
+}
+
+export interface CareRelationship {
+  id: string;
+  fromPersonId: string;
+  toPersonId: string;
+  type: string;
+  context: string;
+  trustNotes?: string[];
+}
+
+export interface CareObservation {
+  id: string;
+  personId: string;
+  text: string;
+  timestamp: string;
+  source: 'family_note' | 'message' | 'appointment' | 'medication' | 'task';
+  tags: string[];
+  sensitivity: SensitivityLevel;
+}
+
+export interface CareEvent {
+  id: string;
+  title: string;
+  timestamp: string;
+  category: 'medication' | 'meal' | 'appointment' | 'family_call' | 'symptom' | 'task';
+  relatedPersonIds: string[];
+  linkedObservationIds: string[];
+}
+
+export interface CareResponsibility {
+  id: string;
+  ownerPersonId: string;
+  subjectPersonId: string;
+  title: string;
+  status: 'open' | 'in_progress' | 'done';
+  priority: 'low' | 'medium' | 'high';
+  due?: string;
+  linkedObservationIds: string[];
+}
+
+export interface CareLoop {
+  id: string;
+  description: string;
+  status: 'open' | 'resolved';
+  relatedPersonIds: string[];
+  evidenceObservationIds: string[];
+  suggestedNextStep: string;
+  openedAt: string;
+}
+
+export interface CareInsight {
+  id: string;
+  claim: string;
+  confidence: number;
+  evidenceObservationIds: string[];
+  recommendedAction: string;
+  safetyLevel: 'normal' | 'human_review' | 'medical_review';
+}
+
+export interface CareAction {
+  id: string;
+  ownerPersonId: string;
+  title: string;
+  description: string;
+  status: 'suggested' | 'accepted' | 'done';
+  linkedInsightIds: string[];
+}
+
+export interface CareMessageDrafts {
+  toParent: string;
+  toSiblings: string;
+  toDoctorOrPharmacist: string;
+}
+
+export interface CareBrief {
+  id: string;
+  generatedAt: string;
+  headline: string;
+  summary: string;
+  whatChanged: CareInsight[];
+  unresolvedLoops: CareLoop[];
+  taskSplit: CareAction[];
+  whatUsuallyWorks: string[];
+  messageDrafts: CareMessageDrafts;
+}
+
+export interface CareCircleGraph {
+  id: string;
+  name: string;
+  people: CarePerson[];
+  relationships: CareRelationship[];
+  observations: CareObservation[];
+  events: CareEvent[];
+  responsibilities: CareResponsibility[];
+  loops: CareLoop[];
+}
