@@ -1406,10 +1406,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   box-shadow: 0 16px 34px rgba(47, 111, 85, 0.14);
 }
 
-.expanded-message-card {
-  grid-column: 1 / -1;
-}
-
 .message-card p {
   color: #334039;
   font-size: 16px;
@@ -1464,11 +1460,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   gap: 16px;
   margin-top: 16px;
   padding: 18px;
-}
-
-.message-composer-panel.embedded {
-  box-shadow: none;
-  margin-top: 18px;
 }
 
 .composer-editor textarea {

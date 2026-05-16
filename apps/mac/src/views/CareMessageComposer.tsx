@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion, type Variants } from 'framer-motion';
+import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import type { CareBrief } from './carecircleDemo.js';
 import { careCircleFixture, generateMessageDrafts } from './carecircleDemo.js';
 
@@ -53,6 +53,8 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
     },
   ];
 
+  const selectedDraft = draftCards.find((card) => card.title === selectedTitle) ?? null;
+
   const stagger: Variants = {
     animate: {
       transition: {
@@ -64,6 +66,33 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
   const fadeUp: Variants = {
     initial: { opacity: 0, y: 14 },
     animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
+  const composerStagger: Variants = {
+    initial: { opacity: 0, y: 30 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.72,
+        ease: [0.22, 1, 0.36, 1],
+        staggerChildren: 0.12,
+        delayChildren: 0.14,
+      },
+    },
+    exit: {
+      opacity: 0,
+      y: 14,
+      transition: { duration: 0.24, ease: 'easeIn' },
+    },
+  };
+  const composerPiece: Variants = {
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.48, ease: [0.22, 1, 0.36, 1] } },
+    exit: { opacity: 0, y: 8, transition: { duration: 0.18 } },
+  };
+  const reasonPiece: Variants = {
+    initial: { opacity: 0, x: 12 },
+    animate: { opacity: 1, x: 0, transition: { duration: 0.42, ease: [0.22, 1, 0.36, 1] } },
   };
 
   const copyDraft = async (title: string, text: string) => {
@@ -91,17 +120,63 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
             selected={selectedTitle === draft.title}
             onOpen={(title) => setSelectedTitle(title)}
             previewAction={draft.previewAction}
-            value={draftEdits[draft.title] ?? draft.text}
-            onEdit={(value) => setDraftEdits((current) => ({ ...current, [draft.title]: value }))}
-            onCopy={() => copyDraft(draft.title, draftEdits[draft.title] ?? draft.text)}
-            onQueue={() => setQueuedTitle(draft.title)}
-            copied={copiedTitle === draft.title}
-            queued={queuedTitle === draft.title}
-            queueLabel={draft.queueLabel}
-            reasons={draft.reasons}
           />
         ))}
       </motion.div>
+
+      <AnimatePresence mode="wait">
+        {selectedDraft && (
+          <motion.section
+            className="message-composer-panel"
+            key={selectedDraft.title}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            variants={composerStagger}
+          >
+            <motion.div className="composer-editor" variants={composerPiece}>
+              <motion.div className="message-card-header" variants={composerPiece}>
+                <h2>{selectedDraft.title}</h2>
+                <span>{selectedDraft.label}</span>
+              </motion.div>
+              <motion.textarea
+                variants={composerPiece}
+                value={draftEdits[selectedDraft.title] ?? selectedDraft.text}
+                onChange={(event) =>
+                  setDraftEdits((current) => ({ ...current, [selectedDraft.title]: event.target.value }))
+                }
+              />
+              <motion.div className="care-action-buttons" variants={composerPiece}>
+                <button
+                  className="copy-draft-button"
+                  type="button"
+                  onClick={() => copyDraft(selectedDraft.title, draftEdits[selectedDraft.title] ?? selectedDraft.text)}
+                >
+                  {copiedTitle === selectedDraft.title ? 'Copied' : 'Copy edited draft'}
+                </button>
+                <button
+                  className={`care-card-button ${queuedTitle === selectedDraft.title ? 'is-done' : ''}`}
+                  type="button"
+                  onClick={() => setQueuedTitle(selectedDraft.title)}
+                >
+                  {queuedTitle === selectedDraft.title ? 'Queued' : selectedDraft.queueLabel}
+                </button>
+              </motion.div>
+            </motion.div>
+            <motion.aside className="composer-reasoning" variants={composerPiece}>
+              <motion.p className="care-kicker" variants={reasonPiece}>
+                Why I wrote it this way
+              </motion.p>
+              {selectedDraft.reasons.map((reason) => (
+                <motion.div className="reason-row" key={reason} variants={reasonPiece}>
+                  <span className="status-dot ready" />
+                  <p>{reason}</p>
+                </motion.div>
+              ))}
+            </motion.aside>
+          </motion.section>
+        )}
+      </AnimatePresence>
     </motion.section>
   );
 }
@@ -113,14 +188,6 @@ function MessageCard({
   selected,
   onOpen,
   previewAction,
-  value,
-  onEdit,
-  onCopy,
-  onQueue,
-  copied,
-  queued,
-  queueLabel,
-  reasons,
 }: {
   title: string;
   label: string;
@@ -128,14 +195,6 @@ function MessageCard({
   selected: boolean;
   onOpen: (title: string) => void;
   previewAction: string;
-  value: string;
-  onEdit: (value: string) => void;
-  onCopy: () => void;
-  onQueue: () => void;
-  copied: boolean;
-  queued: boolean;
-  queueLabel: string;
-  reasons: string[];
 }) {
   const fadeUp: Variants = {
     initial: { opacity: 0, y: 14 },
@@ -143,7 +202,7 @@ function MessageCard({
   };
 
   return (
-    <motion.article className={`message-card ${selected ? 'selected expanded-message-card' : ''}`} variants={fadeUp}>
+    <motion.article className={`message-card ${selected ? 'selected' : ''}`} variants={fadeUp}>
       <div className="message-card-header">
         <h2>{title}</h2>
         <span>{label}</span>
@@ -158,39 +217,6 @@ function MessageCard({
           {previewAction}
         </button>
       </div>
-      {selected && (
-        <motion.section
-          className="message-composer-panel embedded"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-        >
-          <div className="composer-editor">
-            <textarea value={value} onChange={(event) => onEdit(event.target.value)} />
-            <div className="care-action-buttons">
-              <button className="copy-draft-button" type="button" onClick={onCopy}>
-                {copied ? 'Copied' : 'Copy edited draft'}
-              </button>
-              <button
-                className={`care-card-button ${queued ? 'is-done' : ''}`}
-                type="button"
-                onClick={onQueue}
-              >
-                {queued ? 'Queued' : queueLabel}
-              </button>
-            </div>
-          </div>
-          <aside className="composer-reasoning">
-            <p className="care-kicker">Why I wrote it this way</p>
-            {reasons.map((reason) => (
-              <div className="reason-row" key={reason}>
-                <span className="status-dot ready" />
-                <p>{reason}</p>
-              </div>
-            ))}
-          </aside>
-        </motion.section>
-      )}
     </motion.article>
   );
 }
