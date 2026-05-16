@@ -11,6 +11,7 @@ import {
 } from 'recharts';
 import type { FeatureVector, NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 import { OfflineBadge } from '../components/OfflineBadge.js';
+import { useDyadStore } from '../store.js';
 
 interface MapViewProps {
   vectors: FeatureVector[];
@@ -29,6 +30,8 @@ interface ChartRow {
 const MAX_POINTS = 50;
 
 export function MapView({ vectors, messages, detectorResult, onMarkerClick }: MapViewProps) {
+  const partnerName = useDyadStore((s) => s.partnerName);
+  const brief = useDyadStore((s) => s.currentBrief);
   const messageById = useMemo(() => new Map(messages.map(m => [m.message_id, m])), [messages]);
 
   const data: ChartRow[] = useMemo(() => {
@@ -53,29 +56,36 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
     );
   }
 
-  const detectorMarkers: { index: number; valence: number; label: string; message_id: string }[] = [];
+  const detectorMarkers: { index: number; valence: number; label: string; tooltip: string; message_id: string }[] = [];
+  const briefSnippet = brief ? brief.split('\n')[0].replace(/^\[.*?\]:\s*/, '').slice(0, 80) : null;
   if (detectorResult) {
     if (detectorResult.bid_asymmetry?.detected) {
+      const b = detectorResult.bid_asymmetry;
       detectorMarkers.push({
         index: data.length - 1,
         valence: data[data.length - 1]?.self ?? data[data.length - 1]?.partner ?? 0,
         label: 'bid asymmetry',
+        tooltip: `Bid asymmetry (${b.severity})\n${briefSnippet ?? 'Click for full insight →'}`,
         message_id: data[data.length - 1]?.message_id ?? '',
       });
     }
     if (detectorResult.predictive_divergence?.detected) {
+      const d = detectorResult.predictive_divergence;
       detectorMarkers.push({
         index: data.length - 1,
         valence: 0,
         label: 'divergence',
+        tooltip: `Predictive divergence (Δ ${d.divergence_score.toFixed(2)})\n${briefSnippet ?? 'Click for full insight →'}`,
         message_id: data[data.length - 1]?.message_id ?? '',
       });
     }
     if (detectorResult.phantom_third_party?.detected) {
+      const p = detectorResult.phantom_third_party;
       detectorMarkers.push({
         index: Math.floor(data.length / 2),
         valence: 0,
         label: 'phantom',
+        tooltip: `Phantom third-party (ratio ${p.ratio.toFixed(2)})\n${briefSnippet ?? 'Click for full insight →'}`,
         message_id: data[Math.floor(data.length / 2)]?.message_id ?? '',
       });
     }
@@ -84,8 +94,8 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
   return (
     <div className="map-view">
       <div className="map-legend">
-        <span><span className="legend-dot self" />Self</span>
-        <span><span className="legend-dot partner" />Partner</span>
+        <span><span className="legend-dot self" />You</span>
+        <span><span className="legend-dot partner" />{partnerName}</span>
         <span>Markers = detected patterns (click for brief)</span>
         <OfflineBadge reason="LLM detectors paused" />
       </div>
@@ -106,7 +116,7 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
               strokeWidth={2}
               dot={false}
               connectNulls
-              name="Self"
+              name="You"
             />
             <Line
               type="monotone"
@@ -115,7 +125,7 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
               strokeWidth={2}
               dot={false}
               connectNulls
-              name="Partner"
+              name={partnerName}
             />
             {detectorMarkers.map((m, i) => (
               <ReferenceDot
@@ -126,7 +136,11 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
                 fill="#fde047"
                 stroke="#a16207"
                 onClick={() => onMarkerClick(m.message_id)}
-              />
+                ifOverflow="extendDomain"
+                isFront
+              >
+                <title>{m.tooltip}</title>
+              </ReferenceDot>
             ))}
           </LineChart>
         </ResponsiveContainer>

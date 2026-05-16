@@ -1,12 +1,51 @@
-# DYAD — Relational Intelligence Platform
+# DYAD
 
 [![CI](https://github.com/ch1kim0n1/DYAD/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ch1kim0n1/DYAD/actions/workflows/ci.yml)
 
-> The first software that operates on the real machinery of the relationships you can't afford to lose.
+### Relationship intelligence built on the science that predicted divorce.
 
-> **For contributors:** see [`docs/BUILD-ORDER.md`](docs/BUILD-ORDER.md) for the issue dependency map / build sequence, [`docs/SECURITY.md`](docs/SECURITY.md) for the security posture, and [`docs/RELEASING.md`](docs/RELEASING.md) for sign + notarize + ship.
+DYAD reads your iMessage history and surfaces patterns from the same body of
+research — Gottman, Pennebaker, Sue Johnson — that achieved 91 % accuracy
+predicting whether a marriage would dissolve. It runs entirely on your Mac.
+Raw messages never leave the device unredacted; everything analytical lives
+in `~/.dyad/`.
 
-DYAD is a mobile-first relational intelligence platform. It ingests a user's real communication history with specific people in their life — partner, co-founder, parent, close friend — and produces a continuously updated, calibrated, citation-backed model of how that relationship is actually functioning. The system surfaces what is silently going wrong, in time for the user to do something about it.
+> **For contributors:** [`docs/BUILD-ORDER.md`](docs/BUILD-ORDER.md) (issue order) · [`docs/SECURITY.md`](docs/SECURITY.md) (threat model + controls) · [`docs/DATA-PRIVACY.md`](docs/DATA-PRIVACY.md) (what leaves your device) · [`docs/RESEARCH-CITATIONS.md`](docs/RESEARCH-CITATIONS.md) (every claim grounded in published science) · [`docs/RELEASING.md`](docs/RELEASING.md) (sign + notarize + ship).
+
+## What DYAD detects
+
+- **Bid asymmetry** — when one partner is reaching out to connect more than the other is reaching back. Gottman's strongest single predictor.
+- **Predictive divergence** — when you and your partner are emotionally heading in opposite directions inside the same conversation.
+- **Phantom third-party** — when an absent person (ex, parent, friend) is taking up disproportionate space in your messages.
+- **Primary / secondary emotion layering** — when frustration is masking hurt, fear, shame, or loneliness underneath. Emotionally Focused Therapy framing.
+
+For each, DYAD writes a one-paragraph brief and, on request, an alternative reframe — both warm, non-judgmental, and citation-backed.
+
+## Setup in 5 steps
+
+```bash
+# 1. Clone
+git clone https://github.com/ch1kim0n1/DYAD.git && cd DYAD
+
+# 2. Install dependencies (skip native scripts on first pass)
+bun install --ignore-scripts
+
+# 3. Copy + fill in API keys
+cp .env.example .env
+# At minimum: ANTHROPIC_API_KEY and DYAD_PARTNER_NAME
+
+# 4. Start the engine sidecar (one terminal)
+bun run --cwd apps/mac sidecar:dev
+
+# 5. Start the app (another terminal)
+bun run --cwd apps/mac tauri:dev
+```
+
+On first launch, DYAD walks you through Full Disk Access, conversation
+selection, and the API-key handshake. You're on the Map view in under
+five minutes.
+
+
 
 ---
 

@@ -219,6 +219,28 @@ const server = serve({
       });
     }
 
+    // /debug — status + telemetry rollup (#86)
+    if (url.pathname === '/debug') {
+      const { getTelemetry } = await import('@dyad/engine');
+      const telemetry = getTelemetry().summary();
+      return json({
+        ok: true,
+        pipeline_ready: pipeline !== null,
+        brief_ready: briefGen !== null,
+        reframe_ready: reframeGen !== null,
+        dyad_id: DYAD_ID,
+        gstack_session: gstackSessionId,
+        hog_configured: Boolean(HOG_URL),
+        jo_configured: Boolean(JO_URL),
+        telemetry: {
+          totalCalls: telemetry.totalCalls,
+          totalFailures: telemetry.totalFailures,
+          avgMs: telemetry.avgMs,
+          estCostUsd: telemetry.estCostUsd,
+        },
+      });
+    }
+
     if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
 
     try {

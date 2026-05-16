@@ -23,6 +23,10 @@ interface DyadStore {
   isLoadingReframe: boolean;
   lastAnalyzedAt: number | null;
   conversationId: string | null;
+  /** Partner display name (#81). Falls back to "Partner" when not set. */
+  partnerName: string;
+  /** Previous-week relationship snapshot for the trend card (#89). */
+  previousRelationshipModel: RelationshipModel | null;
   /** Offline / degraded mode (#67). When true, LLM-backed views show
    *  a badge instead of stale data; ethical-refusal hard gate stays on. */
   engineOnline: boolean;
@@ -44,6 +48,8 @@ interface DyadStore {
   setLoadingReframe: (loading: boolean) => void;
   setLastAnalyzedAt: (ts: number | null) => void;
   setConversationId: (id: string | null) => void;
+  setPartnerName: (name: string) => void;
+  setPreviousRelationshipModel: (model: RelationshipModel | null) => void;
   setEngineOnline: (v: boolean) => void;
   setActiveView: (view: ActiveView) => void;
   setLoading: (loading: boolean) => void;
@@ -63,6 +69,11 @@ const initialState = {
   isLoadingReframe: false,
   lastAnalyzedAt: null,
   conversationId: null,
+  partnerName: (() => {
+    const env = (import.meta as unknown as { env?: { VITE_DYAD_PARTNER_NAME?: string } }).env;
+    return env?.VITE_DYAD_PARTNER_NAME ?? 'Partner';
+  })(),
+  previousRelationshipModel: null,
   engineOnline: true,
   isLoading: false,
   error: null,
@@ -82,6 +93,8 @@ export const useDyadStore = create<DyadStore>((set) => ({
   setLoadingReframe: (isLoadingReframe) => set({ isLoadingReframe }),
   setLastAnalyzedAt: (lastAnalyzedAt) => set({ lastAnalyzedAt }),
   setConversationId: (conversationId) => set({ conversationId }),
+  setPartnerName: (partnerName) => set({ partnerName }),
+  setPreviousRelationshipModel: (previousRelationshipModel) => set({ previousRelationshipModel }),
   setEngineOnline: (engineOnline) => set({ engineOnline }),
   setActiveView: (activeView) => set({ activeView }),
   setLoading: (isLoading) => set({ isLoading }),

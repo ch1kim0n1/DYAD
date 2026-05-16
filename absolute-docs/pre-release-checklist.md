@@ -53,11 +53,35 @@ sign at the bottom.
 - [ ] CrisisOverlay verified on synthetic unsafe input
 
 ## Distribution (if shipping a build)
-- [ ] App signed with valid Developer ID Application certificate
-- [ ] App notarized — `spctl -a -vv DYAD.app` shows "accepted"
-- [ ] DMG branded (background, drag-to-Applications layout)
-- [ ] Icon visible in macOS dock, DMG, and Full Disk Access dialog
+- [ ] App signed with valid Developer ID Application certificate (#76)
+- [ ] App notarized — `spctl -a -vv DYAD.app` shows "accepted" (#77)
+- [ ] DMG branded (background, drag-to-Applications layout) (#78)
+- [ ] Icon visible in macOS dock, DMG, and Full Disk Access dialog (#79)
 - [ ] `docs/RELEASING.md` followed end-to-end
+
+## UI polish (added in #96)
+- [ ] View transitions animated; respects prefers-reduced-motion (#80)
+- [ ] No `handle_42` or raw participant id visible anywhere; partner name from env (#81)
+- [ ] Skeleton placeholders shown while data loads (#82)
+- [ ] Map annotation markers show hover tooltips (#83)
+
+## Observability (added in #96)
+- [ ] Pino structured logging in engine; no raw `console.log` in core paths (#84)
+- [ ] LLM telemetry tracked; cost meter alerts at threshold (#65, #85)
+- [ ] Debug panel toggleable with ⌘⇧D in dev builds (#86)
+
+## Privacy & ethics (added in #96)
+- [ ] `docs/DATA-PRIVACY.md` written; linked in app footer (#87)
+- [ ] `docs/RESEARCH-CITATIONS.md` written; linked from Atlas view (#88)
+
+## Differentiation (added in #96)
+- [ ] Week-over-week trend card in Atlas (#89)
+- [ ] "Save as image" produces an 800×400 PNG with anonymised names (#90)
+- [ ] Relationship health score 0–100 prominent in Atlas (#91)
+- [ ] Settings panel via ⌘, — switch conversation, lookback, reset (#92)
+- [ ] macOS notification fires on medium / high severity, respects cooldown (#93)
+- [ ] Retry + exponential backoff on every LLM caller (#94)
+- [ ] README sells the product — hero claim + setup in 5 steps (#95)
 
 ## Sign-off
 

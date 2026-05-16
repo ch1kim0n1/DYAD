@@ -3,6 +3,9 @@ import * as crypto from 'node:crypto';
 import { NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 import { buildBriefPrompt, DetectorType } from './brief-prompt.js';
 import { getCostMeter } from '../cost-meter.js';
+import { withRetry } from '../utils/retry.js';
+import { tracedLlmCall } from '../telemetry.js';
+import { child } from '../logger.js';
 
 export interface BriefGeneratorOptions {
   apiKey?: string;
@@ -54,17 +57,21 @@ export class BriefGenerator {
     if (cached) return cached;
 
     const meter = getCostMeter();
+    const log = child('brief-generator');
     try {
       meter.guard('BriefGenerator.generate');
       const prompt = buildBriefPrompt(detectorType, result, recentMessages);
       const fullPrompt = enrichmentContext
         ? `${enrichmentContext}\n\n${prompt}`
         : prompt;
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: this.maxTokens,
-        messages: [{ role: 'user', content: fullPrompt }],
-      });
+      const response = await withRetry(
+        () => tracedLlmCall('brief', this.model, () => this.client.messages.create({
+          model: this.model,
+          max_tokens: this.maxTokens,
+          messages: [{ role: 'user', content: fullPrompt }],
+        })),
+        { onRetry: ({ attempt, delayMs, error }) => log.warn({ attempt, delayMs, err: (error as Error).message, detectorType }, 'brief retry') },
+      );
       meter.record(
         'BriefGenerator.generate',
         this.model,
@@ -76,7 +83,7 @@ export class BriefGenerator {
       if (text) this.cache.set(key, text);
       return text || null;
     } catch (err) {
-      console.error('[BriefGenerator] generate failed:', (err as Error).message);
+      child('brief-generator').error({ err: (err as Error).message, detectorType }, 'brief generation failed');
       return null;
     }
   }

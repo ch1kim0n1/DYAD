@@ -1,6 +1,6 @@
 # Detector accuracy audit
 
-Generated 2026-05-16T00:09:59.824Z by `scripts/accuracy-audit.ts`.
+Generated 2026-05-16T06:57:01.377Z by `scripts/accuracy-audit.ts`.
 
 Each row scores one detector across all reference fixtures using a
 0-message sliding window (step 0). Ground-truth labels

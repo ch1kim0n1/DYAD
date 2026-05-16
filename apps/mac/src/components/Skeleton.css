@@ -1,0 +1,16 @@
+/* Skeleton shimmer (#82) */
+@keyframes skeleton-pulse {
+  0%   { opacity: 0.55; }
+  50%  { opacity: 0.85; }
+  100% { opacity: 0.55; }
+}
+.skeleton-rect {
+  display: block;
+  background: linear-gradient(90deg, #1f1f25 0%, #26262c 50%, #1f1f25 100%);
+  background-size: 200% 100%;
+  border-radius: 6px;
+  animation: skeleton-pulse 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-rect { animation: none; opacity: 0.7; }
+}

@@ -2,6 +2,9 @@ import Anthropic from '@anthropic-ai/sdk';
 import { NormalizedMessage } from '@dyad/shared';
 import { LLM_EXTRACTION_PROMPT_FALLBACK } from '@dyad/prompts';
 import { getCostMeter } from './cost-meter.js';
+import { withRetry } from './utils/retry.js';
+import { tracedLlmCall } from './telemetry.js';
+import { child } from './logger.js';
 
 export interface LLMExtractionResult {
   bid_classification: {
@@ -81,12 +84,21 @@ export class LlmExtractor {
     const prompt = this.buildPrompt(message);
     const meter = getCostMeter();
     meter.guard('LlmExtractor.extract');
+    const log = child('llm-extractor');
     try {
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: this.maxTokens,
-        messages: [{ role: 'user', content: prompt }],
-      });
+      const response = await withRetry(
+        () => tracedLlmCall('l2_extraction', this.model, () => this.client.messages.create({
+          model: this.model,
+          max_tokens: this.maxTokens,
+          messages: [{ role: 'user', content: prompt }],
+        })),
+        {
+          onRetry: ({ attempt, delayMs, error }) => log.warn(
+            { attempt, delayMs, err: (error as Error).message, messageId: message.message_id },
+            'L2 extraction retry',
+          ),
+        },
+      );
       meter.record(
         'LlmExtractor.extract',
         this.model,
@@ -97,7 +109,6 @@ export class LlmExtractor {
       const text = block.type === 'text' ? block.text : '';
       return this.parseResponse(text);
     } catch (err) {
-      // Surface the error to the caller — silent fallbacks hide pipeline issues.
       throw new Error(
         `LlmExtractor.extract failed for message ${message.message_id}: ${(err as Error).message}`
       );

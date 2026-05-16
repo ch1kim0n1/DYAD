@@ -61,6 +61,33 @@ export {
 // Cost meter (#65)
 export { CostMeter, getCostMeter, setCostMeter, type CostRecord } from './cost-meter.js';
 
+// Logger (#84)
+export { logger, child as childLogger } from './logger.js';
+
+// Telemetry (#85)
+export {
+  Telemetry,
+  getTelemetry,
+  tracedLlmCall,
+  type Operation,
+  type OperationSummary,
+  type TelemetrySummary,
+} from './telemetry.js';
+
+// Health score (#91)
+export {
+  computeHealthScore,
+  type HealthScore,
+  type HealthScoreComponent,
+} from './state/health-score.js';
+
+// Trend comparison (#89)
+export {
+  computeRelationshipTrend,
+  type RelationshipTrend,
+  type TrendDirection,
+} from './state/trend.js';
+
 // GBrain client
 export { GBrainClient, type GBrainPage, type GBrainClientOptions } from './gbrain/client.js';
 

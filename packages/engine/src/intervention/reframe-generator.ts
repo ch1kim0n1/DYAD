@@ -4,6 +4,9 @@ import { NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 import { buildReframePrompt } from './reframe-prompt.js';
 import { DetectorType } from './brief-prompt.js';
 import { getCostMeter } from '../cost-meter.js';
+import { withRetry } from '../utils/retry.js';
+import { tracedLlmCall } from '../telemetry.js';
+import { child } from '../logger.js';
 
 export interface ReframeGeneratorOptions {
   apiKey?: string;
@@ -49,15 +52,19 @@ export class ReframeGenerator {
     if (cached) return cached;
 
     const meter = getCostMeter();
+    const log = child('reframe-generator');
     try {
       meter.guard('ReframeGenerator.generate');
       const prompt = buildReframePrompt(detectorType, result, brief, recentMessages);
       const fullPrompt = enrichmentContext ? `${enrichmentContext}\n\n${prompt}` : prompt;
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: this.maxTokens,
-        messages: [{ role: 'user', content: fullPrompt }],
-      });
+      const response = await withRetry(
+        () => tracedLlmCall('reframe', this.model, () => this.client.messages.create({
+          model: this.model,
+          max_tokens: this.maxTokens,
+          messages: [{ role: 'user', content: fullPrompt }],
+        })),
+        { onRetry: ({ attempt, delayMs, error }) => log.warn({ attempt, delayMs, err: (error as Error).message, detectorType }, 'reframe retry') },
+      );
       meter.record(
         'ReframeGenerator.generate',
         this.model,
@@ -69,7 +76,7 @@ export class ReframeGenerator {
       if (text) this.cache.set(key, text);
       return text || null;
     } catch (err) {
-      console.error('[ReframeGenerator] generate failed:', (err as Error).message);
+      log.error({ err: (err as Error).message, detectorType }, 'reframe generation failed');
       return null;
     }
   }

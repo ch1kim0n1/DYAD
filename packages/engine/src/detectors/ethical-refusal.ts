@@ -7,6 +7,9 @@ import {
   NormalizedMessage,
 } from '@dyad/shared';
 import { getCostMeter } from '../cost-meter.js';
+import { withRetry } from '../utils/retry.js';
+import { tracedLlmCall } from '../telemetry.js';
+import { child } from '../logger.js';
 
 export interface EthicalRefusalOptions {
   apiKey?: string;
@@ -135,13 +138,19 @@ Respond with ONLY valid JSON: {
 }`;
 
     const meter = getCostMeter();
+    const log = child('ethical-refusal');
+    const client = this.client; // narrowed by the !this.client guard earlier
+    if (!client) return fastPath;
     try {
       meter.guard('EthicalRefusalClassifier.classify');
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: this.maxTokens,
-        messages: [{ role: 'user', content: prompt }],
-      });
+      const response = await withRetry(
+        () => tracedLlmCall('ethical_refusal', this.model, () => client.messages.create({
+          model: this.model,
+          max_tokens: this.maxTokens,
+          messages: [{ role: 'user', content: prompt }],
+        })),
+        { onRetry: ({ attempt, delayMs, error }) => log.warn({ attempt, delayMs, err: (error as Error).message }, 'ethical-refusal retry') },
+      );
       meter.record(
         'EthicalRefusalClassifier.classify',
         this.model,

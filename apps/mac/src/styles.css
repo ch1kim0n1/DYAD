@@ -126,6 +126,51 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
 .conv-picker .conv-count { color: var(--muted); font-size: 12px; }
 .onboarding-tips { color: var(--fg); }
 
+/* Atlas health score + trend card (#89/#91) */
+.health-score { padding: 16px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+.hs-number { font-size: 56px; font-weight: 700; line-height: 1; }
+.hs-band { font-size: 16px; font-weight: 600; margin-top: 4px; }
+.hs-caption { color: var(--muted); font-size: 11px; margin-top: 6px; }
+.trend-card h3 { margin: 0 0 12px; font-size: 14px; }
+.trend-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.trend-table td { padding: 6px 4px; }
+.trend-name { color: var(--muted); }
+.trend-arrow { color: var(--muted); text-align: center; }
+.trend-delta { font-family: ui-monospace, monospace; }
+.trend-delta.up_better, .trend-delta.down_better { color: var(--green); }
+.trend-delta.up_worse, .trend-delta.down_worse { color: var(--red); }
+.trend-delta.flat { color: var(--muted); }
+.trend-narrative { color: var(--muted); margin-top: 10px; font-style: italic; font-size: 13px; }
+.atlas-citations { color: var(--muted); font-size: 11px; margin-top: 14px; text-align: right; }
+.atlas-citations a { color: var(--accent); }
+
+/* Debug panel (#86) */
+.debug-panel { position: fixed; right: 16px; top: 64px; width: 360px; max-height: calc(100vh - 96px); overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 10px; z-index: 5000; padding: 16px; font-size: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.45); }
+.debug-panel h3 { margin: 0 0 8px; font-size: 13px; }
+.debug-panel dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; }
+.debug-panel dt { color: var(--muted); }
+.debug-panel dd { margin: 0; font-family: ui-monospace, monospace; }
+.debug-panel .close-btn { position: absolute; top: 8px; right: 12px; background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 16px; }
+
+/* Settings panel (#92) */
+.settings-overlay { position: fixed; inset: 0; z-index: 7000; background: rgba(0,0,0,0.5); display: flex; align-items: flex-start; justify-content: center; padding-top: 64px; backdrop-filter: blur(4px); }
+.settings-panel { width: 560px; max-width: calc(100vw - 64px); background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); max-height: calc(100vh - 128px); overflow-y: auto; }
+.settings-panel h2 { margin: 0 0 12px; }
+.settings-panel h3 { margin-top: 20px; margin-bottom: 8px; font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.settings-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.settings-row:last-child { border-bottom: none; }
+.settings-row label { font-size: 14px; }
+.settings-row .danger-btn { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid var(--red); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+.settings-row .primary-btn { background: var(--accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+.settings-close { display: block; margin: 24px auto 0; padding: 8px 24px; background: var(--border); color: var(--fg); border: none; border-radius: 6px; cursor: pointer; }
+
+/* Insight card export (#90) */
+.share-card { width: 800px; padding: 32px; background: linear-gradient(135deg, #0a0a0c 0%, #16161a 100%); color: #e8e8ed; border-radius: 14px; }
+.share-card .sc-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 16px; color: var(--muted); font-size: 12px; }
+.share-card .sc-title { font-size: 22px; font-weight: 600; margin-bottom: 8px; }
+.share-card .sc-brief { font-size: 14px; line-height: 1.6; white-space: pre-wrap; margin-bottom: 16px; }
+.share-card .sc-footer { color: var(--muted); font-size: 11px; margin-top: 16px; text-align: right; }
+
 /* Error boundary surface (#66) */
 .error-boundary { padding: 32px; max-width: 720px; margin: 32px auto; background: var(--card); border: 1px solid var(--red); border-radius: 10px; }
 .error-boundary h2 { margin-top: 0; color: var(--red); }

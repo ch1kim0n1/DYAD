@@ -2,6 +2,9 @@ import Anthropic from '@anthropic-ai/sdk';
 import { FeatureVector, NormalizedMessage, PrimarySecondaryResult } from '@dyad/shared';
 import { buildSecondaryEmotionPrompt } from './secondary-emotion-prompt.js';
 import { getCostMeter } from '../cost-meter.js';
+import { withRetry } from '../utils/retry.js';
+import { tracedLlmCall } from '../telemetry.js';
+import { child } from '../logger.js';
 
 export interface PrimarySecondaryOptions {
   apiKey?: string;
@@ -57,11 +60,15 @@ export class PrimarySecondaryDetector {
     const prompt = buildSecondaryEmotionPrompt(context, target);
     const meter = getCostMeter();
     meter.guard('PrimarySecondaryDetector.detect');
-    const response = await this.client.messages.create({
-      model: this.model,
-      max_tokens: this.maxTokens,
-      messages: [{ role: 'user', content: prompt }],
-    });
+    const log = child('primary-secondary');
+    const response = await withRetry(
+      () => tracedLlmCall('secondary_emotion', this.model, () => this.client.messages.create({
+        model: this.model,
+        max_tokens: this.maxTokens,
+        messages: [{ role: 'user', content: prompt }],
+      })),
+      { onRetry: ({ attempt, delayMs, error }) => log.warn({ attempt, delayMs, err: (error as Error).message }, 'secondary-emotion retry') },
+    );
     meter.record(
       'PrimarySecondaryDetector.detect',
       this.model,

@@ -9,7 +9,10 @@ import { CrisisOverlay } from './components/CrisisOverlay.js';
 import { StatusIndicator } from './components/StatusIndicator.js';
 import { OnboardingFlow } from './components/OnboardingFlow.js';
 import { ErrorBoundary } from './components/ErrorBoundary.js';
+import { SettingsPanel } from './components/SettingsPanel.js';
+import { DebugPanel } from './components/DebugPanel.js';
 import { friendlyError } from './lib/error-messages.js';
+import { maybeNotify } from './lib/notifications.js';
 import {
   waitForSidecar,
   loadMessages,
@@ -54,8 +57,12 @@ export function App() {
   const engineOnline = useDyadStore((s) => s.engineOnline);
   const [crisisDismissed, setCrisisDismissed] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showDebug, setShowDebug] = useState(false);
 
-  // ── Keyboard shortcuts: Cmd+1..4 switch views ────────────────────────
+  // ── Keyboard shortcuts ───────────────────────────────────────────────
+  // Cmd+1..4 switch views; Cmd+, opens Settings; Cmd+Shift+D toggles
+  // the Debug panel (dev builds only).
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey)) return;
@@ -63,6 +70,17 @@ export function App() {
       if (idx >= 0) {
         e.preventDefault();
         setActiveView(SHORTCUT_VIEWS[idx]);
+        return;
+      }
+      if (e.key === ',') {
+        e.preventDefault();
+        setShowSettings(true);
+        return;
+      }
+      const isDev = (import.meta as unknown as { env?: { MODE?: string } }).env?.MODE !== 'production';
+      if (e.shiftKey && (e.key === 'd' || e.key === 'D') && isDev) {
+        e.preventDefault();
+        setShowDebug((v) => !v);
       }
     };
     window.addEventListener('keydown', onKey);
@@ -115,6 +133,16 @@ export function App() {
         if (det) {
           const brief = await requestBrief(det, result, messages.slice(-8), conversationId);
           if (!cancelled && brief) store.setBrief(brief);
+        }
+
+        // System notification on detected high/medium-severity patterns (#93)
+        const detectorsFired: DetectorType[] = [];
+        if (result.bid_asymmetry?.detected) detectorsFired.push('bid_asymmetry');
+        if (result.predictive_divergence?.detected) detectorsFired.push('predictive_divergence');
+        if (result.phantom_third_party?.detected) detectorsFired.push('phantom_third_party');
+        if (result.primary_secondary && result.primary_secondary.confidence >= 0.7) detectorsFired.push('primary_secondary');
+        if (detectorsFired.length > 0) {
+          maybeNotify(result, detectorsFired, document.hasFocus()).catch(() => {});
         }
       } catch (err) {
         if (!cancelled) store.setError((err as Error).message);
@@ -199,6 +227,39 @@ export function App() {
           onDismiss={() => { setCrisisDismissed(true); setActiveView('mirror'); }}
         />
       )}
+      {showSettings && (
+        <SettingsPanel
+          onClose={() => setShowSettings(false)}
+          onReanalyse={() => {
+            useDyadStore.getState().setDetectorResult(null);
+            useDyadStore.getState().setBrief(null);
+            window.location.reload();
+          }}
+          onResetData={async () => {
+            useDyadStore.getState().reset();
+          }}
+          onExport={() => {
+            const data = JSON.stringify({
+              self: useDyadStore.getState().selfModel,
+              partner: useDyadStore.getState().partnerModel,
+              relationship: useDyadStore.getState().relationshipModel,
+            }, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `dyad-snapshot-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+          onSwitchConversation={() => {
+            localStorage.removeItem('dyad_onboarding_complete');
+            setShowSettings(false);
+            setShowOnboarding(true);
+          }}
+        />
+      )}
+      {showDebug && <DebugPanel onClose={() => setShowDebug(false)} />}
     </div>
   );
 }

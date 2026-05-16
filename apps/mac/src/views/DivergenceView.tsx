@@ -1,4 +1,6 @@
 import type { PredictiveDivergenceResult } from '@dyad/shared';
+import { renderShareCardPng, downloadBlob } from '../lib/share-card.js';
+import { useDyadStore } from '../store.js';
 
 interface DivergenceViewProps {
   result: PredictiveDivergenceResult | null;
@@ -67,7 +69,10 @@ export function DivergenceView({
       <div className="card brief-card">
         <h3>Brief</h3>
         {brief ? (
-          <pre className="brief-text">{brief}</pre>
+          <>
+            <pre className="brief-text">{brief}</pre>
+            <ShareAsImageButton brief={brief} />
+          </>
         ) : (
           <p className="muted">Generating brief…</p>
         )}
@@ -90,5 +95,26 @@ export function DivergenceView({
         )}
       </div>
     </div>
+  );
+}
+
+/** "Save as image" button (#90). */
+function ShareAsImageButton({ brief }: { brief: string }) {
+  const gottman = useDyadStore((s) => s.relationshipModel?.gottman_status);
+  return (
+    <button
+      className="reframe-button"
+      style={{ marginTop: 12 }}
+      onClick={async () => {
+        const blob = await renderShareCardPng({
+          detectorType: 'predictive_divergence',
+          brief,
+          gottmanStatus: gottman,
+        });
+        downloadBlob(blob, `dyad-insight-${Date.now()}.png`);
+      }}
+    >
+      Save as image
+    </button>
   );
 }
