@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type Dispatch, type SetStateAction } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { CareBriefView } from './views/CareBriefView.js';
 import { CareCircleDashboard } from './views/CareCircleDashboard.js';
@@ -6,10 +6,21 @@ import { CareMessageComposer } from './views/CareMessageComposer.js';
 import { CareTimeline } from './views/CareTimeline.js';
 import { CareTrustCenter } from './views/CareTrustCenter.js';
 import { ErrorBoundary } from './components/ErrorBoundary.js';
+import { syncCareGraphToGBrainMemory } from './views/carecircleMemory.js';
+import {
+  loadCareCircleRuntimeState,
+  initialCareCircleRuntimeState,
+  saveCareCircleRuntimeState,
+  type CareLiveNote,
+  type CareCircleRuntimeState,
+} from './views/carecircleRuntime.js';
 import {
   analyzeCareWeek,
   careCircleFixture,
   type CareBrief,
+  type CareCircleGraph,
+  type CareEvent,
+  type CareObservation,
   type CareTab,
 } from './views/carecircleDemo.js';
 
@@ -26,7 +37,12 @@ export function App() {
   const [brief, setBrief] = useState<CareBrief | null>(null);
   const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [runtimeState, setRuntimeState] = useState<CareCircleRuntimeState>(loadCareCircleRuntimeState);
   const synthesisTimer = useRef<number | null>(null);
+  const careGraph = useMemo(
+    () => buildCareGraphWithLiveNotes(careCircleFixture, runtimeState.liveNotes ?? []),
+    [runtimeState.liveNotes],
+  );
 
   const metaLabel = useMemo(() => {
     if (!analyzedAt) return 'Synthetic demo data';
@@ -46,8 +62,38 @@ export function App() {
     setBrief(null);
     setAnalyzedAt(null);
     setIsSynthesizing(true);
+    setRuntimeState((state) => ({
+      ...state,
+      gbrainMemory: {
+        status: 'syncing',
+        source: 'gbrain',
+        summary: 'Loading family messages, notes, appointments, medication alerts, and tasks into GBrain.',
+        memoryCount: state.gbrainMemory?.memoryCount ?? 0,
+      },
+    }));
+    void syncCareGraphToGBrainMemory(careGraph).then((savedToGBrain) => {
+      setRuntimeState((state) => ({
+        ...state,
+        gbrainMemory: savedToGBrain
+          ? {
+              status: 'saved',
+              source: 'gbrain',
+              pageId: `carecircle/sources/${careGraph.id}-week`,
+              savedAt: new Date().toISOString(),
+              memoryCount: Math.max(1, state.gbrainMemory?.memoryCount ?? 0),
+              summary: 'CareCircle source bundle saved to GBrain memory.',
+            }
+          : {
+              status: 'local',
+              source: 'local',
+              savedAt: new Date().toISOString(),
+              memoryCount: state.gbrainMemory?.memoryCount ?? 0,
+              summary: 'GBrain bridge unavailable, using local deterministic demo memory.',
+            },
+      }));
+    });
     synthesisTimer.current = window.setTimeout(() => {
-      const nextBrief = analyzeCareWeek();
+      const nextBrief = analyzeCareWeek(careGraph);
       setBrief(nextBrief);
       setAnalyzedAt(nextBrief.generatedAt);
       setIsSynthesizing(false);
@@ -60,6 +106,10 @@ export function App() {
       if (synthesisTimer.current) window.clearTimeout(synthesisTimer.current);
     };
   }, []);
+
+  useEffect(() => {
+    saveCareCircleRuntimeState(runtimeState);
+  }, [runtimeState]);
 
   return (
     <div className="app care-app">
@@ -92,9 +142,12 @@ export function App() {
         <ErrorBoundary name="care-view">
           <AnimatedCareView
             activeTab={activeTab}
+            graph={careGraph}
             brief={brief}
             isSynthesizing={isSynthesizing}
+            runtimeState={runtimeState}
             onAnalyze={handleAnalyze}
+            onRuntimeStateChange={setRuntimeState}
           />
         </ErrorBoundary>
       </main>
@@ -104,17 +157,23 @@ export function App() {
 
 function AnimatedCareView({
   activeTab,
+  graph,
   brief,
   isSynthesizing,
+  runtimeState,
   onAnalyze,
+  onRuntimeStateChange,
 }: {
   activeTab: CareTab;
+  graph: CareCircleGraph;
   brief: CareBrief | null;
   isSynthesizing: boolean;
+  runtimeState: CareCircleRuntimeState;
   onAnalyze: () => void;
+  onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
 }) {
   const reduce = useReducedMotion();
-  const demoBrief = useMemo(() => analyzeCareWeek(), []);
+  const demoBrief = useMemo(() => analyzeCareWeek(graph), [graph]);
   const visibleBrief = brief ?? demoBrief;
   const variants = reduce
     ? { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1 } }
@@ -134,15 +193,71 @@ function AnimatedCareView({
         className="care-view-shell"
       >
         {activeTab === 'dashboard' && (
-          <CareCircleDashboard graph={careCircleFixture} brief={brief} onAnalyze={onAnalyze} />
+          <CareCircleDashboard
+            graph={graph}
+            brief={brief}
+            runtimeState={runtimeState}
+            onAnalyze={onAnalyze}
+          />
         )}
-        {activeTab === 'timeline' && <CareTimeline graph={careCircleFixture} />}
+        {activeTab === 'timeline' && (
+          <CareTimeline
+            graph={graph}
+            runtimeState={runtimeState}
+            onRuntimeStateChange={onRuntimeStateChange}
+          />
+        )}
         {activeTab === 'brief' && (
-          <CareBriefView brief={visibleBrief} isSynthesizing={isSynthesizing} />
+          <CareBriefView
+            graph={graph}
+            brief={visibleBrief}
+            isSynthesizing={isSynthesizing}
+            runtimeState={runtimeState}
+            onRuntimeStateChange={onRuntimeStateChange}
+          />
         )}
-        {activeTab === 'messages' && <CareMessageComposer brief={visibleBrief} />}
-        {activeTab === 'trust' && <CareTrustCenter />}
+        {activeTab === 'messages' && (
+          <CareMessageComposer
+            brief={visibleBrief}
+            runtimeState={runtimeState}
+            onRuntimeStateChange={onRuntimeStateChange}
+          />
+        )}
+        {activeTab === 'trust' && (
+          <CareTrustCenter
+            runtimeState={runtimeState}
+            onResetRuntimeState={() => onRuntimeStateChange(initialCareCircleRuntimeState)}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   );
+}
+
+function buildCareGraphWithLiveNotes(graph: CareCircleGraph, liveNotes: CareLiveNote[]): CareCircleGraph {
+  if (liveNotes.length === 0) return graph;
+
+  const noteObservations: CareObservation[] = liveNotes.map((note) => ({
+    id: note.id,
+    personId: 'linda',
+    text: note.text,
+    timestamp: note.createdAt,
+    source: 'family_note',
+    tags: note.savedToGBrain ? ['family-note', 'gbrain-memory'] : ['family-note', 'local-memory'],
+    sensitivity: 'medium',
+  }));
+  const noteEvents: CareEvent[] = liveNotes.map((note) => ({
+    id: `event-${note.id}`,
+    title: 'Maya added a family note',
+    timestamp: note.createdAt,
+    category: 'family_call',
+    relatedPersonIds: ['linda', 'maya'],
+    linkedObservationIds: [note.id],
+  }));
+
+  return {
+    ...graph,
+    observations: [...graph.observations, ...noteObservations],
+    events: [...graph.events, ...noteEvents],
+  };
 }

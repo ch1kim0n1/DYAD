@@ -1,18 +1,25 @@
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import type { CareBrief } from './carecircleDemo.js';
 import { careCircleFixture, generateMessageDrafts } from './carecircleDemo.js';
+import { openEmailDraft, openSmsDraft } from './carecircleActions.js';
+import { checkCareProviderContext } from './carecircleExternalContext.js';
+import type { CareCircleRuntimeState } from './carecircleRuntime.js';
 
 interface CareMessageComposerProps {
   brief: CareBrief;
+  runtimeState: CareCircleRuntimeState;
+  onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
 }
 
-export function CareMessageComposer({ brief }: CareMessageComposerProps) {
+export function CareMessageComposer({
+  brief,
+  runtimeState,
+  onRuntimeStateChange,
+}: CareMessageComposerProps) {
   const drafts = brief.messageDrafts ?? generateMessageDrafts(careCircleFixture);
   const [copiedTitle, setCopiedTitle] = useState<string | null>(null);
-  const [queuedTitle, setQueuedTitle] = useState<string | null>(null);
   const [selectedTitle, setSelectedTitle] = useState<string | null>(null);
-  const [draftEdits, setDraftEdits] = useState<Record<string, string>>({});
 
   const draftCards = [
     {
@@ -21,6 +28,7 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
       text: drafts.toParent,
       queueLabel: 'Queue for morning',
       previewAction: 'Open',
+      shareModes: ['sms'],
       reasons: [
         "Used Linda's preference for morning calls.",
         'Framed help around comfort and independence.',
@@ -33,6 +41,7 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
       text: drafts.toSiblings,
       queueLabel: 'Queue family update',
       previewAction: 'Open',
+      shareModes: ['sms', 'email'],
       reasons: [
         'Separated Sarah, Arjun, and Maya into clear next roles.',
         'Kept the update short enough for a family thread.',
@@ -45,6 +54,7 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
       text: drafts.toDoctorOrPharmacist,
       queueLabel: 'Review before sharing',
       previewAction: 'Review before sharing',
+      shareModes: ['email'],
       reasons: [
         'Kept the note clinical and source-based.',
         'Said family notes mention symptoms, not that medication caused them.',
@@ -105,6 +115,31 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
       setCopiedTitle(title);
     }
   };
+  const updateDraft = (title: string, text: string) => {
+    onRuntimeStateChange((current) => ({
+      ...current,
+      draftEdits: { ...current.draftEdits, [title]: text },
+    }));
+  };
+  const queueDraft = (title: string, queueLabel: string) => {
+    onRuntimeStateChange((current) => ({
+      ...current,
+      queuedDrafts: { ...current.queuedDrafts, [title]: queueLabel },
+    }));
+  };
+  const checkProviderContext = async () => {
+    onRuntimeStateChange((current) => ({
+      ...current,
+      providerContext: {
+        status: 'checking',
+        source: 'thehog',
+        summary: 'Checking external provider context for the pharmacy handoff.',
+        items: [],
+      },
+    }));
+    const providerContext = await checkCareProviderContext();
+    onRuntimeStateChange((current) => ({ ...current, providerContext }));
+  };
 
   return (
     <motion.section className="care-messages-view" initial="initial" animate="animate" variants={stagger}>
@@ -146,26 +181,51 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
               </motion.div>
               <motion.textarea
                 variants={composerPiece}
-                value={draftEdits[selectedDraft.title] ?? selectedDraft.text}
+                value={runtimeState.draftEdits[selectedDraft.title] ?? selectedDraft.text}
                 onChange={(event) =>
-                  setDraftEdits((current) => ({ ...current, [selectedDraft.title]: event.target.value }))
+                  updateDraft(selectedDraft.title, event.target.value)
                 }
               />
               <motion.div className="care-action-buttons" variants={composerPiece}>
                 <button
                   className="copy-draft-button"
                   type="button"
-                  onClick={() => copyDraft(selectedDraft.title, draftEdits[selectedDraft.title] ?? selectedDraft.text)}
+                  onClick={() =>
+                    copyDraft(selectedDraft.title, runtimeState.draftEdits[selectedDraft.title] ?? selectedDraft.text)
+                  }
                 >
                   {copiedTitle === selectedDraft.title ? 'Copied' : 'Copy edited draft'}
                 </button>
                 <button
-                  className={`care-card-button ${queuedTitle === selectedDraft.title ? 'is-done' : ''}`}
+                  className={`care-card-button ${runtimeState.queuedDrafts[selectedDraft.title] ? 'is-done' : ''}`}
                   type="button"
-                  onClick={() => setQueuedTitle(selectedDraft.title)}
+                  onClick={() => queueDraft(selectedDraft.title, selectedDraft.queueLabel)}
                 >
-                  {queuedTitle === selectedDraft.title ? 'Queued' : selectedDraft.queueLabel}
+                  {runtimeState.queuedDrafts[selectedDraft.title] ? 'Queued' : selectedDraft.queueLabel}
                 </button>
+                {selectedDraft.shareModes.includes('sms') && (
+                  <button
+                    className="care-card-button secondary"
+                    type="button"
+                    onClick={() => openSmsDraft(runtimeState.draftEdits[selectedDraft.title] ?? selectedDraft.text)}
+                  >
+                    Open SMS
+                  </button>
+                )}
+                {selectedDraft.shareModes.includes('email') && (
+                  <button
+                    className="care-card-button secondary"
+                    type="button"
+                    onClick={() =>
+                      openEmailDraft({
+                        subject: getEmailSubject(selectedDraft.title),
+                        body: runtimeState.draftEdits[selectedDraft.title] ?? selectedDraft.text,
+                      })
+                    }
+                  >
+                    Open email
+                  </button>
+                )}
               </motion.div>
             </motion.div>
             <motion.aside className="composer-reasoning" variants={composerPiece}>
@@ -178,6 +238,25 @@ export function CareMessageComposer({ brief }: CareMessageComposerProps) {
                   <p>{reason}</p>
                 </motion.div>
               ))}
+              {selectedDraft.title === 'Pharmacy summary' && (
+                <motion.div className="composer-context-check" variants={reasonPiece}>
+                  <strong>Provider context</strong>
+                  <p>
+                    {runtimeState.providerContext?.summary ??
+                      'Optional Hog lookup can attach provider context without changing the family-note evidence.'}
+                  </p>
+                  <button
+                    className="care-card-button secondary full"
+                    type="button"
+                    onClick={checkProviderContext}
+                    disabled={runtimeState.providerContext?.status === 'checking'}
+                  >
+                    {runtimeState.providerContext?.status === 'checking'
+                      ? 'Checking context...'
+                      : 'Check provider context'}
+                  </button>
+                </motion.div>
+              )}
             </motion.aside>
           </motion.section>
         )}
@@ -230,4 +309,10 @@ function getDraftPreview(text: string): string {
   const sentences = text.match(/[^.!?]+[.!?]+/g);
   if (!sentences) return text;
   return sentences.slice(0, 2).join(' ').trim();
+}
+
+function getEmailSubject(title: string): string {
+  if (title === 'Pharmacy summary') return 'Linda medication review question';
+  if (title === 'Family update') return 'CareCircle update for Mom';
+  return 'CareCircle check-in';
 }

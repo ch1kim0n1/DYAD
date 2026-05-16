@@ -1,10 +1,14 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type Dispatch, type FormEvent, type SetStateAction } from 'react';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import type { CareCircleGraph, CareEvent, CareObservation } from './carecircleDemo.js';
 import { personName } from './carecircleDemo.js';
+import { saveFamilyNoteToGBrainMemory } from './carecircleMemory.js';
+import type { CareCircleRuntimeState, CareLiveNote } from './carecircleRuntime.js';
 
 interface CareTimelineProps {
   graph: CareCircleGraph;
+  runtimeState: CareCircleRuntimeState;
+  onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
 }
 
 const categoryLabels: Record<CareCircleGraph['events'][number]['category'], string> = {
@@ -16,7 +20,9 @@ const categoryLabels: Record<CareCircleGraph['events'][number]['category'], stri
   task: 'Task',
 };
 
-export function CareTimeline({ graph }: CareTimelineProps) {
+export function CareTimeline({ graph, onRuntimeStateChange }: CareTimelineProps) {
+  const [noteText, setNoteText] = useState('');
+  const [isSavingNote, setIsSavingNote] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedSource, setSelectedSource] = useState<{
     event: CareEvent;
@@ -29,7 +35,7 @@ export function CareTimeline({ graph }: CareTimelineProps) {
   const normalizedQuery = query.trim().toLowerCase();
   const events = useMemo(() => {
     return [...graph.events]
-      .sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp))
+      .sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp))
       .filter((event) => {
         if (!normalizedQuery) return true;
         const observationText = event.linkedObservationIds
@@ -62,6 +68,45 @@ export function CareTimeline({ graph }: CareTimelineProps) {
     animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
   };
 
+  const handleNoteSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const text = noteText.trim();
+    if (!text || isSavingNote) return;
+
+    const note: CareLiveNote = {
+      id: createLiveNoteId(),
+      text,
+      createdAt: new Date().toISOString(),
+      savedToGBrain: false,
+    };
+
+    setNoteText('');
+    setIsSavingNote(true);
+    onRuntimeStateChange((state) => ({
+      ...state,
+      liveNotes: [note, ...(state.liveNotes ?? [])],
+    }));
+
+    const savedToGBrain = await saveFamilyNoteToGBrainMemory(note);
+    onRuntimeStateChange((state) => ({
+      ...state,
+      liveNotes: (state.liveNotes ?? []).map((item) =>
+        item.id === note.id ? { ...item, savedToGBrain } : item,
+      ),
+      gbrainMemory: savedToGBrain
+        ? {
+            status: 'saved',
+            source: 'gbrain',
+            pageId: `carecircle/notes/${note.id}`,
+            savedAt: new Date().toISOString(),
+            memoryCount: (state.gbrainMemory?.memoryCount ?? 0) + 1,
+            summary: 'Family note saved to GBrain memory.',
+          }
+        : state.gbrainMemory,
+    }));
+    setIsSavingNote(false);
+  };
+
   return (
     <motion.section className="care-timeline-view" initial="initial" animate="animate" variants={stagger}>
       <motion.div className="view-heading" variants={fadeUp}>
@@ -80,11 +125,27 @@ export function CareTimeline({ graph }: CareTimelineProps) {
         </label>
       </motion.div>
 
+      <motion.form className="family-note-capture" variants={fadeUp} onSubmit={handleNoteSubmit}>
+        <div>
+          <span>Add a family note</span>
+          <input
+            value={noteText}
+            onChange={(event) => setNoteText(event.target.value)}
+            placeholder="Mom sounded tired after dinner, but said morning calls are easier..."
+          />
+        </div>
+        <button className="care-card-button" type="submit" disabled={!noteText.trim() || isSavingNote}>
+          {isSavingNote ? 'Saving...' : 'Save to GBrain'}
+        </button>
+      </motion.form>
+
       <motion.div className="timeline-list" variants={stagger}>
         {events.map((event) => {
           const observations = event.linkedObservationIds
             .map((id) => observationsById.get(id))
             .filter((observation): observation is CareObservation => Boolean(observation));
+          const sourceLabels = getSourceLabels(observations);
+          const memoryLabels = getMemoryLabels(observations);
 
           return (
             <motion.article className={`timeline-item ${event.category}`} key={event.id} variants={fadeUp}>
@@ -104,6 +165,16 @@ export function CareTimeline({ graph }: CareTimelineProps) {
                 </div>
                 <h2>{event.title}</h2>
                 <p>{event.relatedPersonIds.map(personName).join(', ')}</p>
+                <div className="source-badge-row" aria-label="Connected sources">
+                  {sourceLabels.map((source) => (
+                    <span key={source}>{source}</span>
+                  ))}
+                  {memoryLabels.map((label) => (
+                    <span className="memory-source-badge" key={label}>
+                      {label}
+                    </span>
+                  ))}
+                </div>
                 <div className="evidence-row">
                   {observations.map((observation) => (
                     <button
@@ -182,7 +253,7 @@ function SourceOverlay({
           </div>
           <div>
             <span>Source type</span>
-            <strong>{formatSource(observation.source)}</strong>
+            <strong>{getSourceLabel(observation)}</strong>
           </div>
           <div>
             <span>Person</span>
@@ -220,6 +291,40 @@ function SourceOverlay({
   );
 }
 
-function formatSource(source: CareObservation['source']): string {
-  return source.replaceAll('_', ' ');
+function getSourceLabels(observations: CareObservation[]): string[] {
+  return [...new Set(observations.map(getSourceLabel))];
+}
+
+function getMemoryLabels(observations: CareObservation[]): string[] {
+  const labels = observations.flatMap((observation) => {
+    if (observation.tags.includes('gbrain-memory')) return ['saved to GBrain'];
+    if (observation.tags.includes('local-memory')) return ['demo memory fallback'];
+    return [];
+  });
+
+  return [...new Set(labels)];
+}
+
+function getSourceLabel(observation: CareObservation): string {
+  if (observation.tags.some((tag) => ['communication', 'trust'].includes(tag))) {
+    return 'learned pattern';
+  }
+
+  const labels: Record<CareObservation['source'], string> = {
+    family_note: 'family note',
+    message: 'messages',
+    appointment: 'calendar',
+    medication: 'pharmacy notification',
+    task: 'task',
+  };
+
+  return labels[observation.source];
+}
+
+function createLiveNoteId(): string {
+  if (typeof window !== 'undefined' && window.crypto?.randomUUID) {
+    return `note-${window.crypto.randomUUID()}`;
+  }
+
+  return `note-${Date.now()}`;
 }

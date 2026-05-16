@@ -1,0 +1,178 @@
+export interface CareMessyDocument {
+  path: string;
+  source: string;
+  title: string;
+  text: string;
+  metadata: Record<string, string | string[]>;
+}
+
+export const careCircleMessyCorpus: CareMessyDocument[] = [
+  {
+    path: 'messages/maya-linda-thu-morning.txt',
+    source: 'family messages',
+    title: 'Thursday morning dizziness text',
+    text: 'Linda texted Maya at 8:13 AM: I felt a little dizzy after breakfast. Maya replied gently and asked whether she had taken the new blood pressure pill yet.',
+    metadata: { source: 'message', person: 'linda', tags: ['dizziness', 'medication', 'morning'] },
+  },
+  {
+    path: 'messages/linda-group-fri-appointment.txt',
+    source: 'family group chat',
+    title: 'Repeated appointment question',
+    text: 'Linda asked the family thread about the same appointment time twice on Friday. Arjun replied that he would confirm the date and put it in the shared calendar.',
+    metadata: { source: 'message', person: 'linda', tags: ['appointment', 'repetition', 'arjun'] },
+  },
+  {
+    path: 'notes/maya-lunch-tuesday.txt',
+    source: 'family note',
+    title: 'Lunch skipped Tuesday',
+    text: 'Maya logged that Linda skipped lunch on Tuesday. Linda said she was not hungry and wanted to rest. No diagnosis was assumed.',
+    metadata: { source: 'family_note', person: 'linda', tags: ['meal', 'routine-change'] },
+  },
+  {
+    path: 'notes/maya-lunch-friday.txt',
+    source: 'family note',
+    title: 'Lunch skipped Friday',
+    text: 'Maya logged another skipped lunch Friday. This made two skipped lunches in one week, which CareCircle flagged for gentle human review.',
+    metadata: { source: 'family_note', person: 'linda', tags: ['meal', 'pattern'] },
+  },
+  {
+    path: 'pharmacy/bp-med-change.txt',
+    source: 'pharmacy notification',
+    title: 'Blood pressure medication changed',
+    text: 'Pharmacy notification: Linda started a new blood pressure medication five days ago. Medication timing and side effects should be reviewed by pharmacist or doctor if concerns appear.',
+    metadata: { source: 'medication', person: 'linda', tags: ['blood-pressure', 'pharmacy', 'medical-review'] },
+  },
+  {
+    path: 'tasks/sarah-pharmacy-owner.txt',
+    source: 'task tracker',
+    title: 'Sarah owns pharmacy call',
+    text: 'Sarah volunteered to call the local pharmacy. The call is still open and should be framed as a request for guidance, not a diagnosis.',
+    metadata: { source: 'task', person: 'sarah', tags: ['pharmacy', 'owner', 'open-loop'] },
+  },
+  {
+    path: 'tasks/arjun-calendar-owner.txt',
+    source: 'task tracker',
+    title: 'Arjun owns calendar follow-up',
+    text: 'Arjun usually handles calendar tasks and appointment confirmations. CareCircle should route appointment reminders to Arjun first.',
+    metadata: { source: 'task', person: 'arjun', tags: ['calendar', 'appointment'] },
+  },
+  {
+    path: 'patterns/linda-morning-calls.txt',
+    source: 'learned pattern',
+    title: 'Morning calls work better',
+    text: 'Across prior check-ins, Linda responds better to morning calls than late-day calls. She answers more often and sounds less defensive.',
+    metadata: { source: 'learned_pattern', person: 'linda', tags: ['communication', 'morning'] },
+  },
+  {
+    path: 'patterns/linda-concrete-choices.txt',
+    source: 'learned pattern',
+    title: 'Concrete choices help',
+    text: 'Linda responds better to concrete choices like tea or soup, morning or afternoon, instead of broad offers of help.',
+    metadata: { source: 'learned_pattern', person: 'linda', tags: ['communication', 'choices'] },
+  },
+  {
+    path: 'patterns/linda-independence.txt',
+    source: 'trust note',
+    title: 'Independence framing',
+    text: 'Linda gets defensive when help sounds like control. CareCircle should frame support around comfort, independence, and choice.',
+    metadata: { source: 'trust_note', person: 'linda', tags: ['trust', 'communication'] },
+  },
+  {
+    path: 'calendar/dr-chen-appointment.txt',
+    source: 'shared calendar',
+    title: 'Upcoming Dr. Chen appointment',
+    text: 'Shared calendar has an upcoming appointment with Dr. Chen. Linda asked about this appointment multiple times this week.',
+    metadata: { source: 'calendar', person: 'linda', tags: ['doctor', 'appointment'] },
+  },
+  {
+    path: 'notes/maya-dinner-note.txt',
+    source: 'family note',
+    title: 'Dinner sounded tiring',
+    text: 'Maya noted that Linda sounded tired after dinner but perked up when offered two concrete choices for breakfast.',
+    metadata: { source: 'family_note', person: 'linda', tags: ['energy', 'choices'] },
+  },
+  {
+    path: 'messages/sarah-med-question.txt',
+    source: 'family messages',
+    title: 'Sarah asks what to say',
+    text: 'Sarah asked the sibling thread what she should say to the pharmacist. CareCircle should prepare a short source-based script.',
+    metadata: { source: 'message', person: 'sarah', tags: ['pharmacy', 'draft'] },
+  },
+  {
+    path: 'messages/arjun-reminder-ready.txt',
+    source: 'family messages',
+    title: 'Arjun can confirm appointment',
+    text: 'Arjun said he can confirm the appointment and send the family one clear reminder once Maya gives him the latest context.',
+    metadata: { source: 'message', person: 'arjun', tags: ['appointment', 'reminder'] },
+  },
+  {
+    path: 'provider/pharmacy-boundary.txt',
+    source: 'care boundary',
+    title: 'Pharmacy handoff boundary',
+    text: 'Medication-related notes should ask whether timing, dosage, or side effects should be reviewed. Do not claim medication caused symptoms.',
+    metadata: { source: 'safety_rule', person: 'linda', tags: ['medical-review', 'pharmacy'] },
+  },
+  {
+    path: 'provider/doctor-boundary.txt',
+    source: 'care boundary',
+    title: 'Doctor handoff boundary',
+    text: 'CareCircle can prepare a doctor or pharmacist summary, but a human must approve it before sharing. It should cite family notes only.',
+    metadata: { source: 'safety_rule', person: 'maya', tags: ['approval', 'provider'] },
+  },
+  {
+    path: 'notes/maya-water-reminder.txt',
+    source: 'family note',
+    title: 'Hydration reminder preference',
+    text: 'Maya noted that Linda accepts water reminders better when they are paired with a normal routine, like tea in the morning.',
+    metadata: { source: 'family_note', person: 'linda', tags: ['routine', 'hydration'] },
+  },
+  {
+    path: 'messages/linda-no-fuss.txt',
+    source: 'family messages',
+    title: 'Linda does not want fuss',
+    text: 'Linda wrote: Please do not make a fuss. Maya marked this as a trust cue: keep messages gentle and low-pressure.',
+    metadata: { source: 'message', person: 'linda', tags: ['trust', 'tone'] },
+  },
+  {
+    path: 'tasks/sibling-update-overdue.txt',
+    source: 'task tracker',
+    title: 'Sibling update overdue',
+    text: 'The sibling update is overdue. The family thread needs a concise summary with Sarah, Arjun, and Maya each assigned one next step.',
+    metadata: { source: 'task', person: 'maya', tags: ['sibling-update', 'open-loop'] },
+  },
+  {
+    path: 'calendar/maya-work-standup.txt',
+    source: 'calendar',
+    title: 'Maya work standup',
+    text: 'Maya has a work standup tomorrow at 9:00 AM. CareCircle should avoid scheduling Linda check-ins during this busy block.',
+    metadata: { source: 'calendar', person: 'maya', tags: ['busy', 'work'] },
+  },
+  {
+    path: 'calendar/maya-dinner.txt',
+    source: 'calendar',
+    title: 'Maya dinner block',
+    text: 'Maya has dinner blocked tomorrow around 6:30 PM. A check-in reminder should avoid this time.',
+    metadata: { source: 'calendar', person: 'maya', tags: ['busy', 'family'] },
+  },
+  {
+    path: 'notes/linda-breakfast-choice.txt',
+    source: 'family note',
+    title: 'Breakfast choice worked',
+    text: 'Linda responded well when Maya asked whether she wanted oatmeal or toast, instead of asking if she needed help eating.',
+    metadata: { source: 'family_note', person: 'linda', tags: ['meal', 'choices'] },
+  },
+  {
+    path: 'messages/dr-chen-office.txt',
+    source: 'provider message',
+    title: 'Doctor office prefers concise summaries',
+    text: 'Dr. Chen office prefers concise summaries with dates, symptoms mentioned by family, medication name if known, and a clear question.',
+    metadata: { source: 'provider_message', person: 'dr-chen', tags: ['provider', 'summary'] },
+  },
+  {
+    path: 'notes/maya-friday-tone.txt',
+    source: 'family note',
+    title: 'Friday tone note',
+    text: 'Maya noticed Linda sounded more comfortable when the call ended with a choice she controlled.',
+    metadata: { source: 'family_note', person: 'linda', tags: ['tone', 'trust'] },
+  },
+];
