@@ -16,12 +16,14 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@dyad/shared": "workspace:*",
+    "@anthropic-ai/sdk": "^0.27.0",
     "@dyad/lexicons": "workspace:*",
     "@dyad/prompts": "workspace:*",
-    "@anthropic-ai/sdk": "^0.27.0",
+    "@dyad/shared": "workspace:*",
     "p-limit": "^5.0.0",
-    "pino": "^9.0.0"
+    "pino": "^9.0.0",
+    "wink-eng-lite-web-model": "^1.8.1",
+    "wink-nlp": "^2.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

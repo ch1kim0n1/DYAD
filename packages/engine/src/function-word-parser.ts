@@ -1,6 +1,9 @@
+import { tokenize as winkTokenize } from './tokenizer.js';
+
 /**
  * Function-word parser — Pennebaker LIWC-style categories.
  * Rates returned as fraction of total tokens (0..1).
+ * Tokenization goes through the shared wink-nlp tokenizer.
  */
 export interface FunctionWordRates {
   fw_i: number;
@@ -45,11 +48,5 @@ export class FunctionWordParser {
     return counts;
   }
 
-  private tokenize(text: string): string[] {
-    return text
-      .toLowerCase()
-      .replace(/[^\w'\s]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 0);
-  }
+  private tokenize(text: string): string[] { return winkTokenize(text); }
 }

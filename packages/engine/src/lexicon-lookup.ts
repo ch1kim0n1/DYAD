@@ -1,4 +1,5 @@
 import { NRC_EMOTION_LEXICON, AFINN_111, INTENSIFIERS, type NRCEmotionWord } from '@dyad/lexicons';
+import { tokenize } from './tokenizer.js';
 
 export interface NRCEmotions {
   joy: boolean;
@@ -139,11 +140,7 @@ export class LexiconLookup {
     };
   }
 
-  private tokenize(text: string): string[] {
-    return text
-      .toLowerCase()
-      .replace(/[^\w\s]/g, ' ')
-      .split(/\s+/)
-      .filter(w => w.length > 0);
-  }
+  // Delegates to the shared wink-nlp tokenizer (tokenizer.ts) so both the
+  // function-word parser and lexicon lookup agree on what "a word" is.
+  private tokenize(text: string): string[] { return tokenize(text); }
 }

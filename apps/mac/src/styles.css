@@ -1,3 +1,9 @@
+/* Tailwind v3 directives — utility classes coexist with the original
+   semantic class names so views can adopt Tailwind incrementally. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --bg: #0a0a0c;
   --fg: #e8e8ed;

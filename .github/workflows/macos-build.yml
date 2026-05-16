@@ -1,0 +1,83 @@
+name: macOS build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mac/**'
+      - 'packages/**'
+      - '.github/workflows/macos-build.yml'
+  workflow_dispatch:
+
+# Only one in-progress macOS build per branch — the GitHub macOS runners
+# are slow and expensive.
+concurrency:
+  group: macos-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: tauri build (arm64)
+    runs-on: macos-14
+    timeout-minutes: 30
+    env:
+      DYAD_SKIP_INTEGRATION: '1'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Set up Rust toolchain
+        run: |
+          rustup target add aarch64-apple-darwin
+          rustc --version
+
+      - name: Install workspace deps
+        run: bun install --ignore-scripts
+
+      - name: Compile better-sqlite3 + chokidar native modules
+        run: |
+          bun pm install --cwd packages/ingestion || true
+          # Native install is best-effort; the Tauri build path can still
+          # boot the app without chat.db on a CI host.
+        continue-on-error: true
+
+      - name: TypeScript check
+        run: bunx tsc --noEmit
+
+      - name: Unit tests
+        run: bun test packages apps scripts
+
+      - name: Generate icon placeholders
+        run: node apps/mac/src-tauri/icons/generate-placeholder-pngs.mjs
+
+      - name: Compile engine sidecar binary (arm64)
+        run: bun run --cwd apps/mac sidecar:build:darwin-arm64
+
+      - name: Vite frontend build
+        run: bun run --cwd apps/mac build
+
+      - name: Tauri build (.app bundle, unsigned)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ''
+        run: bun run --cwd apps/mac tauri:build -- --target aarch64-apple-darwin --bundles app
+        continue-on-error: true
+
+      - name: Inspect output
+        if: always()
+        run: |
+          ls -la apps/mac/src-tauri/target/release/bundle 2>&1 || echo "no bundle dir"
+          ls -la apps/mac/src-tauri/binaries 2>&1 || echo "no sidecar dir"
+
+      - name: Upload artefacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dyad-mac-bundle
+          path: |
+            apps/mac/src-tauri/target/release/bundle/**/*.app
+            apps/mac/src-tauri/binaries/dyad-engine-*
+          if-no-files-found: ignore
