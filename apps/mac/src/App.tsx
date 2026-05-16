@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { CareBriefView } from './views/CareBriefView.js';
 import { CareCircleDashboard } from './views/CareCircleDashboard.js';
@@ -24,6 +24,8 @@ export function App() {
   const [activeTab, setActiveTab] = useState<CareTab>('dashboard');
   const [brief, setBrief] = useState<CareBrief | null>(null);
   const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const synthesisTimer = useRef<number | null>(null);
 
   const metaLabel = useMemo(() => {
     if (!analyzedAt) return 'Synthetic demo data';
@@ -36,11 +38,27 @@ export function App() {
   }, [analyzedAt]);
 
   const handleAnalyze = () => {
-    const nextBrief = analyzeCareWeek();
-    setBrief(nextBrief);
-    setAnalyzedAt(nextBrief.generatedAt);
+    if (synthesisTimer.current) {
+      window.clearTimeout(synthesisTimer.current);
+    }
     setActiveTab('brief');
+    setBrief(null);
+    setAnalyzedAt(null);
+    setIsSynthesizing(true);
+    synthesisTimer.current = window.setTimeout(() => {
+      const nextBrief = analyzeCareWeek();
+      setBrief(nextBrief);
+      setAnalyzedAt(nextBrief.generatedAt);
+      setIsSynthesizing(false);
+      synthesisTimer.current = null;
+    }, 3800);
   };
+
+  useEffect(() => {
+    return () => {
+      if (synthesisTimer.current) window.clearTimeout(synthesisTimer.current);
+    };
+  }, []);
 
   return (
     <div className="app care-app">
@@ -70,7 +88,12 @@ export function App() {
       </header>
 
       <main className="app-main care-main">
-        <AnimatedCareView activeTab={activeTab} brief={brief} onAnalyze={handleAnalyze} />
+        <AnimatedCareView
+          activeTab={activeTab}
+          brief={brief}
+          isSynthesizing={isSynthesizing}
+          onAnalyze={handleAnalyze}
+        />
       </main>
     </div>
   );
@@ -79,13 +102,17 @@ export function App() {
 function AnimatedCareView({
   activeTab,
   brief,
+  isSynthesizing,
   onAnalyze,
 }: {
   activeTab: CareTab;
   brief: CareBrief | null;
+  isSynthesizing: boolean;
   onAnalyze: () => void;
 }) {
   const reduce = useReducedMotion();
+  const demoBrief = useMemo(() => analyzeCareWeek(), []);
+  const visibleBrief = brief ?? demoBrief;
   const variants = reduce
     ? { initial: { opacity: 1 }, animate: { opacity: 1 }, exit: { opacity: 1 } }
     : {
@@ -107,8 +134,10 @@ function AnimatedCareView({
           <CareCircleDashboard graph={careCircleFixture} brief={brief} onAnalyze={onAnalyze} />
         )}
         {activeTab === 'timeline' && <CareTimeline graph={careCircleFixture} />}
-        {activeTab === 'brief' && <CareBriefView brief={brief} onAnalyze={onAnalyze} />}
-        {activeTab === 'messages' && <CareMessageComposer brief={brief} onAnalyze={onAnalyze} />}
+        {activeTab === 'brief' && (
+          <CareBriefView brief={visibleBrief} isSynthesizing={isSynthesizing} />
+        )}
+        {activeTab === 'messages' && <CareMessageComposer brief={visibleBrief} />}
         {activeTab === 'trust' && <CareTrustCenter />}
       </motion.div>
     </AnimatePresence>
