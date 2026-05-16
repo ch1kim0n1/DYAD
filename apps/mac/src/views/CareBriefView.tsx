@@ -25,13 +25,58 @@ export function CareBriefView({ brief, onAnalyze }: CareBriefViewProps) {
 
   if (!brief) {
     return (
-      <motion.section className="empty-brief" initial="initial" animate="animate" variants={fadeUp}>
-        <p className="care-kicker">Care Brief</p>
-        <h1>I can catch you up without making you read the whole week.</h1>
-        <p>I will surface what changed, prepare the next moves, and pause anything sensitive for approval.</p>
-        <button className="care-primary-button" type="button" onClick={onAnalyze}>
-          Catch me up
-        </button>
+      <motion.section className="care-brief-view" initial="initial" animate="animate" variants={stagger}>
+        <motion.div className="brief-hero pre-brief-hero" variants={fadeUp}>
+          <p className="care-kicker">Care Brief</p>
+          <h1>No catch-up run yet. I can assemble the week in one pass.</h1>
+          <p>
+            I will fill the brief with changes, staged next moves, Linda preferences, and evidence. Medical items
+            stay paused until a human reviews them.
+          </p>
+          <div className="brief-hero-actions">
+            <button className="care-primary-button" type="button" onClick={onAnalyze}>
+              Catch me up and open brief
+            </button>
+          </div>
+        </motion.div>
+
+        <motion.section className="care-plan-strip preflight-strip" aria-label="Brief slots" variants={stagger}>
+          <motion.article className="plan-step placeholder-step" variants={fadeUp}>
+            <span>Will draft</span>
+            <h2>Family update</h2>
+            <p>Sibling note and task owners will appear here after catch-up.</p>
+          </motion.article>
+          <motion.article className="plan-step placeholder-step" variants={fadeUp}>
+            <span>Will prepare</span>
+            <h2>Appointment reminder</h2>
+            <p>Calendar follow-up will be staged without making you search the thread.</p>
+          </motion.article>
+          <motion.article className="plan-step placeholder-step waiting" variants={fadeUp}>
+            <span>Will pause</span>
+            <h2>Medical review</h2>
+            <p>Medication-related notes will stay approval-gated.</p>
+          </motion.article>
+        </motion.section>
+
+        <div className="brief-layout">
+          <div className="brief-main-column">
+            <motion.section className="care-panel preflight-panel" variants={fadeUp}>
+              <h2>What will fill in</h2>
+              <div className="preflight-list">
+                <span>Changed this week</span>
+                <span>Loose ends I am tracking</span>
+                <span>Evidence chips from family notes</span>
+              </div>
+            </motion.section>
+          </div>
+
+          <aside className="brief-side-column">
+            <motion.section className="care-panel preflight-panel" variants={fadeUp}>
+              <h2>What I remember</h2>
+              <p>Communication preferences and care boundaries will appear here once the brief is assembled.</p>
+            </motion.section>
+          </aside>
+        </div>
       </motion.section>
     );
   }

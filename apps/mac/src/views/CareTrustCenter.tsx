@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 
 const trustControls = [
@@ -33,7 +32,6 @@ const trustControls = [
 ];
 
 export function CareTrustCenter() {
-  const [handled, setHandled] = useState<Record<string, string>>({});
   const stagger: Variants = {
     animate: { transition: { staggerChildren: 0.1, delayChildren: 0.08 } },
   };
@@ -61,19 +59,15 @@ export function CareTrustCenter() {
         </div>
       </motion.div>
 
-      <motion.div className="trust-grid" variants={stagger}>
+      <motion.div className="trust-checklist" variants={stagger}>
         {trustControls.map((control) => (
-          <motion.article className="trust-card" key={control.title} variants={fadeUp}>
-            <h2>{control.title}</h2>
-            <p>{control.body}</p>
-            <button
-              className="care-card-button secondary full"
-              type="button"
-              onClick={() => setHandled((current) => ({ ...current, [control.title]: 'Checked' }))}
-            >
-              {handled[control.title] ?? 'Check setting'}
-            </button>
-          </motion.article>
+          <motion.div className="trust-check-row" key={control.title} variants={fadeUp}>
+            <span className="trust-check-icon" aria-hidden="true">OK</span>
+            <div>
+              <h2>{control.title}</h2>
+              <p>{control.body}</p>
+            </div>
+          </motion.div>
         ))}
       </motion.div>
     </motion.section>
