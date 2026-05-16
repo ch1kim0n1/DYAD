@@ -13,7 +13,9 @@
     "test:ingestion": "bun test packages/ingestion",
     "test:engine": "bun test packages/engine",
     "typecheck": "tsc --noEmit",
-    "lexicons:build": "node packages/lexicons/scripts/build-nrc-lexicon.mjs"
+    "lexicons:build": "node packages/lexicons/scripts/build-nrc-lexicon.mjs",
+    "carecircle:seed-gbrain": "bun run scripts/seed-carecircle-gbrain.ts",
+    "carecircle:sync-calendar": "bun run scripts/sync-calendar-gbrain.ts"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

@@ -9,6 +9,11 @@ export interface CareCircleRuntimeState {
   selectedReminderStart?: string;
   providerContext?: CareProviderContext;
   gbrainMemory?: CareGBrainMemoryState;
+  /** Stored locally only — never written to GBrain page content. */
+  calendarIcsUrl?: string;
+  calendarLastSyncAt?: string;
+  calendarSyncedCount?: number;
+  calendarSyncError?: string;
 }
 
 export interface CareLiveNote {
@@ -68,6 +73,10 @@ export const initialCareCircleRuntimeState: CareCircleRuntimeState = {
   selectedReminderStart: undefined,
   providerContext: undefined,
   gbrainMemory: undefined,
+  calendarIcsUrl: undefined,
+  calendarLastSyncAt: undefined,
+  calendarSyncedCount: undefined,
+  calendarSyncError: undefined,
 };
 
 export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
@@ -89,6 +98,10 @@ export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
       selectedReminderStart: parsed.selectedReminderStart,
       providerContext: parsed.providerContext,
       gbrainMemory: parsed.gbrainMemory,
+      calendarIcsUrl: parsed.calendarIcsUrl,
+      calendarLastSyncAt: parsed.calendarLastSyncAt,
+      calendarSyncedCount: parsed.calendarSyncedCount,
+      calendarSyncError: parsed.calendarSyncError,
     };
   } catch {
     return initialCareCircleRuntimeState;

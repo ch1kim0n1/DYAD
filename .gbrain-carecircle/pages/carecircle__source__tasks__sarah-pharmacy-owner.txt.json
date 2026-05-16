@@ -1,0 +1,23 @@
+{
+  "id": "carecircle::source::tasks::sarah-pharmacy-owner.txt",
+  "kind": "carecircle_source_document",
+  "title": "Sarah owns pharmacy call",
+  "content": {
+    "path": "tasks/sarah-pharmacy-owner.txt",
+    "source": "task tracker",
+    "text": "Sarah volunteered to call the local pharmacy. The call is still open and should be framed as a request for guidance, not a diagnosis.",
+    "metadata": {
+      "source": "task",
+      "person": "sarah",
+      "tags": [
+        "pharmacy",
+        "owner",
+        "open-loop"
+      ]
+    },
+    "recency_rank": 14,
+    "when_label": "Open"
+  },
+  "created_at": "2026-05-16T23:07:45.100Z",
+  "updated_at": "2026-05-16T23:07:45.100Z"
+}

@@ -1,0 +1,23 @@
+{
+  "id": "carecircle::source::messages::linda-group-fri-appointment.txt",
+  "kind": "carecircle_source_document",
+  "title": "Repeated appointment question",
+  "content": {
+    "path": "messages/linda-group-fri-appointment.txt",
+    "source": "family group chat",
+    "text": "Linda asked the family thread about the same appointment time twice on Friday. Arjun replied that he would confirm the date and put it in the shared calendar.",
+    "metadata": {
+      "source": "message",
+      "person": "linda",
+      "tags": [
+        "appointment",
+        "repetition",
+        "arjun"
+      ]
+    },
+    "recency_rank": 3,
+    "when_label": "Friday"
+  },
+  "created_at": "2026-05-16T23:07:45.092Z",
+  "updated_at": "2026-05-16T23:07:45.092Z"
+}

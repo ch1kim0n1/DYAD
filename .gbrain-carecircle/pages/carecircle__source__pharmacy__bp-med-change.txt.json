@@ -1,0 +1,23 @@
+{
+  "id": "carecircle::source::pharmacy::bp-med-change.txt",
+  "kind": "carecircle_source_document",
+  "title": "Blood pressure medication changed",
+  "content": {
+    "path": "pharmacy/bp-med-change.txt",
+    "source": "pharmacy notification",
+    "text": "Pharmacy notification: Linda started a new blood pressure medication five days ago. Medication timing and side effects should be reviewed by pharmacist or doctor if concerns appear.",
+    "metadata": {
+      "source": "medication",
+      "person": "linda",
+      "tags": [
+        "blood-pressure",
+        "pharmacy",
+        "medical-review"
+      ]
+    },
+    "recency_rank": 12,
+    "when_label": "Past 5 days"
+  },
+  "created_at": "2026-05-16T23:07:45.098Z",
+  "updated_at": "2026-05-16T23:07:45.098Z"
+}

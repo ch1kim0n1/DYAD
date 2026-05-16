@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::tasks::sibling-update-overdue.txt",
+  "kind": "carecircle_source_document",
+  "title": "Sibling update overdue",
+  "content": {
+    "path": "tasks/sibling-update-overdue.txt",
+    "source": "task tracker",
+    "text": "The sibling update is overdue. The family thread needs a concise summary with Sarah, Arjun, and Maya each assigned one next step.",
+    "metadata": {
+      "source": "task",
+      "person": "maya",
+      "tags": [
+        "sibling-update",
+        "open-loop"
+      ]
+    },
+    "recency_rank": 6,
+    "when_label": "Now"
+  },
+  "created_at": "2026-05-16T23:07:45.125Z",
+  "updated_at": "2026-05-16T23:07:45.125Z"
+}

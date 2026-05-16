@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::patterns::linda-independence.txt",
+  "kind": "carecircle_source_document",
+  "title": "Independence framing",
+  "content": {
+    "path": "patterns/linda-independence.txt",
+    "source": "trust note",
+    "text": "Linda gets defensive when help sounds like control. CareCircle should frame support around comfort, independence, and choice.",
+    "metadata": {
+      "source": "trust_note",
+      "person": "linda",
+      "tags": [
+        "trust",
+        "communication"
+      ]
+    },
+    "recency_rank": null,
+    "when_label": null
+  },
+  "created_at": "2026-05-16T23:07:45.109Z",
+  "updated_at": "2026-05-16T23:07:45.109Z"
+}

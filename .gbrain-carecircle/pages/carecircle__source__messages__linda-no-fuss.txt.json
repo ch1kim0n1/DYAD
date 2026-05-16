@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::messages::linda-no-fuss.txt",
+  "kind": "carecircle_source_document",
+  "title": "Linda does not want fuss",
+  "content": {
+    "path": "messages/linda-no-fuss.txt",
+    "source": "family messages",
+    "text": "Linda wrote: Please do not make a fuss. Maya marked this as a trust cue: keep messages gentle and low-pressure.",
+    "metadata": {
+      "source": "message",
+      "person": "linda",
+      "tags": [
+        "trust",
+        "tone"
+      ]
+    },
+    "recency_rank": 9,
+    "when_label": "This week"
+  },
+  "created_at": "2026-05-16T23:07:45.123Z",
+  "updated_at": "2026-05-16T23:07:45.123Z"
+}

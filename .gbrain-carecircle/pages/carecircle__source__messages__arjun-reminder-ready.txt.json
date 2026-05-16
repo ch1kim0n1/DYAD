@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::messages::arjun-reminder-ready.txt",
+  "kind": "carecircle_source_document",
+  "title": "Arjun can confirm appointment",
+  "content": {
+    "path": "messages/arjun-reminder-ready.txt",
+    "source": "family messages",
+    "text": "Arjun said he can confirm the appointment and send the family one clear reminder once Maya gives him the latest context.",
+    "metadata": {
+      "source": "message",
+      "person": "arjun",
+      "tags": [
+        "appointment",
+        "reminder"
+      ]
+    },
+    "recency_rank": 4,
+    "when_label": "This week"
+  },
+  "created_at": "2026-05-16T23:07:45.119Z",
+  "updated_at": "2026-05-16T23:07:45.119Z"
+}

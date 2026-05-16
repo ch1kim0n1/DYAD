@@ -3,13 +3,27 @@ import react from '@vitejs/plugin-react';
 import { spawn } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { careCircleMessyCorpus } from './src/views/carecircleMessyCorpus';
+import { buildRecentEventsFromGBrain, searchCareCircleGBrain } from './src/lib/carecircle-gbrain-queries.js';
+import { CareCircleGBrainStore } from './src/lib/carecircle-gbrain-store.js';
+import {
+  getCalendarIcsUrlFromEnv,
+  listCalendarBlocksFromGBrain,
+  normalizeIcsUrl,
+  syncCalendarIcsToGBrain,
+} from './src/lib/sync-calendar-gbrain.js';
+import { ensureCareCircleGBrainSeeded } from './src/lib/seed-carecircle-gbrain.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '../..');
 const careCircleRoot = resolve(repoRoot, '..');
 const gbrainRepo = resolve(careCircleRoot, 'gbrain');
-const gbrainHome = resolve(careCircleRoot, '.gbrain-carecircle');
+const gbrainHome = process.env.GBRAIN_HOME ?? resolve(repoRoot, '.gbrain-carecircle');
+const careCircleGBrain = new CareCircleGBrainStore(gbrainHome);
+
+async function withSeededGBrain<T>(fn: () => T | Promise<T>): Promise<T> {
+  await ensureCareCircleGBrainSeeded(careCircleGBrain);
+  return fn();
+}
 
 function careCircleGBrainBridge() {
   return {
@@ -88,8 +102,57 @@ function careCircleGBrainBridge() {
         try {
           const body = await readJson(req);
           const query = String(body.query ?? 'pharmacy dizziness medication appointment');
-          const result = await searchCareCircleCorpus(query);
+          const result = await withSeededGBrain(() => searchCareCircleGBrain(careCircleGBrain, query));
           sendJson(res, 200, result);
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message });
+        }
+      });
+
+      server.middlewares.use('/api/carecircle/recent-events-summary', async (req, res) => {
+        if (req.method !== 'POST') {
+          sendJson(res, 405, { error: 'Method not allowed' });
+          return;
+        }
+        try {
+          await readJson(req);
+          await withSeededGBrain(async () => {
+            const payload = buildRecentEventsFromGBrain(careCircleGBrain);
+            sendJson(res, 200, { ...payload, gbrainSaved: true, source: 'gbrain', gbrainHome });
+          });
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message });
+        }
+      });
+
+      server.middlewares.use('/api/carecircle/calendar-sync', async (req, res) => {
+        if (req.method !== 'POST') {
+          sendJson(res, 405, { error: 'Method not allowed' });
+          return;
+        }
+        try {
+          const body = await readJson(req);
+          const rawUrl = String(body.icsUrl ?? getCalendarIcsUrlFromEnv() ?? '');
+          const icsUrl = normalizeIcsUrl(rawUrl);
+          await withSeededGBrain(async () => {
+            const result = await syncCalendarIcsToGBrain(careCircleGBrain, icsUrl);
+            sendJson(res, 200, { ...result, source: 'gbrain' });
+          });
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message });
+        }
+      });
+
+      server.middlewares.use('/api/carecircle/calendar-events', async (req, res) => {
+        if (req.method !== 'GET') {
+          sendJson(res, 405, { error: 'Method not allowed' });
+          return;
+        }
+        try {
+          await withSeededGBrain(async () => {
+            const listed = listCalendarBlocksFromGBrain(careCircleGBrain);
+            sendJson(res, 200, { ...listed, source: 'gbrain' });
+          });
         } catch (err) {
           sendJson(res, 500, { error: (err as Error).message });
         }
@@ -143,126 +206,6 @@ function sendJson(res: import('node:http').ServerResponse, status: number, body:
   res.statusCode = status;
   res.setHeader('content-type', 'application/json');
   res.end(JSON.stringify(body));
-}
-
-async function searchCareCircleCorpus(query: string) {
-  const zeroEntropyKey = "ze_zf9oHaTXbPRMeO3o"
-  const collectionName = process.env.ZEROENTROPY_COLLECTION ?? 'carecircle-demo';
-  if (zeroEntropyKey) {
-    try {
-      await ensureZeroEntropyCollection(zeroEntropyKey, collectionName);
-      const response = await zeroEntropyFetch(zeroEntropyKey, '/queries/top-snippets', {
-        collection_name: collectionName,
-        query,
-        k: 6,
-        precise_responses: true,
-        include_document_metadata: true,
-        reranker: 'zerank-2',
-      });
-      const data = (await response.json()) as {
-        results?: Array<{ path: string; content: string; score: number }>;
-        document_results?: Array<{ path: string; metadata?: Record<string, string | string[]> }>;
-      };
-      const metadataByPath = new Map((data.document_results ?? []).map((item) => [item.path, item.metadata ?? {}]));
-
-      return {
-        status: 'ready',
-        source: 'zeroentropy',
-        summary: 'I searched the family context and pulled the strongest sources behind this care plan.',
-        indexedDocuments: careCircleMessyCorpus.length,
-        results: (data.results ?? []).map((item) => ({
-          path: item.path,
-          title: careCircleMessyCorpus.find((doc) => doc.path === item.path)?.title ?? item.path,
-          source: careCircleMessyCorpus.find((doc) => doc.path === item.path)?.source ?? 'ZeroEntropy',
-          text: item.content,
-          score: item.score,
-          metadata: metadataByPath.get(item.path) ?? {},
-        })),
-      };
-    } catch (err) {
-      return localCareCircleSearch(query, `ZeroEntropy unavailable: ${(err as Error).message}`);
-    }
-  }
-
-  return localCareCircleSearch(query, 'Set ZEROENTROPY_API_KEY to query the live ZeroEntropy index.');
-}
-
-async function ensureZeroEntropyCollection(apiKey: string, collectionName: string) {
-  const collection = await zeroEntropyFetch(apiKey, '/collections/add-collection', {
-    collection_name: collectionName,
-    num_shards: 1,
-  });
-  if (![201, 409].includes(collection.status)) {
-    throw new Error(`collection setup failed with ${collection.status}`);
-  }
-
-  await Promise.all(
-    careCircleMessyCorpus.map((doc) =>
-      zeroEntropyFetch(apiKey, '/documents/add-document', {
-        collection_name: collectionName,
-        path: doc.path,
-        content: { type: 'text', text: doc.text },
-        metadata: normalizeZeroEntropyMetadata(doc.metadata),
-      }),
-    ),
-  );
-}
-
-async function zeroEntropyFetch(apiKey: string, path: string, body: unknown) {
-  const response = await fetch(`https://api.zeroentropy.dev/v1${path}`, {
-    method: 'POST',
-    headers: {
-      authorization: `Bearer ${apiKey}`,
-      'content-type': 'application/json',
-    },
-    body: JSON.stringify(body),
-  });
-  if (![200, 201, 409].includes(response.status)) {
-    const detail = await response.text();
-    throw new Error(`${path} returned ${response.status}${detail ? `: ${detail}` : ''}`);
-  }
-  return response;
-}
-
-function normalizeZeroEntropyMetadata(metadata: Record<string, string | string[]>) {
-  return Object.fromEntries(
-    Object.entries(metadata).map(([key, value]) => [
-      Array.isArray(value) && !key.startsWith('list:') ? `list:${key}` : key,
-      value,
-    ]),
-  );
-}
-
-function localCareCircleSearch(query: string, note: string) {
-  const terms = query
-    .toLowerCase()
-    .split(/\W+/)
-    .filter((term) => term.length > 2);
-  const results = careCircleMessyCorpus
-    .map((doc) => {
-      const haystack = `${doc.title} ${doc.source} ${doc.text} ${Object.values(doc.metadata).flat().join(' ')}`.toLowerCase();
-      const score = terms.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0);
-      return { ...doc, score };
-    })
-    .filter((doc) => doc.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 6)
-    .map((doc) => ({
-      path: doc.path,
-      title: doc.title,
-      source: doc.source,
-      text: doc.text,
-      score: doc.score,
-      metadata: doc.metadata,
-    }));
-
-  return {
-    status: 'demo',
-    source: 'local',
-    summary: note,
-    indexedDocuments: careCircleMessyCorpus.length,
-    results,
-  };
 }
 
 function safeSlug(value: string) {

@@ -1461,6 +1461,134 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   margin-top: 18px;
 }
 
+.calendar-gbrain-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.calendar-gbrain-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.calendar-gbrain-header h2 {
+  font-size: 22px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.calendar-gbrain-lead {
+  color: #637168;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.calendar-gbrain-form {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.calendar-ics-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calendar-ics-field span {
+  color: #2f6f55;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.calendar-ics-field input {
+  background: #fffdf8;
+  border: 1px solid #b9d3bc;
+  border-radius: 10px;
+  color: #24302b;
+  font: inherit;
+  font-size: 14px;
+  min-height: 48px;
+  padding: 0 14px;
+  width: 100%;
+}
+
+.calendar-gbrain-error {
+  color: #a34b2a;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.calendar-gbrain-meta {
+  color: #637168;
+  font-size: 13px;
+  margin: 0;
+}
+
+.calendar-gbrain-events {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.calendar-gbrain-events li {
+  background: #f4faf3;
+  border: 1px solid #cfded0;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.calendar-gbrain-event-top {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.calendar-gbrain-event-top strong {
+  color: #24302b;
+  font-size: 14px;
+}
+
+.calendar-gbrain-event-top span {
+  color: #7b8d5d;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.calendar-gbrain-events p {
+  color: #637168;
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.dashboard-recent-event-source {
+  color: #2f6f55;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+@media (max-width: 720px) {
+  .calendar-gbrain-form {
+    grid-template-columns: 1fr;
+  }
+}
+
 .status-dot {
   border-radius: 50%;
   display: inline-block;

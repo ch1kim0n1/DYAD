@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::notes::maya-water-reminder.txt",
+  "kind": "carecircle_source_document",
+  "title": "Hydration reminder preference",
+  "content": {
+    "path": "notes/maya-water-reminder.txt",
+    "source": "family note",
+    "text": "Maya noted that Linda accepts water reminders better when they are paired with a normal routine, like tea in the morning.",
+    "metadata": {
+      "source": "family_note",
+      "person": "linda",
+      "tags": [
+        "routine",
+        "hydration"
+      ]
+    },
+    "recency_rank": 16,
+    "when_label": "Pattern"
+  },
+  "created_at": "2026-05-16T23:07:45.122Z",
+  "updated_at": "2026-05-16T23:07:45.122Z"
+}

@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::calendar::maya-work-standup.txt",
+  "kind": "carecircle_source_document",
+  "title": "Maya work standup",
+  "content": {
+    "path": "calendar/maya-work-standup.txt",
+    "source": "calendar",
+    "text": "Maya has a work standup tomorrow at 9:00 AM. CareCircle should avoid scheduling Linda check-ins during this busy block.",
+    "metadata": {
+      "source": "calendar",
+      "person": "maya",
+      "tags": [
+        "busy",
+        "work"
+      ]
+    },
+    "recency_rank": 17,
+    "when_label": "Tomorrow"
+  },
+  "created_at": "2026-05-16T23:07:45.127Z",
+  "updated_at": "2026-05-16T23:07:45.127Z"
+}

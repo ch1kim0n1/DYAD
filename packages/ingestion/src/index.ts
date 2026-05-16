@@ -11,3 +11,9 @@ export {
   type CheckpointData,
   type CheckpointOptions,
 } from './checkpoint-persistence.js';
+export {
+  fetchIcsEvents,
+  parseIcsCalendar,
+  type ParsedCalendarEvent,
+  type FetchIcsOptions,
+} from './calendar-ics-reader.js';

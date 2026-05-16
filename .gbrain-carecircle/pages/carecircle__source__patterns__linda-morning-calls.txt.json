@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::patterns::linda-morning-calls.txt",
+  "kind": "carecircle_source_document",
+  "title": "Morning calls work better",
+  "content": {
+    "path": "patterns/linda-morning-calls.txt",
+    "source": "learned pattern",
+    "text": "Across prior check-ins, Linda responds better to morning calls than late-day calls. She answers more often and sounds less defensive.",
+    "metadata": {
+      "source": "learned_pattern",
+      "person": "linda",
+      "tags": [
+        "communication",
+        "morning"
+      ]
+    },
+    "recency_rank": null,
+    "when_label": null
+  },
+  "created_at": "2026-05-16T23:07:45.104Z",
+  "updated_at": "2026-05-16T23:07:45.104Z"
+}

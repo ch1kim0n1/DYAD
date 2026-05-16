@@ -1,0 +1,16 @@
+{
+  "id": "carecircle::calendar::4vuu8aglji01j2bvdloopucpf4@google.com",
+  "kind": "carecircle_calendar_event",
+  "title": "dr chan emergency appointment at hospital",
+  "content": {
+    "uid": "4vuu8aglji01j2bvdloopucpf4@google.com",
+    "summary": "dr chan emergency appointment at hospital",
+    "start": "2026-05-18T18:00:00.000Z",
+    "end": "2026-05-18T19:45:00.000Z",
+    "location": "",
+    "description": "",
+    "source": "shared_calendar"
+  },
+  "created_at": "2026-05-16T23:30:31.753Z",
+  "updated_at": "2026-05-16T23:30:31.753Z"
+}

@@ -198,6 +198,7 @@ function AnimatedCareView({
             graph={graph}
             brief={brief}
             runtimeState={runtimeState}
+            onRuntimeStateChange={onRuntimeStateChange}
             onAnalyze={onAnalyze}
           />
         )}

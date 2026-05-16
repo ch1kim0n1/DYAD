@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::notes::maya-dinner-note.txt",
+  "kind": "carecircle_source_document",
+  "title": "Dinner sounded tiring",
+  "content": {
+    "path": "notes/maya-dinner-note.txt",
+    "source": "family note",
+    "text": "Maya noted that Linda sounded tired after dinner but perked up when offered two concrete choices for breakfast.",
+    "metadata": {
+      "source": "family_note",
+      "person": "linda",
+      "tags": [
+        "energy",
+        "choices"
+      ]
+    },
+    "recency_rank": 7,
+    "when_label": "Recent evening"
+  },
+  "created_at": "2026-05-16T23:07:45.114Z",
+  "updated_at": "2026-05-16T23:07:45.114Z"
+}
