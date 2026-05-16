@@ -374,6 +374,71 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   color: #fff7ec;
 }
 
+.care-card-button,
+.care-mini-button {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+}
+
+.care-card-button {
+  background: #2f6f55;
+  color: #fffdf8;
+  font-size: 13px;
+  min-height: 38px;
+  padding: 0 13px;
+}
+
+.care-card-button.secondary {
+  background: #fffdf8;
+  border-color: #d9d0c2;
+  color: #2f6f55;
+}
+
+.care-card-button.warn {
+  background: #c76f44;
+  color: #fffdf8;
+}
+
+.care-card-button.is-done {
+  background: #edf4ee;
+  border-color: #cfded0;
+  color: #2f6f55;
+}
+
+.care-card-button.full {
+  margin-top: 14px;
+  width: 100%;
+}
+
+.care-mini-button {
+  background: #fffdf8;
+  border-color: #d9d0c2;
+  color: #2f6f55;
+  font-size: 12px;
+  min-height: 30px;
+  padding: 0 10px;
+}
+
+.care-mini-button.warn {
+  color: #9a4d2f;
+}
+
+.care-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.care-action-buttons.compact {
+  margin-top: 12px;
+}
+
 .family-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -952,6 +1017,7 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
 }
 
 .assistant-status p {
+  flex: 1;
   color: #425148;
   font-size: 13px;
   font-weight: 700;
@@ -1004,6 +1070,12 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   margin: 16px 0 8px;
 }
 
+.action-card,
+.plan-step,
+.message-card {
+  transform-origin: 50% 100%;
+}
+
 .plan-step.done {
   border-color: #cfded0;
 }
@@ -1049,6 +1121,11 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   width: fit-content;
 }
 
+.family-card .person-button {
+  grid-column: 1 / -1;
+  width: fit-content;
+}
+
 .avatar-mark {
   background: #edf4ee;
   border-color: #cfded0;
@@ -1058,6 +1135,13 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
 .brief-hero p:not(.care-kicker) {
   color: #34413b;
   font-size: 19px;
+}
+
+.brief-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .brief-layout {
@@ -1128,7 +1212,6 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   cursor: pointer;
   font-size: 13px;
   font-weight: 800;
-  margin-top: 18px;
   min-height: 38px;
   padding: 0 14px;
 }
