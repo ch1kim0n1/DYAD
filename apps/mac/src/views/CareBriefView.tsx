@@ -285,7 +285,7 @@ function CareSynthesisView() {
           <motion.span
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}
-            transition={{ duration: 3.6, ease: 'easeInOut' }}
+            transition={{ duration: 5.0, ease: 'easeInOut' }}
           />
         </div>
       </motion.div>
