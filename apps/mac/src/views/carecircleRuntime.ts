@@ -16,7 +16,12 @@ export interface CareLiveNote {
   text: string;
   createdAt: string;
   savedToGBrain: boolean;
+  authorPersonId: string;
+  subjectPersonId: string;
+  noteType: CareLiveNoteType;
 }
+
+export type CareLiveNoteType = 'check_in' | 'symptom' | 'meal' | 'appointment' | 'task' | 'preference';
 
 export interface CareCalendarBlock {
   id: string;
@@ -79,7 +84,7 @@ export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
       actionStatus: parsed.actionStatus ?? {},
       draftEdits: parsed.draftEdits ?? {},
       queuedDrafts: parsed.queuedDrafts ?? {},
-      liveNotes: parsed.liveNotes ?? [],
+      liveNotes: (parsed.liveNotes ?? []).map(normalizeLiveNote),
       calendarBlocks: parsed.calendarBlocks ?? getDefaultCalendarBlocks(),
       selectedReminderStart: parsed.selectedReminderStart,
       providerContext: parsed.providerContext,
@@ -88,6 +93,18 @@ export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
   } catch {
     return initialCareCircleRuntimeState;
   }
+}
+
+function normalizeLiveNote(note: Partial<CareLiveNote>): CareLiveNote {
+  return {
+    id: note.id ?? `note-${Date.now()}`,
+    text: note.text ?? '',
+    createdAt: note.createdAt ?? new Date().toISOString(),
+    savedToGBrain: Boolean(note.savedToGBrain),
+    authorPersonId: note.authorPersonId ?? 'maya',
+    subjectPersonId: note.subjectPersonId ?? 'linda',
+    noteType: note.noteType ?? 'check_in',
+  };
 }
 
 export function saveCareCircleRuntimeState(state: CareCircleRuntimeState): void {

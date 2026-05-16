@@ -64,6 +64,8 @@ title: Family note from Maya
 
 ${note.text}
 
+Author: ${note.authorPersonId}
+Type: ${note.noteType}
 Source: family note
 Captured: ${note.createdAt}
 Safety boundary: Family notes are context for human review, not diagnosis.

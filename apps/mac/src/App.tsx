@@ -17,6 +17,7 @@ import {
 import {
   analyzeCareWeek,
   careCircleFixture,
+  personName,
   type CareBrief,
   type CareCircleGraph,
   type CareEvent,
@@ -239,19 +240,23 @@ function buildCareGraphWithLiveNotes(graph: CareCircleGraph, liveNotes: CareLive
 
   const noteObservations: CareObservation[] = liveNotes.map((note) => ({
     id: note.id,
-    personId: 'linda',
+    personId: note.subjectPersonId ?? 'linda',
     text: note.text,
     timestamp: note.createdAt,
-    source: 'family_note',
-    tags: note.savedToGBrain ? ['family-note', 'gbrain-memory'] : ['family-note', 'local-memory'],
+    source: getLiveNoteSource(note.noteType),
+    tags: [
+      getLiveNoteTag(note.noteType),
+      `author-${note.authorPersonId ?? 'maya'}`,
+      note.savedToGBrain ? 'gbrain-memory' : 'local-memory',
+    ],
     sensitivity: 'medium',
   }));
   const noteEvents: CareEvent[] = liveNotes.map((note) => ({
     id: `event-${note.id}`,
-    title: 'Maya added a family note',
+    title: `${personName(note.authorPersonId ?? 'maya')} added ${getLiveNoteTitle(note.noteType)}`,
     timestamp: note.createdAt,
-    category: 'family_call',
-    relatedPersonIds: ['linda', 'maya'],
+    category: getLiveNoteCategory(note.noteType),
+    relatedPersonIds: [...new Set([note.subjectPersonId ?? 'linda', note.authorPersonId ?? 'maya'])],
     linkedObservationIds: [note.id],
   }));
 
@@ -260,4 +265,38 @@ function buildCareGraphWithLiveNotes(graph: CareCircleGraph, liveNotes: CareLive
     observations: [...graph.observations, ...noteObservations],
     events: [...graph.events, ...noteEvents],
   };
+}
+
+function getLiveNoteSource(noteType: CareLiveNote['noteType']): CareObservation['source'] {
+  if (!noteType) return 'family_note';
+  if (noteType === 'appointment') return 'appointment';
+  if (noteType === 'task') return 'task';
+  return 'family_note';
+}
+
+function getLiveNoteCategory(noteType: CareLiveNote['noteType']): CareEvent['category'] {
+  if (!noteType) return 'family_call';
+  if (noteType === 'symptom') return 'symptom';
+  if (noteType === 'meal') return 'meal';
+  if (noteType === 'appointment') return 'appointment';
+  if (noteType === 'task') return 'task';
+  return 'family_call';
+}
+
+function getLiveNoteTag(noteType: CareLiveNote['noteType']): string {
+  if (!noteType) return 'check-in';
+  return noteType.replace('_', '-');
+}
+
+function getLiveNoteTitle(noteType: CareLiveNote['noteType']): string {
+  const labels: Record<CareLiveNote['noteType'], string> = {
+    check_in: 'a check-in note',
+    symptom: 'a symptom note',
+    meal: 'a meal note',
+    appointment: 'an appointment note',
+    task: 'a task note',
+    preference: 'a preference note',
+  };
+
+  return labels[noteType] ?? 'a check-in note';
 }

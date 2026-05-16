@@ -20,20 +20,6 @@ interface CareBriefViewProps {
   onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
 }
 
-interface CareSourceSearchState {
-  status: 'idle' | 'searching' | 'ready';
-  summary: string;
-  source: string;
-  indexedDocuments: number;
-  results: Array<{
-    path: string;
-    title: string;
-    source: string;
-    text: string;
-    score: number;
-  }>;
-}
-
 export function CareBriefView({
   graph,
   brief,
@@ -43,14 +29,8 @@ export function CareBriefView({
 }: CareBriefViewProps) {
   const [busyTitle, setBusyTitle] = useState('');
   const [busyTime, setBusyTime] = useState('10:00');
-  const [sourceQuery, setSourceQuery] = useState('What explains dizziness, skipped meals, appointment confusion, and who should act?');
-  const [sourceSearch, setSourceSearch] = useState<CareSourceSearchState>({
-    status: 'idle',
-    summary: 'Search family notes, messages, tasks, calendar blocks, learned patterns, and provider boundaries.',
-    source: 'local',
-    indexedDocuments: 0,
-    results: [],
-  });
+  const [showScheduleDetails, setShowScheduleDetails] = useState(false);
+  const [showReasoning, setShowReasoning] = useState(false);
   const stagger: Variants = {
     animate: {
       transition: {
@@ -71,12 +51,13 @@ export function CareBriefView({
     runtimeState.selectedReminderStart ??
     reminderSlots.find((slot) => slot.conflictCount === 0)?.start.toISOString() ??
     reminderSlots[0]?.start.toISOString();
+  const selectedReminderLabel = selectedReminderStart ? formatCalendarTime(selectedReminderStart) : 'the selected time';
 
   if (isSynthesizing) {
     return <CareSynthesisView graph={graph} />;
   }
 
-  const planCards = getPlanCards(brief.taskSplit);
+  const planCards = getPlanCards(brief.taskSplit, selectedReminderLabel, runtimeState.reminderSet);
   const updateActionStatus = (key: string, value: string) => {
     onRuntimeStateChange((current) => ({
       ...current,
@@ -151,56 +132,14 @@ export function CareBriefView({
     }));
     setBusyTitle('');
   };
-  const searchMessySources = async () => {
-    setSourceSearch((current) => ({ ...current, status: 'searching' }));
-    try {
-      const response = await fetch('/api/carecircle/context-search', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ query: sourceQuery }),
-      });
-      const data = (await response.json()) as Omit<CareSourceSearchState, 'status'>;
-      setSourceSearch({ ...data, status: 'ready' });
-    } catch {
-      setSourceSearch((current) => ({
-        ...current,
-        status: 'ready',
-        summary: 'Context search unavailable. The deterministic brief is still available.',
-      }));
-    }
-  };
-
   return (
     <motion.section className="care-brief-view" initial="initial" animate="animate" variants={stagger}>
       <motion.div className="brief-hero" variants={fadeUp}>
         <p className="care-kicker">CareCircle brief</p>
         <h1>{brief.headline}</h1>
-        <p className="brief-lead">I found three changes and staged the next moves for the family.</p>
-        <div className="brief-care-checklist" aria-label="Care plan summary">
-          <div className="brief-check-item">
-            <span className="brief-check-box done" aria-hidden="true" />
-            <div>
-              <strong>Family update drafted</strong>
-              <p>Sarah, Arjun, and Maya each have a clear next step.</p>
-            </div>
-          </div>
-          <div className="brief-check-item">
-            <span className="brief-check-box done" aria-hidden="true" />
-            <div>
-              <strong>Appointment reminder prepared</strong>
-              <p>Arjun can confirm the date without re-reading the week.</p>
-            </div>
-          </div>
-          <div className="brief-check-item needs-review">
-            <span className="brief-check-box review" aria-hidden="true">
-              !
-            </span>
-            <div>
-              <strong>Pharmacy call needs approval</strong>
-              <p>Medication-related notes stay paused for human review.</p>
-            </div>
-          </div>
-        </div>
+        <p className="brief-lead">
+          I found three changes and staged the next moves. One item needs your approval before anyone acts.
+        </p>
       </motion.div>
 
       <motion.section className="care-plan-strip" aria-label="Today care plan" variants={stagger}>
@@ -221,13 +160,14 @@ export function CareBriefView({
             </button>
           </motion.article>
         ))}
-        </motion.section>
+      </motion.section>
 
-        <motion.section className="calendar-availability-panel" aria-label="Calendar availability" variants={fadeUp}>
-          <div>
-            <p className="care-kicker">Calendar-aware reminder</p>
-            <h2>Pick a time that does not conflict</h2>
-          </div>
+      <motion.section className="calendar-availability-panel compact" aria-label="Calendar availability" variants={fadeUp}>
+        <div>
+          <p className="care-kicker">Calendar-aware reminder</p>
+          <h2>Suggested free times</h2>
+        </div>
+        <div className="calendar-slot-area">
           <div className="slot-list" aria-label="Suggested reminder times">
             {reminderSlots.map((slot) => (
               <button
@@ -240,6 +180,11 @@ export function CareBriefView({
                   onRuntimeStateChange((current) => ({
                     ...current,
                     selectedReminderStart: slot.start.toISOString(),
+                    reminderSet: false,
+                    actionStatus: {
+                      ...current.actionStatus,
+                      'action-arjun-appointment': `Reminder set for ${slot.label}`,
+                    },
                   }))
                 }
               >
@@ -248,149 +193,129 @@ export function CareBriefView({
               </button>
             ))}
           </div>
-          <form className="busy-block-form" onSubmit={addBusyBlock}>
-            <input
-              value={busyTitle}
-              onChange={(event) => setBusyTitle(event.target.value)}
-              placeholder="Add busy block, e.g. class Sunday 10pm"
-            />
-            <input value={busyTime} onChange={(event) => setBusyTime(event.target.value)} type="time" />
-            <button className="care-card-button secondary" type="submit">
-              Add
-            </button>
-          </form>
-          <div className="busy-block-list">
-            {runtimeState.calendarBlocks.map((block) => (
-              <span key={block.id}>
-                {block.title} · {formatCalendarTime(block.start)}
-              </span>
-            ))}
-          </div>
-        </motion.section>
-
-      <div className="brief-layout">
-        <div className="brief-main-column">
-          <motion.section className="care-panel" variants={fadeUp}>
-            <h2>Why I staged this</h2>
-            <div className="insight-list">
-              {brief.whatChanged.map((insight) => (
-                <article className="insight-card" key={insight.id}>
-                  <div className="insight-header">
-                    <h3>{insight.claim}</h3>
-                    <span className={`review-pill ${insight.safetyLevel}`}>
-                      {insight.safetyLevel === 'medical_review' ? 'doctor or pharmacist' : 'human review'}
-                    </span>
-                  </div>
-                  <p>{insight.recommendedAction}</p>
-                  <div className="confidence-line">
-                    <span>Confidence</span>
-                    <strong>{Math.round(insight.confidence * 100)}%</strong>
-                  </div>
-                  <div className="evidence-row">
-                    {evidenceText(insight.evidenceObservationIds).map((text) => (
-                      <span className="evidence-chip" key={text}>
-                        {text}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </motion.section>
-
-          <motion.section className="care-panel" variants={fadeUp}>
-            <h2>Loose ends I am tracking</h2>
-            <div className="loop-list">
-              {brief.unresolvedLoops.map((loop) => (
-                <article className="loop-card" key={loop.id}>
-                  <h3>{loop.description}</h3>
-                  <p>{loop.suggestedNextStep}</p>
-                  <div className="evidence-row">
-                    {evidenceText(loop.evidenceObservationIds).map((text) => (
-                      <span className="evidence-chip" key={text}>
-                        {text}
-                      </span>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </motion.section>
+          <button
+            className="care-mini-button"
+            type="button"
+            onClick={() => setShowScheduleDetails((current) => !current)}
+          >
+            {showScheduleDetails ? 'Hide schedule' : 'Edit schedule'}
+          </button>
         </div>
-
-        <aside className="brief-side-column">
-          <motion.section className="care-panel" variants={fadeUp}>
-            <h2>Linda preferences I remembered</h2>
-            <div className="preference-source-list">
-              {brief.whatUsuallyWorks.map((item, index) => {
-                const sources = [
-                  'from family note: morning calls',
-                  'observed pattern: concrete choices',
-                  'trust note: independence framing',
-                ];
-                return (
-                  <article className="preference-source" key={item}>
-                    <p>{item}</p>
-                    <span>{sources[index] ?? 'source visible'}</span>
-                  </article>
-                );
-              })}
-            </div>
-          </motion.section>
-
-          <motion.section className="care-panel assurance-panel" variants={fadeUp}>
-            <h2>What you do now</h2>
-            <p>
-              Review the pharmacy call before anyone acts. Everything else is drafted and ready for the family
-              to pick up.
-            </p>
-          </motion.section>
-
-          <motion.section className="care-panel source-search-panel" variants={fadeUp}>
-            <div className="provider-context-header">
-              <div>
-                <p className="care-kicker">Messy source retrieval</p>
-                <h2>Search the whole family context</h2>
-              </div>
-              <span className={`provider-context-badge ${sourceSearch.status === 'searching' ? 'checking' : 'ready'}`}>
-                {sourceSearch.status === 'searching'
-                  ? 'Searching'
-                  : sourceSearch.source === 'zeroentropy'
-                  ? 'Live retrieval'
-                  : 'Local fallback'}
-              </span>
-            </div>
-            <p className="source-search-summary">{sourceSearch.summary}</p>
-            <div className="source-query-row">
-              <input value={sourceQuery} onChange={(event) => setSourceQuery(event.target.value)} />
-              <button
-                className="care-card-button secondary"
-                type="button"
-                onClick={searchMessySources}
-                disabled={sourceSearch.status === 'searching'}
-              >
-                {sourceSearch.status === 'searching' ? 'Searching...' : 'Retrieve context'}
+        {showScheduleDetails && (
+          <div className="calendar-details">
+            <form className="busy-block-form" onSubmit={addBusyBlock}>
+              <input
+                value={busyTitle}
+                onChange={(event) => setBusyTitle(event.target.value)}
+                placeholder="Add busy block, e.g. class Sunday 10pm"
+              />
+              <input value={busyTime} onChange={(event) => setBusyTime(event.target.value)} type="time" />
+              <button className="care-card-button secondary" type="submit">
+                Add
               </button>
+            </form>
+            <div className="busy-block-list">
+              {runtimeState.calendarBlocks.map((block) => (
+                <span key={block.id}>
+                  {block.title} · {formatCalendarTime(block.start)}
+                </span>
+              ))}
             </div>
-            <div className="source-search-meta">
-              <span>{sourceSearch.indexedDocuments || 24} source documents</span>
-              <span>{sourceSearch.results.length || 0} snippets shown</span>
-            </div>
-            {sourceSearch.results.length ? (
-              <div className="retrieved-source-list">
-                {sourceSearch.results.map((result) => (
-                  <article key={result.path}>
-                    <span>{result.source}</span>
-                    <strong>{result.title}</strong>
-                    <p>{result.text}</p>
-                  </article>
-                ))}
-              </div>
-            ) : null}
-          </motion.section>
+          </div>
+        )}
+      </motion.section>
 
-        </aside>
-      </div>
+      <motion.section className="care-panel assurance-panel primary-next-panel" variants={fadeUp}>
+        <h2>What you do now</h2>
+        <p>
+          Review the pharmacy call before anyone acts. Everything else is drafted and ready for the family to pick up.
+        </p>
+      </motion.section>
+
+      <motion.section className="care-panel reasoning-toggle-panel" variants={fadeUp}>
+        <button
+          className="reasoning-toggle-button"
+          type="button"
+          onClick={() => setShowReasoning((current) => !current)}
+        >
+          <span>{showReasoning ? 'Hide reasoning' : 'Show why I staged this'}</span>
+          <strong>{showReasoning ? '-' : '+'}</strong>
+        </button>
+
+        {showReasoning && (
+          <div className="brief-layout">
+            <div className="brief-main-column">
+              <section className="care-panel">
+                <h2>Why I staged this</h2>
+                <div className="insight-list">
+                  {brief.whatChanged.map((insight) => (
+                    <article className="insight-card" key={insight.id}>
+                      <div className="insight-header">
+                        <h3>{insight.claim}</h3>
+                        <span className={`review-pill ${insight.safetyLevel}`}>
+                          {insight.safetyLevel === 'medical_review' ? 'doctor or pharmacist' : 'human review'}
+                        </span>
+                      </div>
+                      <p>{insight.recommendedAction}</p>
+                      <div className="confidence-line">
+                        <span>Confidence</span>
+                        <strong>{Math.round(insight.confidence * 100)}%</strong>
+                      </div>
+                      <div className="evidence-row">
+                        {evidenceText(insight.evidenceObservationIds).map((text) => (
+                          <span className="evidence-chip" key={text}>
+                            {text}
+                          </span>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="care-panel">
+                <h2>Loose ends I am tracking</h2>
+                <div className="loop-list">
+                  {brief.unresolvedLoops.map((loop) => (
+                    <article className="loop-card" key={loop.id}>
+                      <h3>{loop.description}</h3>
+                      <p>{loop.suggestedNextStep}</p>
+                      <div className="evidence-row">
+                        {evidenceText(loop.evidenceObservationIds).map((text) => (
+                          <span className="evidence-chip" key={text}>
+                            {text}
+                          </span>
+                        ))}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <aside className="brief-side-column">
+              <section className="care-panel">
+                <h2>Linda preferences I remembered</h2>
+                <div className="preference-source-list">
+                  {brief.whatUsuallyWorks.map((item, index) => {
+                    const sources = [
+                      'from family note: morning calls',
+                      'observed pattern: concrete choices',
+                      'trust note: independence framing',
+                    ];
+                    return (
+                      <article className="preference-source" key={item}>
+                        <p>{item}</p>
+                        <span>{sources[index] ?? 'source visible'}</span>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            </aside>
+          </div>
+        )}
+      </motion.section>
     </motion.section>
   );
 }
@@ -443,7 +368,7 @@ function weekdayIndex(day: string): number {
   return ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'].indexOf(normalized);
 }
 
-function getPlanCards(actions: CareAction[]) {
+function getPlanCards(actions: CareAction[], selectedReminderLabel: string, reminderSet: boolean) {
   const pharmacy = actions.find((action) => action.id.includes('pharmacy'));
   const appointment = actions.find((action) => action.id.includes('appointment'));
   const familyRoles = actions
@@ -469,9 +394,10 @@ function getPlanCards(actions: CareAction[]) {
       status: 'Ready',
       title: 'Appointment confirmation',
       description:
-        appointment?.description ?? 'I prepared the reminder so Arjun can confirm without re-reading the week.',
-      buttonLabel: 'Schedule reminder',
-      doneLabel: 'Calendar file downloaded',
+        appointment?.description ??
+        `I found a conflict-free check-in slot at ${selectedReminderLabel}, so Arjun can confirm without re-reading the week.`,
+      buttonLabel: reminderSet ? `Download ${selectedReminderLabel}` : `Use ${selectedReminderLabel}`,
+      doneLabel: `Reminder set for ${selectedReminderLabel}`,
       tone: 'done',
     },
     {
@@ -576,7 +502,7 @@ function CareSynthesisView({ graph }: { graph: CareCircleGraph }) {
 }
 
 function getSynthesisSourceLabel(observation: CareObservation): string {
-  if (observation.tags.includes('gbrain-memory')) return 'GBrain note';
+  if (observation.tags.includes('gbrain-memory')) return 'new note';
   if (observation.tags.includes('local-memory')) return 'new family note';
   if (observation.tags.some((tag) => ['communication', 'trust'].includes(tag))) return 'learned pattern';
 
