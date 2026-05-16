@@ -1,5 +1,5 @@
+import { motion, type Variants } from 'framer-motion';
 import type { CareBrief, CareCircleGraph } from './carecircleDemo.js';
-import { personName } from './carecircleDemo.js';
 
 interface CareCircleDashboardProps {
   graph: CareCircleGraph;
@@ -7,68 +7,57 @@ interface CareCircleDashboardProps {
   onAnalyze: () => void;
 }
 
+const personPulse: Record<string, string> = {
+  linda: '3 changes surfaced this week',
+  maya: 'morning check-in drafted',
+  sarah: 'pharmacy call pending',
+  arjun: 'appointment reminder ready',
+  'dr-chen': 'review path prepared',
+};
+
+const roleDescriptor: Record<string, string> = {
+  linda: 'mother',
+  maya: 'coordinator',
+  sarah: 'sibling',
+  arjun: 'sibling',
+  'dr-chen': 'doctor',
+};
+
 export function CareCircleDashboard({ graph, brief, onAnalyze }: CareCircleDashboardProps) {
-  const actionCards = brief
-    ? [
-        {
-          owner: 'I staged',
-          title: 'Pharmacy call',
-          body: 'Sarah has the call brief ready. I am holding it for approval because it touches medication.',
-          meta: 'Needs approval',
-        },
-        {
-          owner: 'I prepared',
-          title: 'Appointment reminder',
-          body: 'Arjun can confirm the date from one clean note instead of searching the thread.',
-          meta: 'Ready',
-        },
-        {
-          owner: 'I drafted',
-          title: 'Morning check-in',
-          body: "Maya has a gentle message that protects Linda's independence and asks the important question.",
-          meta: 'Low friction',
-        },
-      ]
-    : [
-        {
-          owner: 'I can check',
-          title: 'What changed',
-          body: 'I will pull together the scattered family notes and show only the patterns that matter.',
-          meta: 'Ready',
-        },
-        {
-          owner: 'I can stage',
-          title: 'The next moves',
-          body: 'I will prepare the calls, reminders, and family update so you are not starting cold.',
-          meta: 'Source visible',
-        },
-        {
-          owner: 'You approve',
-          title: 'Sensitive steps',
-          body: 'Anything medical stays paused until a human reviews it.',
-          meta: 'Safe boundary',
-        },
-      ];
+  const dashboardPeople = graph.people.filter((person) => person.id !== 'pharmacy');
+  const stagger: Variants = {
+    animate: {
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.08,
+      },
+    },
+  };
+
+  const fadeUp: Variants = {
+    initial: { opacity: 0, y: 14 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+  };
 
   return (
-    <section className="care-dashboard">
-      <div className="care-hero-panel">
+    <motion.section className="care-dashboard" initial="initial" animate="animate" variants={stagger}>
+      <motion.div className="care-hero-panel" variants={fadeUp}>
         <div>
           <p className="care-kicker">CareCircle is watching the care load</p>
-          <h1>{brief ? "I found the week's care loose ends and staged the next moves." : 'Come home, check once, and feel caught up.'}</h1>
+          <h1>{brief ? "You're caught up. The next moves are staged." : 'Come home, check once, and feel caught up.'}</h1>
           <p>
             {brief
               ? 'Nothing has been sent. The medical item is waiting for approval, the appointment reminder is ready, and the family update is drafted.'
-              : 'When you are tired, CareCircle reads the family context for you and prepares the gentle, practical follow-through.'}
+              : 'Mom seemed off this week. I can pull the important changes together, prepare the follow-through, and pause anything sensitive for human review.'}
           </p>
         </div>
         <button className="care-primary-button" type="button" onClick={onAnalyze}>
-          {brief ? 'Refresh care plan' : 'Catch me up'}
+          {brief ? 'Refresh' : 'Catch me up'}
         </button>
-      </div>
+      </motion.div>
 
       {brief && (
-        <section className="assistant-status" aria-label="CareCircle status">
+        <motion.section className="assistant-status dashboard-status" aria-label="CareCircle status" variants={fadeUp}>
           <div>
             <span className="status-dot ready" />
             <p>Drafted sibling update</p>
@@ -81,38 +70,35 @@ export function CareCircleDashboard({ graph, brief, onAnalyze }: CareCircleDashb
             <span className="status-dot waiting" />
             <p>Paused pharmacy call for human review</p>
           </div>
-        </section>
+        </motion.section>
       )}
 
-      <div className="care-action-grid" aria-label="Recommended next actions">
-        {actionCards.map((card) => (
-          <article className="action-card" key={card.title}>
-            <div className="action-card-top">
-              <span>{card.owner}</span>
-              <small>{card.meta}</small>
+      <motion.div className="family-grid" aria-label="Family circle" variants={stagger}>
+        {dashboardPeople.map((person) => (
+          <motion.article className="family-card" key={person.id} variants={fadeUp}>
+            <div className="family-card-top">
+              <div className="avatar-mark" aria-hidden="true">
+                {person.name.slice(0, 1)}
+              </div>
+              <div>
+                <h2>{person.name}</h2>
+                <p className={`pulse-line ${person.id === 'linda' || person.id === 'sarah' ? 'attention' : ''}`}>
+                  {personPulse[person.id] ?? 'care context ready'}
+                </p>
+              </div>
             </div>
-            <h2>{card.title}</h2>
-            <p>{card.body}</p>
-          </article>
+            <div className="family-card-bottom">
+              <span className="role-line">{roleDescriptor[person.id] ?? person.role}</span>
+              <span aria-hidden="true" className="footer-divider-dot">
+                ·
+              </span>
+              <span className="responsibility-line">
+                {person.responsibilities?.slice(0, 1).join('') ?? person.relationshipLabel}
+              </span>
+            </div>
+          </motion.article>
         ))}
-      </div>
-
-      <div className="family-grid" aria-label="Family circle">
-        {graph.people.map((person) => (
-          <article className="family-card" key={person.id}>
-            <div className="avatar-mark" aria-hidden="true">
-              {person.name.slice(0, 1)}
-            </div>
-            <div>
-              <h2>{person.name}</h2>
-              <p>{person.relationshipLabel}</p>
-            </div>
-            <span className="responsibility-line">
-              {person.responsibilities?.slice(0, 1).join('') ?? personName(person.id)}
-            </span>
-          </article>
-        ))}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }

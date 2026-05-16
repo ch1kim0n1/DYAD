@@ -1,22 +1,37 @@
-export type CareTab = 'dashboard' | 'timeline' | 'brief' | 'messages' | 'trust';
+import {
+  analyzeCareWeek as analyzeCareWeekFromEngine,
+  careCircleFixture,
+  generateMessageDrafts as generateMessageDraftsFromEngine,
+  getWhatChanged as getWhatChangedFromEngine,
+} from '@dyad/engine/carecircle';
+import type {
+  CareBrief as SharedCareBrief,
+  CareCircleGraph as SharedCareCircleGraph,
+  CareInsight as SharedCareInsight,
+  CareMessageDrafts as SharedCareMessageDrafts,
+} from '@dyad/shared';
 
-export interface CarePerson {
-  id: string;
-  name: string;
-  role: string;
-  relationshipLabel: string;
-  responsibilities?: string[];
-  notes?: string[];
+export type CareTab = 'dashboard' | 'timeline' | 'brief' | 'messages' | 'trust';
+export type {
+  CareAction,
+  CareBrief,
+  CareCircleGraph,
+  CareEvent,
+  CareInsight,
+  CareLoop,
+  CareMessageDrafts,
+  CareObservation,
+  CarePerson,
+} from '@dyad/shared';
+
+export { careCircleFixture };
+
+export function analyzeCareWeek(graph: SharedCareCircleGraph = careCircleFixture): SharedCareBrief {
+  return analyzeCareWeekFromEngine(graph);
 }
 
-export interface CareObservation {
-  id: string;
-  personId: string;
-  text: string;
-  timestamp: string;
-  source: 'family_note' | 'message' | 'appointment' | 'medication' | 'task';
-  tags: string[];
-  sensitivity: 'low' | 'medium' | 'high';
+export function getWhatChanged(graph: SharedCareCircleGraph = careCircleFixture): SharedCareInsight[] {
+  return getWhatChangedFromEngine(graph);
 }
 
 export interface CareEvent {
@@ -345,6 +360,12 @@ export function analyzeCareWeek(): CareBrief {
         'Linda started a new blood pressure medication five days ago. Since then, family notes mention dizziness twice, two skipped lunches, and repeated questions about an upcoming appointment. We are not assuming causation, but would like guidance on whether medication timing, dosage, or side effects should be reviewed.',
     },
   };
+}
+
+export function generateMessageDrafts(
+  graph: SharedCareCircleGraph = careCircleFixture,
+): SharedCareMessageDrafts {
+  return generateMessageDraftsFromEngine(graph);
 }
 
 export function personName(id: string): string {

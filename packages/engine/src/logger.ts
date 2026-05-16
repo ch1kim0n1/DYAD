@@ -12,10 +12,11 @@
  */
 import pino, { type Logger } from 'pino';
 
-const level = process.env.LOG_LEVEL ?? 'info';
+const env = typeof process !== 'undefined' ? process.env : {};
+const level = env.LOG_LEVEL ?? 'info';
 
 function buildLogger(): Logger {
-  const isDev = process.env.NODE_ENV !== 'production';
+  const isDev = env.NODE_ENV !== 'production';
   if (isDev) {
     try {
       // pino-pretty is an optional dependency; fall back gracefully.
