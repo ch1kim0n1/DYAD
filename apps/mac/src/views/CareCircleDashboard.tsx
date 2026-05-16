@@ -1,6 +1,5 @@
 import { motion, type Variants } from 'framer-motion';
 import type { CareBrief, CareCircleGraph } from './carecircleDemo.js';
-import { personName } from './carecircleDemo.js';
 
 interface CareCircleDashboardProps {
   graph: CareCircleGraph;
@@ -14,6 +13,14 @@ const personPulse: Record<string, string> = {
   sarah: 'pharmacy call pending',
   arjun: 'appointment reminder ready',
   'dr-chen': 'review path prepared',
+};
+
+const roleDescriptor: Record<string, string> = {
+  linda: 'mother',
+  maya: 'coordinator',
+  sarah: 'sibling',
+  arjun: 'sibling',
+  'dr-chen': 'doctor',
 };
 
 export function CareCircleDashboard({ graph, brief, onAnalyze }: CareCircleDashboardProps) {
@@ -75,15 +82,18 @@ export function CareCircleDashboard({ graph, brief, onAnalyze }: CareCircleDashb
               </div>
               <div>
                 <h2>{person.name}</h2>
-                <p>{person.relationshipLabel}</p>
+                <p className={`pulse-line ${person.id === 'linda' || person.id === 'sarah' ? 'attention' : ''}`}>
+                  {personPulse[person.id] ?? 'care context ready'}
+                </p>
               </div>
             </div>
             <div className="family-card-bottom">
-              <span className="responsibility-line">
-                {person.responsibilities?.slice(0, 1).join('') ?? personName(person.id)}
+              <span className="role-line">{roleDescriptor[person.id] ?? person.role}</span>
+              <span aria-hidden="true" className="footer-divider-dot">
+                ·
               </span>
-              <span className={`pulse-line ${person.id === 'linda' || person.id === 'sarah' ? 'attention' : ''}`}>
-                {personPulse[person.id] ?? 'care context ready'}
+              <span className="responsibility-line">
+                {person.responsibilities?.slice(0, 1).join('') ?? person.relationshipLabel}
               </span>
             </div>
           </motion.article>
