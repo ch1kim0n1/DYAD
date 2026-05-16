@@ -5,6 +5,7 @@ import { CareCircleDashboard } from './views/CareCircleDashboard.js';
 import { CareMessageComposer } from './views/CareMessageComposer.js';
 import { CareTimeline } from './views/CareTimeline.js';
 import { CareTrustCenter } from './views/CareTrustCenter.js';
+import { ErrorBoundary } from './components/ErrorBoundary.js';
 import {
   analyzeCareWeek,
   careCircleFixture,
@@ -70,7 +71,9 @@ export function App() {
       </header>
 
       <main className="app-main care-main">
-        <AnimatedCareView activeTab={activeTab} brief={brief} onAnalyze={handleAnalyze} />
+        <ErrorBoundary name="care-view">
+          <AnimatedCareView activeTab={activeTab} brief={brief} onAnalyze={handleAnalyze} />
+        </ErrorBoundary>
       </main>
     </div>
   );

@@ -274,7 +274,7 @@ export const careCircleFixture: CareCircleGraph = {
 export function analyzeCareWeek(): CareBrief {
   return {
     id: 'brief-week-2026-05-16',
-    generatedAt: '2026-05-16T09:00:00-07:00',
+    generatedAt: new Date().toISOString(),
     headline: 'This week may be worth a human review',
     summary:
       'Three things changed this week: Linda skipped lunch twice, asked about the same appointment four times, and mentioned dizziness twice after a blood pressure medication change. This may be worth checking with her doctor or pharmacist. Sarah can handle the pharmacy call, Arjun can confirm the appointment, and Maya should ask Linda three gentle questions today.',

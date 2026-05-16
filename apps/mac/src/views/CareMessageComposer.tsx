@@ -20,9 +20,14 @@ export function CareMessageComposer({ brief, onAnalyze }: CareMessageComposerPro
   const [copiedTitle, setCopiedTitle] = useState<string | null>(null);
 
   const copyDraft = async (title: string, text: string) => {
-    await navigator.clipboard.writeText(text);
-    setCopiedTitle(title);
-    window.setTimeout(() => setCopiedTitle(null), 1400);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedTitle(title);
+      window.setTimeout(() => setCopiedTitle(null), 1400);
+    } catch {
+      // Clipboard API unavailable — show persistent "copied" state as a prompt to copy manually
+      setCopiedTitle(title);
+    }
   };
 
   return (
