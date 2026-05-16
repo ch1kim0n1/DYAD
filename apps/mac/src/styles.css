@@ -1261,7 +1261,80 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
 
 .brief-hero p:not(.care-kicker) {
   color: #34413b;
-  font-size: 19px;
+  font-size: 17px;
+}
+
+.brief-hero .brief-lead {
+  color: #3f4c45;
+  font-size: 18px;
+  line-height: 1.45;
+  margin-top: 14px;
+  max-width: 660px;
+}
+
+.brief-care-checklist {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  max-width: 760px;
+}
+
+.brief-check-item {
+  align-items: flex-start;
+  background: rgba(255, 253, 248, 0.74);
+  border: 1px solid #dce7d9;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+}
+
+.brief-check-box {
+  align-items: center;
+  background: #edf4ee;
+  border: 1px solid #cfded0;
+  border-radius: 7px;
+  color: #2f6f55;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  height: 26px;
+  justify-content: center;
+  width: 26px;
+}
+
+.brief-check-box.done::after {
+  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+  content: "";
+  height: 11px;
+  transform: translateY(-1px) rotate(42deg);
+  width: 6px;
+}
+
+.brief-check-item.needs-review {
+  border-color: #edcbb9;
+}
+
+.brief-check-item.needs-review .brief-check-box {
+  background: #f4dfd4;
+  border-color: #edcbb9;
+  color: #934b2e;
+}
+
+.brief-check-item strong {
+  color: #24302b;
+  display: block;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.brief-check-item p {
+  color: #637168;
+  font-size: 13px;
+  line-height: 1.4;
+  margin: 4px 0 0;
 }
 
 .brief-hero-actions {
