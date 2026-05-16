@@ -2,6 +2,78 @@
 
 [![CI](https://github.com/ch1kim0n1/DYAD/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ch1kim0n1/DYAD/actions/workflows/ci.yml)
 
+## CareCircle Demo Mode
+
+CareCircle is relationship intelligence for family care. It uses DYAD's relationship substrate to help a family notice what changed, keep sources visible, split next actions, and communicate gently when an aging parent may need extra support.
+
+The demo opens directly into CareCircle and does not require onboarding, iMessage access, Full Disk Access, sidecar services, API keys, GBrain, or GStack availability. It uses synthetic fixture data so the judge sees the core product in the first 10 seconds.
+
+### Product thesis
+
+Modern caregiving breaks down because important signals live across sibling texts, appointments, medication notes, memory, and half-finished tasks. CareCircle turns that scattered context into a calm weekly brief:
+
+> Three things changed this week: Linda skipped lunch twice, asked about the same appointment four times, and mentioned dizziness twice after a blood pressure medication change. This may be worth checking with her doctor or pharmacist. Sarah can handle the pharmacy call, Arjun can confirm the appointment, and Maya should ask Linda three gentle questions today.
+
+The product is not a diagnosis engine. It is a family coordination layer with evidence, task owners, source visibility, and human review for medical concerns.
+
+### Demo flow
+
+1. Open the Mac app. The first screen is the CareCircle dashboard.
+2. A judge sees the family circle: Linda, Maya, Sarah, Arjun, and Dr. Chen.
+3. Click **Analyze this week**.
+4. The app reveals the Care Brief with what changed, unresolved loops, task split, what usually works, and evidence chips.
+5. Open **Messages** to show drafts for Mom, siblings, and the doctor/pharmacist.
+6. Open **Trust** to show privacy posture, source visibility, sharing controls, export/delete controls, and human review boundaries.
+
+### Setup
+
+```bash
+bun install
+bun run dev:mac
+```
+
+For a production Tauri shell:
+
+```bash
+bun run --cwd apps/mac tauri:dev
+```
+
+For a static web demo during judging:
+
+```bash
+bun run --cwd apps/mac dev
+```
+
+### Architecture
+
+- **DYAD substrate**: the existing relationship-intelligence architecture provides typed relationship state, pattern detection, intervention framing, privacy posture, and local-first Mac UI foundations.
+- **CareCircle care-network layer**: generalizes from a dyad to a family care graph with people, responsibilities, observations, events, loops, insights, actions, message drafts, and a weekly brief.
+- **GBrain as memory**: in a live version, GBrain stores longitudinal family care context such as recurring routines, open loops, communication preferences, prior briefs, and trusted care-network entities.
+- **GStack as workflow orchestration**: in a live version, GStack coordinates ingestion, evidence retrieval, deterministic safety checks, brief generation, task splitting, message drafting, and review routing.
+
+### Privacy posture
+
+- Synthetic demo data is used for judging.
+- Family notes should be encrypted and source-visible.
+- Drafts require explicit review; CareCircle does not auto-send messages.
+- Family data is not used for model training.
+- Export and delete controls are part of the product surface.
+- Medical concerns are routed to human review, doctor guidance, or pharmacist guidance.
+
+### Safety boundaries
+
+CareCircle does not diagnose dementia, claim medication caused symptoms, claim it knows Linda's feelings, or replace family members, doctors, pharmacists, or caregivers. It uses language like "may be worth checking," "family notes mention," "human review," and "doctor or pharmacist."
+
+### Expansion paths
+
+- Elder homes: staff-family coordination briefs with resident-specific source visibility.
+- Home care agencies: shift notes, medication reminders, family updates, and open-loop tracking.
+- Co-parenting: school events, schedule changes, repeated concerns, and shared action plans.
+- Cofounders: relationship intelligence for leadership strain, unresolved decisions, and role clarity.
+- High-touch client management: account context, relationship history, next best actions, and trust-sensitive summaries.
+
+---
+
 ### Relationship intelligence built on the science that predicted divorce.
 
 DYAD reads your iMessage history and surfaces patterns from the same body of
