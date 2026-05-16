@@ -6,6 +6,8 @@ import { CareMessageComposer } from './views/CareMessageComposer.js';
 import { CareTimeline } from './views/CareTimeline.js';
 import { CareTrustCenter } from './views/CareTrustCenter.js';
 import { ErrorBoundary } from './components/ErrorBoundary.js';
+import { SettingsPanel } from './components/SettingsPanel.js';
+import { CrisisOverlay } from './components/CrisisOverlay.js';
 import {
   analyzeCareWeek,
   careCircleFixture,
@@ -27,6 +29,9 @@ export function App() {
   const [analyzedAt, setAnalyzedAt] = useState<string | null>(null);
   const [isSynthesizing, setIsSynthesizing] = useState(false);
   const synthesisTimer = useRef<number | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [crisisDismissed, setCrisisDismissed] = useState(false);
+  const [showCrisis, setShowCrisis] = useState(false);
 
   const metaLabel = useMemo(() => {
     if (!analyzedAt) return 'Synthetic demo data';
@@ -61,8 +66,34 @@ export function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey)) return;
+      if (e.key === ',') {
+        e.preventDefault();
+        setShowSettings(true);
+      }
+      // Dev-only: Cmd+Shift+K triggers crisis overlay for testing
+      if (e.shiftKey && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        setShowCrisis(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
     <div className="app care-app">
+      {showCrisis && !crisisDismissed && (
+        <CrisisOverlay
+          refusal={{ safe: false, category: 'suicidality', should_refuse: true, triggers: [], confidence: 1.0, referral_resources: [], crisis_resources: [] }}
+          onDismiss={() => {
+            setCrisisDismissed(true);
+            setShowCrisis(false);
+          }}
+        />
+      )}
       <header className="app-header care-header">
         <div className="care-brand-block">
           <div className="app-brand care-brand">CareCircle</div>
@@ -97,6 +128,22 @@ export function App() {
             onAnalyze={handleAnalyze}
           />
         </ErrorBoundary>
+        {showSettings && (
+          <SettingsPanel
+            onClose={() => setShowSettings(false)}
+            onReanalyse={() => {
+              setShowSettings(false);
+              handleAnalyze();
+            }}
+            onResetData={async () => {
+              setBrief(null);
+              setAnalyzedAt(null);
+              setShowSettings(false);
+            }}
+            onExport={() => setShowSettings(false)}
+            onSwitchConversation={() => setShowSettings(false)}
+          />
+        )}
       </main>
     </div>
   );
