@@ -10,7 +10,6 @@ import {
   suggestReminderSlots,
 } from './carecircleActions.js';
 import { checkCareProviderContext } from './carecircleExternalContext.js';
-import { saveCareBriefToGBrainMemory } from './carecircleMemory.js';
 import type { CareCircleRuntimeState } from './carecircleRuntime.js';
 
 interface CareBriefViewProps {
@@ -96,20 +95,6 @@ export function CareBriefView({
     }));
     const providerContext = await checkCareProviderContext();
     onRuntimeStateChange((current) => ({ ...current, providerContext }));
-  };
-  const commitCarePlanMemory = async () => {
-    onRuntimeStateChange((current) => ({
-      ...current,
-      planAccepted: true,
-      gbrainMemory: {
-        status: 'syncing',
-        source: 'local',
-        summary: 'Saving care plan into GBrain memory...',
-        memoryCount: current.gbrainMemory?.memoryCount ?? 0,
-      },
-    }));
-    const gbrainMemory = await saveCareBriefToGBrainMemory(brief);
-    onRuntimeStateChange((current) => ({ ...current, gbrainMemory }));
   };
   const handlePlanAction = async (card: ReturnType<typeof getPlanCards>[number]) => {
     if (card.kind === 'family') {
@@ -404,88 +389,10 @@ export function CareBriefView({
             ) : null}
           </motion.section>
 
-          <motion.section className="care-panel memory-sync-panel" variants={fadeUp}>
-            <div className="provider-context-header">
-              <div>
-                <p className="care-kicker">GBrain workflow</p>
-                <h2>Care memory</h2>
-              </div>
-              <span className={`provider-context-badge ${runtimeState.gbrainMemory?.status ?? 'idle'}`}>
-                {memoryStatusLabel(runtimeState.gbrainMemory?.status)}
-              </span>
-            </div>
-            <p>
-              {runtimeState.gbrainMemory?.summary ??
-                'Save this accepted plan as care memory so the next brief starts from what was already handled.'}
-            </p>
-            {runtimeState.gbrainMemory?.pageId && (
-              <div className="memory-page-card">
-                <strong>{runtimeState.gbrainMemory.pageId}</strong>
-                <span>
-                  {runtimeState.gbrainMemory.memoryCount} memory page
-                  {runtimeState.gbrainMemory.memoryCount === 1 ? '' : 's'} available
-                </span>
-              </div>
-            )}
-            <button
-              className="care-card-button secondary full"
-              type="button"
-              onClick={commitCarePlanMemory}
-              disabled={runtimeState.gbrainMemory?.status === 'syncing'}
-            >
-              {runtimeState.gbrainMemory?.status === 'syncing'
-                ? 'Saving to memory...'
-                : runtimeState.planAccepted
-                ? 'Care plan saved'
-                : 'Save accepted plan'}
-            </button>
-          </motion.section>
-
-          <motion.section className="care-panel provider-context-panel" variants={fadeUp}>
-            <div className="provider-context-header">
-              <div>
-                <p className="care-kicker">External context</p>
-                <h2>Provider handoff check</h2>
-              </div>
-              <span className={`provider-context-badge ${runtimeState.providerContext?.status ?? 'idle'}`}>
-                {providerStatusLabel(runtimeState.providerContext?.status)}
-              </span>
-            </div>
-            <p>{runtimeState.providerContext?.summary ?? 'Use The Hog to check outside context only for routing and handoff prep.'}</p>
-            {runtimeState.providerContext?.items.length ? (
-              <div className="provider-context-list">
-                {runtimeState.providerContext.items.map((item) => (
-                  <article key={`${item.title}-${item.sourceLabel}`}>
-                    <strong>{item.title}</strong>
-                    <p>{item.detail}</p>
-                    <span>{item.sourceLabel}</span>
-                  </article>
-                ))}
-              </div>
-            ) : null}
-            {runtimeState.providerContext?.operationId && (
-              <span className="provider-operation">Hog operation: {runtimeState.providerContext.operationId}</span>
-            )}
-          </motion.section>
         </aside>
       </div>
     </motion.section>
   );
-}
-
-function providerStatusLabel(status: CareCircleRuntimeState['providerContext']['status'] | undefined) {
-  if (status === 'checking') return 'Checking';
-  if (status === 'ready') return 'Ready';
-  if (status === 'demo') return 'Demo safe';
-  if (status === 'error') return 'Offline';
-  return 'Optional';
-}
-
-function memoryStatusLabel(status: CareCircleRuntimeState['gbrainMemory']['status'] | undefined) {
-  if (status === 'syncing') return 'Syncing';
-  if (status === 'saved') return 'GBrain';
-  if (status === 'local') return 'Saved';
-  return 'Ready';
 }
 
 function formatCalendarTime(value: string): string {
