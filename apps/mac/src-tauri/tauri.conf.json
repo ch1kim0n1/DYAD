@@ -37,7 +37,7 @@
     "active": true,
     "targets": "all",
     "externalBin": ["binaries/dyad-engine"],
-    "icon": ["icons/icon.icns", "icons/icon-1024.png", "icons/icon-512.png", "icons/icon-128.png"],
+    "icon": ["icons/icon-1024.png", "icons/icon-512.png", "icons/icon-128.png", "icons/icon-32.png"],
     "macOS": {
       "entitlements": "entitlements.plist",
       "minimumSystemVersion": "12.0",
