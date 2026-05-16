@@ -1,3 +1,5 @@
+import type { CareManualMedication } from '../lib/medication-gbrain.js';
+
 export interface CareCircleRuntimeState {
   planAccepted: boolean;
   reminderSet: boolean;
@@ -14,6 +16,8 @@ export interface CareCircleRuntimeState {
   calendarLastSyncAt?: string;
   calendarSyncedCount?: number;
   calendarSyncError?: string;
+  medications?: CareManualMedication[];
+  medicationSyncError?: string;
 }
 
 export interface CareLiveNote {
@@ -77,6 +81,8 @@ export const initialCareCircleRuntimeState: CareCircleRuntimeState = {
   calendarLastSyncAt: undefined,
   calendarSyncedCount: undefined,
   calendarSyncError: undefined,
+  medications: undefined,
+  medicationSyncError: undefined,
 };
 
 export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
@@ -102,6 +108,8 @@ export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
       calendarLastSyncAt: parsed.calendarLastSyncAt,
       calendarSyncedCount: parsed.calendarSyncedCount,
       calendarSyncError: parsed.calendarSyncError,
+      medications: parsed.medications,
+      medicationSyncError: parsed.medicationSyncError,
     };
   } catch {
     return initialCareCircleRuntimeState;

@@ -9,6 +9,7 @@ import {
   syncCalendarToGBrain,
   type CalendarListResponse,
 } from '../lib/carecircle-calendar-client.js';
+import { CareMedicationPanel } from './CareMedicationPanel.js';
 
 interface CareCircleDashboardProps {
   graph: CareCircleGraph;
@@ -208,6 +209,12 @@ export function CareCircleDashboard({
           <p className="calendar-gbrain-meta">No upcoming events in the synced window.</p>
         ) : null}
       </motion.section>
+
+      <CareMedicationPanel
+        runtimeState={runtimeState}
+        onRuntimeStateChange={onRuntimeStateChange}
+        variants={fadeUp}
+      />
 
       {brief && (
         <motion.section className="assistant-status dashboard-status" aria-label="CareCircle status" variants={fadeUp}>

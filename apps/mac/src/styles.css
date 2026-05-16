@@ -1589,6 +1589,175 @@ body, html, #root { margin: 0; padding: 0; height: 100%; background: var(--bg); 
   }
 }
 
+.medication-gbrain-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.medication-gbrain-header {
+  align-items: flex-start;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.medication-gbrain-header h2 {
+  font-size: 22px;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.medication-gbrain-lead,
+.medication-gbrain-summary,
+.medication-gbrain-meta {
+  color: #637168;
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.medication-gbrain-summary {
+  color: #2f6f55;
+  font-weight: 600;
+}
+
+.medication-add-form {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+}
+
+.medication-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.medication-field.wide {
+  grid-column: 1 / -2;
+}
+
+.medication-field span {
+  color: #2f6f55;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.medication-field input {
+  background: #fffdf8;
+  border: 1px solid #b9d3bc;
+  border-radius: 10px;
+  color: #24302b;
+  font: inherit;
+  font-size: 14px;
+  min-height: 44px;
+  padding: 0 14px;
+  width: 100%;
+}
+
+.medication-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.medication-gbrain-error {
+  color: #a34b2a;
+  font-size: 13px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.medication-manual-list,
+.medication-gbrain-matches {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.medication-manual-list li,
+.medication-gbrain-matches li {
+  background: #f4faf3;
+  border: 1px solid #cfded0;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.medication-manual-top {
+  align-items: baseline;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.medication-manual-top strong {
+  color: #24302b;
+  font-size: 14px;
+}
+
+.medication-score {
+  color: #7b8d5d;
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.medication-remove {
+  background: transparent;
+  border: 0;
+  color: #a34b2a;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0;
+}
+
+.medication-note {
+  color: #637168;
+  font-size: 13px;
+  margin: 0 0 6px;
+}
+
+.medication-matches-heading {
+  color: #24302b;
+  font-size: 15px;
+  margin: 4px 0 0;
+}
+
+.medication-match-terms {
+  color: #2f6f55;
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  margin-top: 8px;
+  text-transform: uppercase;
+}
+
+@media (max-width: 900px) {
+  .medication-add-form {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .medication-field.wide {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .medication-add-form {
+    grid-template-columns: 1fr;
+  }
+}
+
 .status-dot {
   border-radius: 50%;
   display: inline-block;

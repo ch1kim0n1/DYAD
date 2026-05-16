@@ -4,6 +4,7 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { buildRecentEventsFromGBrain, searchCareCircleGBrain } from '../src/lib/carecircle-gbrain-queries.js';
 import { CareCircleGBrainStore } from '../src/lib/carecircle-gbrain-store.js';
+import { syncMedicationsToGBrain } from '../src/lib/medication-gbrain.js';
 import { seedCareCircleGBrain } from '../src/lib/seed-carecircle-gbrain.js';
 import { careCircleMessyCorpus } from '../src/views/carecircleMessyCorpus.js';
 
@@ -43,7 +44,27 @@ describe('carecircle GBrain store', () => {
     seedCareCircleGBrain(store);
     const result = searchCareCircleGBrain(store, 'dizziness pharmacy appointment');
     expect(result.source).toBe('gbrain');
-    expect(result.indexedDocuments).toBe(careCircleMessyCorpus.length);
+    expect(result.indexedDocuments).toBeGreaterThanOrEqual(careCircleMessyCorpus.length);
     expect(result.results.length).toBeGreaterThan(0);
+  });
+
+  test('context search finds manually added medications', () => {
+    const store = tempStore();
+    seedCareCircleGBrain(store);
+    syncMedicationsToGBrain(store, [
+      {
+        id: 'med-tylenol',
+        name: 'Tylenol',
+        dosage: '500mg',
+        schedule: 'as needed',
+        personId: 'linda',
+        notes: '',
+        addedAt: new Date().toISOString(),
+      },
+    ]);
+
+    const result = searchCareCircleGBrain(store, 'tylenol');
+    expect(result.results.some((hit) => hit.title.toLowerCase() === 'tylenol')).toBe(true);
+    expect(result.results[0]?.title.toLowerCase()).toBe('tylenol');
   });
 });

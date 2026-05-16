@@ -1,4 +1,5 @@
 import type { CareCircleGBrainStore, CareCircleGBrainPage } from './carecircle-gbrain-store.js';
+import { MEDICATION_KIND, MEDICATION_REGISTRY_ID } from './medication-gbrain.js';
 import { CALENDAR_EVENT_KIND } from './sync-calendar-gbrain.js';
 import type { CareRecentEvent, CareRecentEventsSummary } from '../views/carecircleRecentEvents.js';
 
@@ -79,6 +80,23 @@ export interface GBrainSearchHit {
   metadata: Record<string, unknown>;
 }
 
+function searchHaystack(page: CareCircleGBrainPage): string {
+  const c = page.content;
+  if (page.kind === MEDICATION_KIND) {
+    return `${page.title} ${c.name ?? ''} ${c.dosage ?? ''} ${c.schedule ?? ''} ${c.notes ?? ''} ${JSON.stringify(c.medications ?? {})}`.toLowerCase();
+  }
+  return `${page.title} ${c.source} ${c.summary ?? ''} ${c.text} ${c.description ?? ''} ${c.location ?? ''} ${JSON.stringify(c.metadata ?? {})}`.toLowerCase();
+}
+
+function searchHitText(page: CareCircleGBrainPage): string {
+  const c = page.content;
+  if (page.kind === MEDICATION_KIND) {
+    const parts = [c.dosage, c.schedule, c.notes].filter(Boolean);
+    return parts.length > 0 ? parts.join(' · ') : String(c.name ?? page.title);
+  }
+  return String(c.text ?? c.description ?? page.title);
+}
+
 export function searchCareCircleGBrain(
   store: CareCircleGBrainStore,
   query: string
@@ -89,22 +107,39 @@ export function searchCareCircleGBrain(
   indexedDocuments: number;
   results: GBrainSearchHit[];
 } {
-  const pages = [...store.listPages(SOURCE_KIND), ...store.listPages(CALENDAR_EVENT_KIND)];
-  const terms = query
-    .toLowerCase()
+  const normalizedQuery = query.trim().toLowerCase();
+  const pages = [
+    ...store.listPages(SOURCE_KIND),
+    ...store.listPages(CALENDAR_EVENT_KIND),
+    ...store.listPages(MEDICATION_KIND),
+  ];
+  const terms = normalizedQuery
     .split(/\W+/)
     .filter((term) => term.length > 2);
+  const queryTokens = terms.length > 0 ? terms : normalizedQuery.length > 2 ? [normalizedQuery] : [];
 
   const results = pages
     .map((page) => {
       const c = page.content;
-      const haystack = `${page.title} ${c.source} ${c.summary ?? ''} ${c.text} ${c.description ?? ''} ${c.location ?? ''} ${JSON.stringify(c.metadata ?? {})}`.toLowerCase();
-      const score = terms.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0);
+      const haystack = searchHaystack(page);
+      let score = queryTokens.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0);
+
+      if (page.kind === MEDICATION_KIND && normalizedQuery.length > 2 && haystack.includes(normalizedQuery)) {
+        score += 5;
+      }
+
+      const sourceLabel =
+        page.kind === MEDICATION_KIND
+          ? page.id === MEDICATION_REGISTRY_ID
+            ? 'medication registry'
+            : 'manual medication'
+          : String(c.source ?? 'shared calendar');
+
       return {
         path: String(c.path ?? c.uid ?? page.id),
         title: page.title,
-        source: String(c.source ?? 'shared calendar'),
-        text: String(c.text ?? c.description ?? page.title),
+        source: sourceLabel,
+        text: searchHitText(page),
         score,
         metadata: (c.metadata as Record<string, unknown>) ?? {},
       };
@@ -119,7 +154,7 @@ export function searchCareCircleGBrain(
     summary:
       results.length > 0
         ? 'I searched GBrain family context and pulled the strongest sources behind this care plan.'
-        : 'No GBrain matches for that query. Try dizziness, lunch, appointment, or pharmacy.',
+        : 'No GBrain matches for that query. Try a medication name, dizziness, lunch, appointment, or pharmacy.',
     indexedDocuments: pages.length,
     results,
   };

@@ -12,6 +12,12 @@ import {
   syncCalendarIcsToGBrain,
 } from './src/lib/sync-calendar-gbrain.js';
 import { ensureCareCircleGBrainSeeded } from './src/lib/seed-carecircle-gbrain.js';
+import {
+  loadMedicationsFromGBrain,
+  searchMedicationContextInGBrain,
+  syncMedicationsToGBrain,
+  type CareManualMedication,
+} from './src/lib/medication-gbrain.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, '../..');
@@ -157,8 +163,63 @@ function careCircleGBrainBridge() {
           sendJson(res, 500, { error: (err as Error).message });
         }
       });
+
+      server.middlewares.use('/api/carecircle/medications/scan', async (req, res) => {
+        if (req.method !== 'POST') {
+          sendJson(res, 405, { error: 'Method not allowed' });
+          return;
+        }
+        try {
+          const body = await readJson(req);
+          const manual = parseMedications(body);
+          await withSeededGBrain(async () => {
+            const snapshot = searchMedicationContextInGBrain(careCircleGBrain, manual);
+            sendJson(res, 200, snapshot);
+          });
+        } catch (err) {
+          sendJson(res, 500, { error: (err as Error).message });
+        }
+      });
+
+      server.middlewares.use('/api/carecircle/medications', async (req, res) => {
+        if (req.method === 'GET') {
+          try {
+            await withSeededGBrain(async () => {
+              const manual = loadMedicationsFromGBrain(careCircleGBrain);
+              const snapshot = searchMedicationContextInGBrain(careCircleGBrain, manual);
+              sendJson(res, 200, snapshot);
+            });
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message });
+          }
+          return;
+        }
+
+        if (req.method === 'POST') {
+          try {
+            const body = await readJson(req);
+            const manual = parseMedications(body);
+            await withSeededGBrain(async () => {
+              syncMedicationsToGBrain(careCircleGBrain, manual);
+              const snapshot = searchMedicationContextInGBrain(careCircleGBrain, manual);
+              sendJson(res, 200, snapshot);
+            });
+          } catch (err) {
+            sendJson(res, 500, { error: (err as Error).message });
+          }
+          return;
+        }
+
+        sendJson(res, 405, { error: 'Method not allowed' });
+      });
     },
   };
+}
+
+function parseMedications(body: Record<string, unknown>): CareManualMedication[] {
+  const raw = body.medications;
+  if (!Array.isArray(raw)) return [];
+  return raw as CareManualMedication[];
 }
 
 function runGBrainPut(slug: string, markdown: string): Promise<string> {
