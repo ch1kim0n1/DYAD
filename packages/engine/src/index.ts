@@ -20,6 +20,7 @@ export {
 // L3 metrics
 export { LatencyZScore } from './latency-zscore.js';
 export { RollingRate } from './rolling-rate.js';
+export { CognitiveTwin, type CognitiveTwinOptions } from './nous/twin/cognitive-twin.js';
 
 // L3 state updaters
 export { SelfModelUpdater } from './state/self-model-updater.js';

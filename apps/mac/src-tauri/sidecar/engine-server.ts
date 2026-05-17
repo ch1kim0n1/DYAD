@@ -26,6 +26,7 @@ import {
   SelfModelUpdater,
   PartnerModelUpdater,
   GBrainClient,
+  CognitiveTwin,
   type DetectorType,
 } from '@dyad/engine';
 import { ChatDbReader, MessageNormalizer, PIIRedactor } from '@dyad/ingestion';
@@ -215,6 +216,7 @@ const server = serve({
         dyad_id: DYAD_ID,
         gstack_session: gstackSessionId,
         hog_configured: Boolean(HOG_URL),
+        nous_ready: true, // NOUS is always ready (uses local storage)
         jo_configured: Boolean(JO_URL),
       });
     }
@@ -367,6 +369,18 @@ const server = serve({
           body.messages,
           extra || undefined
         );
+
+      // ── /nous/cycle ───────────────────────────────────────────────────
+      if (url.pathname === '/nous/cycle') {
+        const body = await readBody<{ budget?: number }>(req);
+        const twin = new CognitiveTwin({
+          dyadId: DYAD_ID,
+          budget: body.budget ?? 10,
+        });
+        const result = await twin.runCycle();
+        return json(result);
+      }
+
         return json({ reframe: text });
       }
       return new Response('Not Found', { status: 404 });
