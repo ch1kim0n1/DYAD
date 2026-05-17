@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::messages::dr-chen-office.txt",
+  "kind": "carecircle_source_document",
+  "title": "Doctor office prefers concise summaries",
+  "content": {
+    "path": "messages/dr-chen-office.txt",
+    "source": "provider message",
+    "text": "Dr. Chen office prefers concise summaries with dates, symptoms mentioned by family, medication name if known, and a clear question.",
+    "metadata": {
+      "source": "provider_message",
+      "person": "dr-chen",
+      "tags": [
+        "provider",
+        "summary"
+      ]
+    },
+    "recency_rank": 19,
+    "when_label": "Provider note"
+  },
+  "created_at": "2026-05-16T23:07:45.132Z",
+  "updated_at": "2026-05-16T23:07:45.132Z"
+}

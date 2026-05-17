@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::notes::maya-lunch-friday.txt",
+  "kind": "carecircle_source_document",
+  "title": "Lunch skipped Friday",
+  "content": {
+    "path": "notes/maya-lunch-friday.txt",
+    "source": "family note",
+    "text": "Maya logged another skipped lunch Friday. This made two skipped lunches in one week, which CareCircle flagged for gentle human review.",
+    "metadata": {
+      "source": "family_note",
+      "person": "linda",
+      "tags": [
+        "meal",
+        "pattern"
+      ]
+    },
+    "recency_rank": 2,
+    "when_label": "Friday"
+  },
+  "created_at": "2026-05-16T23:07:45.096Z",
+  "updated_at": "2026-05-16T23:07:45.096Z"
+}

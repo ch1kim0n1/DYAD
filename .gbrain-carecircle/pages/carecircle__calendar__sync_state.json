@@ -1,0 +1,12 @@
+{
+  "id": "carecircle::calendar::sync_state",
+  "kind": "carecircle_calendar_sync_state",
+  "title": "Calendar sync state",
+  "content": {
+    "last_sync_at": "2026-05-16T23:48:41.545Z",
+    "event_count": 2,
+    "feed_configured": true
+  },
+  "created_at": "2026-05-16T23:30:31.756Z",
+  "updated_at": "2026-05-16T23:48:41.546Z"
+}

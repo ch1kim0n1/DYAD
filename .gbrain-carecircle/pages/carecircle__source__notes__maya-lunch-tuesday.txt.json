@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::notes::maya-lunch-tuesday.txt",
+  "kind": "carecircle_source_document",
+  "title": "Lunch skipped Tuesday",
+  "content": {
+    "path": "notes/maya-lunch-tuesday.txt",
+    "source": "family note",
+    "text": "Maya logged that Linda skipped lunch on Tuesday. Linda said she was not hungry and wanted to rest. No diagnosis was assumed.",
+    "metadata": {
+      "source": "family_note",
+      "person": "linda",
+      "tags": [
+        "meal",
+        "routine-change"
+      ]
+    },
+    "recency_rank": 11,
+    "when_label": "Tuesday"
+  },
+  "created_at": "2026-05-16T23:07:45.094Z",
+  "updated_at": "2026-05-16T23:07:45.094Z"
+}

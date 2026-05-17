@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::notes::maya-friday-tone.txt",
+  "kind": "carecircle_source_document",
+  "title": "Friday tone note",
+  "content": {
+    "path": "notes/maya-friday-tone.txt",
+    "source": "family note",
+    "text": "Maya noticed Linda sounded more comfortable when the call ended with a choice she controlled.",
+    "metadata": {
+      "source": "family_note",
+      "person": "linda",
+      "tags": [
+        "tone",
+        "trust"
+      ]
+    },
+    "recency_rank": 1,
+    "when_label": "Friday"
+  },
+  "created_at": "2026-05-16T23:07:45.133Z",
+  "updated_at": "2026-05-16T23:07:45.133Z"
+}

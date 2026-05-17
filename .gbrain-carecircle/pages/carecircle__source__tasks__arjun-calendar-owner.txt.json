@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::tasks::arjun-calendar-owner.txt",
+  "kind": "carecircle_source_document",
+  "title": "Arjun owns calendar follow-up",
+  "content": {
+    "path": "tasks/arjun-calendar-owner.txt",
+    "source": "task tracker",
+    "text": "Arjun usually handles calendar tasks and appointment confirmations. CareCircle should route appointment reminders to Arjun first.",
+    "metadata": {
+      "source": "task",
+      "person": "arjun",
+      "tags": [
+        "calendar",
+        "appointment"
+      ]
+    },
+    "recency_rank": 15,
+    "when_label": "Standing"
+  },
+  "created_at": "2026-05-16T23:07:45.102Z",
+  "updated_at": "2026-05-16T23:07:45.102Z"
+}

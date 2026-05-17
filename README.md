@@ -308,9 +308,15 @@ bun run engine:test
 # GSTACK_API_KEY=
 # GBRAIN_API_KEY=
 # THE_HOG_API_KEY=
+# THEHOG_API_KEY=
+# THEHOG_API_SECRET=
 # JO_API_KEY=
 # DYAD_PII_REDACTION=true
 ```
+
+For the CareCircle web prototype, The Hog is represented as an integration path in the
+provider handoff UI while the demo remains deterministic and offline-safe. Do not commit
+real keys.
 
 Grant Full Disk Access to your terminal in **System Settings → Privacy & Security → Full Disk Access** before first run — required for chat.db access.
 

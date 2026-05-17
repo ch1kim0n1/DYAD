@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::provider::pharmacy-boundary.txt",
+  "kind": "carecircle_source_document",
+  "title": "Pharmacy handoff boundary",
+  "content": {
+    "path": "provider/pharmacy-boundary.txt",
+    "source": "care boundary",
+    "text": "Medication-related notes should ask whether timing, dosage, or side effects should be reviewed. Do not claim medication caused symptoms.",
+    "metadata": {
+      "source": "safety_rule",
+      "person": "linda",
+      "tags": [
+        "medical-review",
+        "pharmacy"
+      ]
+    },
+    "recency_rank": null,
+    "when_label": null
+  },
+  "created_at": "2026-05-16T23:07:45.120Z",
+  "updated_at": "2026-05-16T23:07:45.120Z"
+}

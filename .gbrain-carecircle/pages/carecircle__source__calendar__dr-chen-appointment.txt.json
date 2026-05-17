@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::calendar::dr-chen-appointment.txt",
+  "kind": "carecircle_source_document",
+  "title": "Upcoming Dr. Chen appointment",
+  "content": {
+    "path": "calendar/dr-chen-appointment.txt",
+    "source": "shared calendar",
+    "text": "Shared calendar has an upcoming appointment with Dr. Chen. Linda asked about this appointment multiple times this week.",
+    "metadata": {
+      "source": "calendar",
+      "person": "linda",
+      "tags": [
+        "doctor",
+        "appointment"
+      ]
+    },
+    "recency_rank": 13,
+    "when_label": "Upcoming"
+  },
+  "created_at": "2026-05-16T23:07:45.112Z",
+  "updated_at": "2026-05-16T23:07:45.112Z"
+}

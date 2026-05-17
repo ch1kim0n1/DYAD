@@ -1,0 +1,23 @@
+{
+  "id": "carecircle::source::messages::maya-linda-thu-morning.txt",
+  "kind": "carecircle_source_document",
+  "title": "Thursday morning dizziness text",
+  "content": {
+    "path": "messages/maya-linda-thu-morning.txt",
+    "source": "family messages",
+    "text": "Linda texted Maya at 8:13 AM: I felt a little dizzy after breakfast. Maya replied gently and asked whether she had taken the new blood pressure pill yet.",
+    "metadata": {
+      "source": "message",
+      "person": "linda",
+      "tags": [
+        "dizziness",
+        "medication",
+        "morning"
+      ]
+    },
+    "recency_rank": 10,
+    "when_label": "Thursday morning"
+  },
+  "created_at": "2026-05-16T23:07:45.089Z",
+  "updated_at": "2026-05-16T23:07:45.089Z"
+}

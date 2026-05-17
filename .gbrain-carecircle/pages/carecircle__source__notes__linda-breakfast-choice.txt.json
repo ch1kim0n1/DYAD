@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::notes::linda-breakfast-choice.txt",
+  "kind": "carecircle_source_document",
+  "title": "Breakfast choice worked",
+  "content": {
+    "path": "notes/linda-breakfast-choice.txt",
+    "source": "family note",
+    "text": "Linda responded well when Maya asked whether she wanted oatmeal or toast, instead of asking if she needed help eating.",
+    "metadata": {
+      "source": "family_note",
+      "person": "linda",
+      "tags": [
+        "meal",
+        "choices"
+      ]
+    },
+    "recency_rank": 8,
+    "when_label": "Recent morning"
+  },
+  "created_at": "2026-05-16T23:07:45.131Z",
+  "updated_at": "2026-05-16T23:07:45.131Z"
+}

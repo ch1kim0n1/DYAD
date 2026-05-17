@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::patterns::linda-concrete-choices.txt",
+  "kind": "carecircle_source_document",
+  "title": "Concrete choices help",
+  "content": {
+    "path": "patterns/linda-concrete-choices.txt",
+    "source": "learned pattern",
+    "text": "Linda responds better to concrete choices like tea or soup, morning or afternoon, instead of broad offers of help.",
+    "metadata": {
+      "source": "learned_pattern",
+      "person": "linda",
+      "tags": [
+        "communication",
+        "choices"
+      ]
+    },
+    "recency_rank": null,
+    "when_label": null
+  },
+  "created_at": "2026-05-16T23:07:45.106Z",
+  "updated_at": "2026-05-16T23:07:45.106Z"
+}

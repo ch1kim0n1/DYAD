@@ -1,0 +1,22 @@
+{
+  "id": "carecircle::source::calendar::maya-dinner.txt",
+  "kind": "carecircle_source_document",
+  "title": "Maya dinner block",
+  "content": {
+    "path": "calendar/maya-dinner.txt",
+    "source": "calendar",
+    "text": "Maya has dinner blocked tomorrow around 6:30 PM. A check-in reminder should avoid this time.",
+    "metadata": {
+      "source": "calendar",
+      "person": "maya",
+      "tags": [
+        "busy",
+        "family"
+      ]
+    },
+    "recency_rank": 18,
+    "when_label": "Tomorrow"
+  },
+  "created_at": "2026-05-16T23:07:45.129Z",
+  "updated_at": "2026-05-16T23:07:45.129Z"
+}
