@@ -102,5 +102,18 @@ export {
 // GBrain client
 export { GBrainClient, type GBrainPage, type GBrainClientOptions } from './gbrain/client.js';
 
+// Enrichment clients
+export {
+  HogEnricher,
+  type HogEnricherOptions,
+} from './enrichment/the-hog.js';
+export {
+  JoClient,
+  type JoClientOptions,
+  type JoContext,
+  type JoEvent,
+  type JoPhoto,
+} from './enrichment/jo.js';
+
 // Utilities
 export * from './utils/index.js';

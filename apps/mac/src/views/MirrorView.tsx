@@ -1,12 +1,7 @@
 import { useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  RadarChart,
-  PolarGrid,
-  PolarAngleAxis,
-  PolarRadiusAxis,
-  Radar,
-} from 'recharts';
+import { ParentSize } from '@visx/responsive';
+import { scaleLinear } from '@visx/scale';
+import { Group } from '@visx/group';
 import type { FeatureVector, SelfModel, PrimarySecondaryResult } from '@dyad/shared';
 
 interface MirrorViewProps {
@@ -25,6 +20,125 @@ const NRC_KEYS: { key: keyof FeatureVector; label: string }[] = [
   { key: 'nrc_disgust', label: 'Disgust' },
   { key: 'nrc_anger', label: 'Anger' },
 ];
+
+const EMOTION_COLORS: Record<string, string> = {
+  Joy: '#FFD700',
+  Trust: '#3B82F6',
+  'Anticip.': '#F97316',
+  Surprise: '#EC4899',
+  Fear: '#7C3AED',
+  Sadness: '#64748B',
+  Disgust: '#65A30D',
+  Anger: '#DC2626',
+};
+
+interface RadarChartProps {
+  width: number;
+  height: number;
+  data: { emotion: string; value: number }[];
+}
+
+function RadarChart({ width, height, data }: RadarChartProps) {
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = Math.min(cx, cy) - 36;
+  const n = data.length;
+
+  const rScale = scaleLinear({ domain: [0, 100], range: [0, radius] });
+
+  const angleStep = (2 * Math.PI) / n;
+  const startAngle = -Math.PI / 2;
+
+  const axes = data.map((d, i) => {
+    const angle = startAngle + angleStep * i;
+    return {
+      label: d.emotion,
+      x: cx + radius * Math.cos(angle),
+      y: cy + radius * Math.sin(angle),
+      lx: cx + (radius + 16) * Math.cos(angle),
+      ly: cy + (radius + 16) * Math.sin(angle),
+      angle,
+      color: EMOTION_COLORS[d.emotion] ?? '#5b8def',
+    };
+  });
+
+  const gridLevels = [0.25, 0.5, 0.75, 1.0];
+
+  const polygonPoints = data
+    .map((d, i) => {
+      const angle = startAngle + angleStep * i;
+      const r = rScale(d.value);
+      return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+    })
+    .join(' ');
+
+  return (
+    <svg width={width} height={height}>
+      <Group>
+        {gridLevels.map((level) => {
+          const pts = Array.from({ length: n }, (_, i) => {
+            const angle = startAngle + angleStep * i;
+            const r = radius * level;
+            return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+          }).join(' ');
+          return (
+            <polygon
+              key={level}
+              points={pts}
+              fill="none"
+              stroke="#26262c"
+              strokeWidth={1}
+            />
+          );
+        })}
+        {axes.map((ax) => (
+          <line
+            key={ax.label}
+            x1={cx}
+            y1={cy}
+            x2={ax.x}
+            y2={ax.y}
+            stroke="#26262c"
+            strokeWidth={1}
+          />
+        ))}
+        <polygon
+          points={polygonPoints}
+          fill="#5b8def"
+          fillOpacity={0.25}
+          stroke="#5b8def"
+          strokeWidth={1.5}
+        />
+        {data.map((d, i) => {
+          const angle = startAngle + angleStep * i;
+          const r = rScale(d.value);
+          return (
+            <circle
+              key={d.emotion}
+              cx={cx + r * Math.cos(angle)}
+              cy={cy + r * Math.sin(angle)}
+              r={3}
+              fill={EMOTION_COLORS[d.emotion] ?? '#5b8def'}
+            />
+          );
+        })}
+        {axes.map((ax) => (
+          <text
+            key={ax.label}
+            x={ax.lx}
+            y={ax.ly}
+            fill={ax.color}
+            fontSize={10}
+            textAnchor={ax.lx < cx - 4 ? 'end' : ax.lx > cx + 4 ? 'start' : 'middle'}
+            dominantBaseline="middle"
+          >
+            {ax.label}
+          </text>
+        ))}
+      </Group>
+    </svg>
+  );
+}
 
 export function MirrorView({ selfModel, recentVectors, primarySecondaryResult }: MirrorViewProps) {
   const messageCount = recentVectors.length;
@@ -63,14 +177,11 @@ export function MirrorView({ selfModel, recentVectors, primarySecondaryResult }:
       <div className="card">
         <h3>Emotional fingerprint (NRC)</h3>
         <div style={{ height: 280 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart data={radarData}>
-              <PolarGrid stroke="#26262c" />
-              <PolarAngleAxis dataKey="emotion" stroke="#8a8a92" />
-              <PolarRadiusAxis stroke="#26262c" />
-              <Radar dataKey="value" stroke="#5b8def" fill="#5b8def" fillOpacity={0.35} />
-            </RadarChart>
-          </ResponsiveContainer>
+          <ParentSize>
+            {({ width, height }) => (
+              <RadarChart width={width} height={Math.max(height, 240)} data={radarData} />
+            )}
+          </ParentSize>
         </div>
       </div>
 
@@ -127,7 +238,9 @@ export function MirrorView({ selfModel, recentVectors, primarySecondaryResult }:
         <h3>Recurring templates</h3>
         {selfModel && selfModel.recurring_templates.length > 0 ? (
           selfModel.recurring_templates.slice(0, 5).map((t) => (
-            <span key={t.template_id} className="tag">{t.description}</span>
+            <span key={t.template_id} className="tag">
+              {t.description}
+            </span>
           ))
         ) : (
           <p style={{ color: '#8a8a92' }}>No recurring templates detected yet.</p>

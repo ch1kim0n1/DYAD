@@ -1,14 +1,12 @@
 import { useMemo } from 'react';
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ReferenceDot,
-} from 'recharts';
+import { ParentSize } from '@visx/responsive';
+import { scaleLinear } from '@visx/scale';
+import { LinePath } from '@visx/shape';
+import { curveMonotoneX } from '@visx/curve';
+import { AxisBottom, AxisLeft } from '@visx/axis';
+import { GridRows } from '@visx/grid';
+import { Group } from '@visx/group';
+import { useTooltip, TooltipWithBounds, defaultStyles } from '@visx/tooltip';
 import type { FeatureVector, NormalizedMessage, OrchestratorResult } from '@dyad/shared';
 import { OfflineBadge } from '../components/OfflineBadge.js';
 import { useDyadStore } from '../store.js';
@@ -27,12 +25,147 @@ interface ChartRow {
   partner?: number;
 }
 
+interface DetectorMarker {
+  index: number;
+  valence: number;
+  label: string;
+  tooltip: string;
+  message_id: string;
+}
+
 const MAX_POINTS = 50;
+const MARGIN = { top: 16, right: 24, left: 44, bottom: 30 };
+
+interface InnerChartProps {
+  width: number;
+  height: number;
+  data: ChartRow[];
+  detectorMarkers: DetectorMarker[];
+  partnerName: string;
+  onMarkerClick: (id: string) => void;
+}
+
+function InnerChart({ width, height, data, detectorMarkers, onMarkerClick }: InnerChartProps) {
+  const { showTooltip, hideTooltip, tooltipData, tooltipLeft, tooltipTop, tooltipOpen } =
+    useTooltip<DetectorMarker>();
+
+  const innerWidth = width - MARGIN.left - MARGIN.right;
+  const innerHeight = height - MARGIN.top - MARGIN.bottom;
+
+  const xScale = useMemo(
+    () => scaleLinear({ domain: [0, Math.max(data.length - 1, 1)], range: [0, innerWidth] }),
+    [data.length, innerWidth],
+  );
+  const yScale = useMemo(
+    () => scaleLinear({ domain: [-5, 5], range: [innerHeight, 0] }),
+    [innerHeight],
+  );
+
+  const selfPoints = useMemo(() => data.filter((d) => d.self !== undefined), [data]);
+  const partnerPoints = useMemo(() => data.filter((d) => d.partner !== undefined), [data]);
+
+  if (width < 10) return null;
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg width={width} height={height} style={{ overflow: 'visible' }}>
+        <Group left={MARGIN.left} top={MARGIN.top}>
+          <GridRows scale={yScale} width={innerWidth} stroke="#26262c" strokeDasharray="3,3" />
+          <AxisBottom
+            top={innerHeight}
+            scale={xScale}
+            stroke="#8a8a92"
+            tickStroke="#8a8a92"
+            numTicks={6}
+            tickLabelProps={() => ({ fill: '#8a8a92', fontSize: 11, textAnchor: 'middle' as const })}
+          />
+          <AxisLeft
+            scale={yScale}
+            stroke="#8a8a92"
+            tickStroke="#8a8a92"
+            numTicks={5}
+            tickLabelProps={() => ({
+              fill: '#8a8a92',
+              fontSize: 11,
+              dx: -4,
+              textAnchor: 'end' as const,
+              dy: 4,
+            })}
+          />
+          <LinePath
+            data={selfPoints}
+            x={(d) => xScale(d.index)}
+            y={(d) => yScale(d.self!)}
+            stroke="#5b8def"
+            strokeWidth={2}
+            curve={curveMonotoneX}
+          />
+          <LinePath
+            data={partnerPoints}
+            x={(d) => xScale(d.index)}
+            y={(d) => yScale(d.partner!)}
+            stroke="#f97316"
+            strokeWidth={2}
+            curve={curveMonotoneX}
+          />
+          {detectorMarkers.map((m, i) => (
+            <circle
+              key={`${m.message_id}-${i}`}
+              cx={xScale(m.index)}
+              cy={yScale(m.valence)}
+              r={6}
+              fill="#fde047"
+              stroke="#a16207"
+              strokeWidth={1.5}
+              style={{ cursor: 'pointer' }}
+              onClick={() => onMarkerClick(m.message_id)}
+              onMouseEnter={() =>
+                showTooltip({
+                  tooltipData: m,
+                  tooltipLeft: xScale(m.index) + MARGIN.left,
+                  tooltipTop: yScale(m.valence) + MARGIN.top - 12,
+                })
+              }
+              onMouseLeave={hideTooltip}
+            />
+          ))}
+        </Group>
+      </svg>
+      {tooltipOpen && tooltipData && (
+        <TooltipWithBounds
+          left={tooltipLeft}
+          top={tooltipTop}
+          style={{
+            ...defaultStyles,
+            background: '#16161a',
+            border: '1px solid #26262c',
+            color: '#e8e8ed',
+            fontSize: 12,
+            maxWidth: 240,
+            whiteSpace: 'pre-wrap',
+            lineHeight: 1.5,
+          }}
+        >
+          <strong>{tooltipData.label}</strong>
+          {tooltipData.tooltip && (
+            <>
+              <br />
+              {tooltipData.tooltip}
+            </>
+          )}
+        </TooltipWithBounds>
+      )}
+    </div>
+  );
+}
 
 export function MapView({ vectors, messages, detectorResult, onMarkerClick }: MapViewProps) {
   const partnerName = useDyadStore((s) => s.partnerName);
   const brief = useDyadStore((s) => s.currentBrief);
-  const messageById = useMemo(() => new Map(messages.map(m => [m.message_id, m])), [messages]);
+  const messageById = useMemo(
+    () => new Map(messages.map((m) => [m.message_id, m])),
+    [messages],
+  );
 
   const data: ChartRow[] = useMemo(() => {
     const slice = vectors.slice(-MAX_POINTS);
@@ -56,8 +189,11 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
     );
   }
 
-  const detectorMarkers: { index: number; valence: number; label: string; tooltip: string; message_id: string }[] = [];
-  const briefSnippet = brief ? brief.split('\n')[0].replace(/^\[.*?\]:\s*/, '').slice(0, 80) : null;
+  const briefSnippet = brief
+    ? brief.split('\n')[0].replace(/^\[.*?\]:\s*/, '').slice(0, 80)
+    : null;
+
+  const detectorMarkers: DetectorMarker[] = [];
   if (detectorResult) {
     if (detectorResult.bid_asymmetry?.detected) {
       const b = detectorResult.bid_asymmetry;
@@ -94,56 +230,30 @@ export function MapView({ vectors, messages, detectorResult, onMarkerClick }: Ma
   return (
     <div className="map-view">
       <div className="map-legend">
-        <span><span className="legend-dot self" />You</span>
-        <span><span className="legend-dot partner" />{partnerName}</span>
+        <span>
+          <span className="legend-dot self" />
+          You
+        </span>
+        <span>
+          <span className="legend-dot partner" />
+          {partnerName}
+        </span>
         <span>Markers = detected patterns (click for brief)</span>
         <OfflineBadge reason="LLM detectors paused" />
       </div>
       <div style={{ flex: 1, minHeight: 320 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 16, right: 24, left: 0, bottom: 8 }}>
-            <CartesianGrid stroke="#26262c" />
-            <XAxis dataKey="index" stroke="#8a8a92" />
-            <YAxis domain={[-5, 5]} stroke="#8a8a92" />
-            <Tooltip
-              contentStyle={{ background: '#16161a', border: '1px solid #26262c', color: '#e8e8ed' }}
-              labelFormatter={(idx) => `Message ${idx}`}
+        <ParentSize>
+          {({ width, height }) => (
+            <InnerChart
+              width={width}
+              height={Math.max(height, 320)}
+              data={data}
+              detectorMarkers={detectorMarkers}
+              partnerName={partnerName}
+              onMarkerClick={onMarkerClick}
             />
-            <Line
-              type="monotone"
-              dataKey="self"
-              stroke="#5b8def"
-              strokeWidth={2}
-              dot={false}
-              connectNulls
-              name="You"
-            />
-            <Line
-              type="monotone"
-              dataKey="partner"
-              stroke="#f97316"
-              strokeWidth={2}
-              dot={false}
-              connectNulls
-              name={partnerName}
-            />
-            {detectorMarkers.map((m, i) => (
-              <ReferenceDot
-                key={`${m.message_id}-${i}`}
-                x={m.index}
-                y={m.valence}
-                r={6}
-                fill="#fde047"
-                stroke="#a16207"
-                onClick={() => onMarkerClick(m.message_id)}
-                ifOverflow="extendDomain"
-                isFront
-              >
-                <title>{m.tooltip}</title>
-              </ReferenceDot>
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+          )}
+        </ParentSize>
       </div>
     </div>
   );

@@ -1,47 +1,57 @@
-/**
- * Minimal shadcn-style primitives (tech-stack.md).
- *
- * Real shadcn/ui is a CLI that copies Radix-backed components into your
- * tree; we don't want the Radix dependency right now. Instead we ship a
- * small set of Tailwind-styled primitives with the same prop surface
- * (Button.variant, Card, Input, Label, Separator) so views can adopt
- * them incrementally and a future migration to shadcn proper is just a
- * `npx shadcn add` away.
- */
 import React from 'react';
+import { Slot } from '@radix-ui/react-slot';
+import { cva, type VariantProps } from 'class-variance-authority';
+import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from 'clsx';
 
-function cn(...classes: (string | false | null | undefined)[]): string {
-  return classes.filter(Boolean).join(' ');
+export function cn(...inputs: ClassValue[]): string {
+  return twMerge(clsx(inputs));
 }
 
-type Variant = 'default' | 'destructive' | 'outline' | 'ghost' | 'link';
-type Size = 'default' | 'sm' | 'lg' | 'icon';
+// ── Button ────────────────────────────────────────────────────────────────────
 
-const baseBtn = 'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50';
-const btnVariants: Record<Variant, string> = {
-  default:     'bg-accent text-white hover:bg-accent/90',
-  destructive: 'bg-red text-white hover:bg-red/90',
-  outline:     'border border-border bg-transparent hover:bg-card text-fg',
-  ghost:       'hover:bg-card text-fg',
-  link:        'text-accent underline-offset-4 hover:underline',
-};
-const btnSizes: Record<Size, string> = {
-  default: 'h-9 px-4 py-2',
-  sm:      'h-8 px-3 text-xs',
-  lg:      'h-10 px-6',
-  icon:    'h-9 w-9',
-};
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  {
+    variants: {
+      variant: {
+        default:     'bg-accent text-white hover:bg-accent/90',
+        destructive: 'bg-red text-white hover:bg-red/90',
+        outline:     'border border-border bg-transparent hover:bg-card text-fg',
+        ghost:       'hover:bg-card text-fg',
+        link:        'text-accent underline-offset-4 hover:underline',
+      },
+      size: {
+        default: 'h-9 px-4 py-2',
+        sm:      'h-8 px-3 text-xs',
+        lg:      'h-10 px-6',
+        icon:    'h-9 w-9',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
+);
 
-export const Button = React.forwardRef<HTMLButtonElement, {
-  variant?: Variant;
-  size?: Size;
-  className?: string;
-} & React.ButtonHTMLAttributes<HTMLButtonElement>>(
-  ({ variant = 'default', size = 'default', className, ...rest }, ref) => (
-    <button ref={ref} className={cn(baseBtn, btnVariants[variant], btnSizes[size], className)} {...rest} />
-  ),
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    VariantProps<typeof buttonVariants> {
+  asChild?: boolean;
+}
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ variant, size, asChild = false, className, ...rest }, ref) => {
+    const Comp = asChild ? Slot : 'button';
+    return (
+      <Comp ref={ref} className={cn(buttonVariants({ variant, size, className }))} {...rest} />
+    );
+  },
 );
 Button.displayName = 'Button';
+
+// ── Card ──────────────────────────────────────────────────────────────────────
 
 export function Card({ className, ...rest }: React.HTMLAttributes<HTMLDivElement>) {
   return <div className={cn('rounded-xl border border-border bg-card text-fg', className)} {...rest} />;
@@ -56,25 +66,38 @@ export function CardContent({ className, ...rest }: React.HTMLAttributes<HTMLDiv
   return <div className={cn('p-5 pt-0', className)} {...rest} />;
 }
 
-export const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement> & { className?: string }>(
-  ({ className, ...rest }, ref) => (
-    <input
-      ref={ref}
-      className={cn(
-        'flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm text-fg placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50',
-        className,
-      )}
-      {...rest}
-    />
-  ),
-);
+// ── Input ─────────────────────────────────────────────────────────────────────
+
+export const Input = React.forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & { className?: string }
+>(({ className, ...rest }, ref) => (
+  <input
+    ref={ref}
+    className={cn(
+      'flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm text-fg placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:cursor-not-allowed disabled:opacity-50',
+      className,
+    )}
+    {...rest}
+  />
+));
 Input.displayName = 'Input';
+
+// ── Label ─────────────────────────────────────────────────────────────────────
 
 export function Label({ className, ...rest }: React.LabelHTMLAttributes<HTMLLabelElement>) {
   return <label className={cn('text-sm font-medium leading-none', className)} {...rest} />;
 }
 
-export function Separator({ className, orientation = 'horizontal' }: { className?: string; orientation?: 'horizontal' | 'vertical' }) {
+// ── Separator ─────────────────────────────────────────────────────────────────
+
+export function Separator({
+  className,
+  orientation = 'horizontal',
+}: {
+  className?: string;
+  orientation?: 'horizontal' | 'vertical';
+}) {
   return (
     <div
       className={cn(
@@ -88,25 +111,27 @@ export function Separator({ className, orientation = 'horizontal' }: { className
   );
 }
 
+// ── Badge ─────────────────────────────────────────────────────────────────────
+
+const badgeVariants = cva(
+  'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium',
+  {
+    variants: {
+      variant: {
+        default:     'bg-accent/20 text-accent border-accent/30',
+        secondary:   'bg-card text-muted border-border',
+        outline:     'border-border text-fg',
+        destructive: 'bg-red/15 text-red border-red/30',
+      },
+    },
+    defaultVariants: { variant: 'default' },
+  },
+);
+
 export function Badge({
-  variant = 'default',
   className,
+  variant,
   ...rest
-}: { variant?: 'default' | 'secondary' | 'outline' | 'destructive'; className?: string } & React.HTMLAttributes<HTMLSpanElement>) {
-  const variantClass = {
-    default:     'bg-accent/20 text-accent border-accent/30',
-    secondary:   'bg-card text-muted border-border',
-    outline:     'border-border text-fg',
-    destructive: 'bg-red/15 text-red border-red/30',
-  }[variant];
-  return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium',
-        variantClass,
-        className,
-      )}
-      {...rest}
-    />
-  );
+}: React.HTMLAttributes<HTMLSpanElement> & VariantProps<typeof badgeVariants>) {
+  return <span className={cn(badgeVariants({ variant, className }))} {...rest} />;
 }
