@@ -124,8 +124,12 @@ export function searchCareCircleGBrain(
       const haystack = searchHaystack(page);
       let score = queryTokens.reduce((sum, term) => sum + (haystack.includes(term) ? 1 : 0), 0);
 
-      if (page.kind === MEDICATION_KIND && normalizedQuery.length > 2 && haystack.includes(normalizedQuery)) {
-        score += 5;
+      if (page.kind === MEDICATION_KIND && normalizedQuery.length > 2) {
+        if (haystack.includes(normalizedQuery)) score += 5;
+        // Individual medication pages rank above the registry when their title matches directly
+        if (page.id !== MEDICATION_REGISTRY_ID && page.title.toLowerCase().includes(normalizedQuery)) {
+          score += 3;
+        }
       }
 
       const sourceLabel =
