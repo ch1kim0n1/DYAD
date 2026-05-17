@@ -7,8 +7,8 @@
     "skipLibCheck": true,
     "moduleResolution": "bundler",
     "paths": {
-      "@dyad/shared": ["../../packages/shared/src/index.ts"],
-      "@dyad/shared/*": ["../../packages/shared/src/*"]
+      "@dyad/shared": ["../packages/shared/src/index.ts"],
+      "@dyad/shared/*": ["../packages/shared/src/*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

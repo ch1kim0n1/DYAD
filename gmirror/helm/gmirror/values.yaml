@@ -1,0 +1,43 @@
+replicaCount: 2
+
+image:
+  repository: gmirror
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  httpPort: 3002
+  healthPort: 8080
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "250m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"
+
+autoscaling:
+  enabled: false
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+config:
+  populationSize: "1000"
+  scenarioSetSize: "100"
+  redTeamSetSize: "50"
+  scoringProfile: "default"
+  panelSize: "10"
+  logLevel: "info"
+
+secrets:
+  postgresUrl: ""
+  anthropicApiKey: ""
+  openaiApiKey: ""

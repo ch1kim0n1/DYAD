@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: gstack-nginx
+    ports:
+      - "${NGINX_HTTP_PORT:-80}:80"
+      - "${NGINX_HTTPS_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certs:/etc/nginx/certs:ro
+    networks:
+      - gstack-network
+    depends_on:
+      - gbrain
+      - gorchestrator
+      - gmirror
+      - gtom
+      - gagent
+      - glearn
+    restart: unless-stopped
+
+networks:
+  gstack-network:
+    external: true

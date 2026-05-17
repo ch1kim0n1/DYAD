@@ -1,0 +1,100 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gorchestrator
+  labels:
+    app: gorchestrator
+    component: gstack
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: gorchestrator
+  template:
+    metadata:
+      labels:
+        app: gorchestrator
+        component: gstack
+    spec:
+      containers:
+      - name: gorchestrator
+        image: gorchestrator:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: http
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: GBRAIN_ENDPOINT
+          value: "http://gbrain-service:3000"
+        - name: GMIRROR_ENDPOINT
+          value: "http://gmirror-service:3002"
+        - name: GTOM_ENDPOINT
+          value: "http://gtom-service:3003"
+        - name: POSTGRES_URL
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: url
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /app/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: gorchestrator-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gorchestrator-service
+  labels:
+    app: gorchestrator
+    component: gstack
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: gorchestrator
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gorchestrator-pvc
+  labels:
+    app: gorchestrator
+    component: gstack
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

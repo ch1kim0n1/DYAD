@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gtom
+  namespace: gstack
+  labels:
+    app: gtom
+    component: gstack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gtom
+  template:
+    metadata:
+      labels:
+        app: gtom
+        component: gstack
+    spec:
+      containers:
+      - name: gtom
+        image: ghcr.io/gstack/gtom:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3003
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gstack-config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 3003
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 3003
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: gtom-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gtom-svc
+  namespace: gstack
+  labels:
+    app: gtom
+    component: gstack
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3003
+    targetPort: 3003
+    protocol: TCP
+    name: http
+  selector:
+    app: gtom
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gtom-pvc
+  namespace: gstack
+  labels:
+    app: gtom
+    component: gstack
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

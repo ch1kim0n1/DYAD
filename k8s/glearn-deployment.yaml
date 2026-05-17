@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: glearn
+  namespace: gstack
+  labels:
+    app: glearn
+    component: gstack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: glearn
+  template:
+    metadata:
+      labels:
+        app: glearn
+        component: gstack
+    spec:
+      containers:
+      - name: glearn
+        image: ghcr.io/gstack/glearn:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3004
+          name: http
+        envFrom:
+        - configMapRef:
+            name: gstack-config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 3004
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 3004
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: glearn-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: glearn-svc
+  namespace: gstack
+  labels:
+    app: glearn
+    component: gstack
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3004
+    targetPort: 3004
+    protocol: TCP
+    name: http
+  selector:
+    app: glearn
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: glearn-pvc
+  namespace: gstack
+  labels:
+    app: glearn
+    component: gstack
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

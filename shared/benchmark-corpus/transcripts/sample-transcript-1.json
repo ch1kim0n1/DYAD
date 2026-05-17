@@ -1,0 +1,12 @@
+{
+  "transcript_id": "transcript-001",
+  "session_id": "session-001",
+  "content": "User: Please implement a Fibonacci function.\nAssistant: I'll create a recursive Fibonacci function with memoization for efficiency.",
+  "timestamp": "2026-05-13T00:00:00Z",
+  "metadata": {
+    "task_type": "code_generation",
+    "model": "claude-sonnet-4-6",
+    "tokens_used": 1500,
+    "latency_ms": 2500
+  }
+}

@@ -1,0 +1,9 @@
+{"dimension":"overall_score","baseline":0.5,"tolerance":0.08,"direction":"min","min_samples":1}
+{"dimension":"correctness","baseline":0.667,"tolerance":0.06,"direction":"min","min_samples":1}
+{"dimension":"user_outcome","baseline":0.688,"tolerance":0.06,"direction":"min","min_samples":1}
+{"dimension":"robustness","baseline":0.529,"tolerance":0.06,"direction":"min","min_samples":1}
+{"dimension":"cost","baseline":0.989,"tolerance":0.06,"direction":"min","min_samples":1}
+{"dimension":"confidence","baseline":0.3,"tolerance":0.06,"direction":"min","min_samples":1}
+{"dimension":"cost_usd","baseline":0.05,"tolerance":1,"direction":"max","min_samples":1}
+{"dimension":"latency_ms","baseline":5000,"tolerance":1,"direction":"max","min_samples":1}
+{"dimension":"escalation_rate","baseline":0,"tolerance":0,"direction":"max","min_samples":1}

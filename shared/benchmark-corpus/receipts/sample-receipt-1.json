@@ -1,0 +1,23 @@
+{
+  "receipt_id": "receipt-001",
+  "schema_version": 1,
+  "timestamp": "2026-05-13T00:00:00Z",
+  "project": "gagent",
+  "rubric_name": "gagent_v1",
+  "rubric_sha8": "a1b2c3d4",
+  "input_hash": "e5f6g7h8",
+  "models_used": ["claude-sonnet-4-6"],
+  "config_hash": "i9j0k1l2",
+  "verdict": "pass",
+  "overall_score": 0.85,
+  "dimensions": {
+    "correctness": 0.9,
+    "efficiency": 0.8,
+    "clarity": 0.85
+  },
+  "metadata": {
+    "tokens_used": 1500,
+    "latency_ms": 2500,
+    "cost_usd": 0.015
+  }
+}

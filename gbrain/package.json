@@ -1,0 +1,68 @@
+{
+  "name": "gbrain",
+  "version": "0.1.0",
+  "description": "GBrain — SQLite-backed persistence for G-Stack development",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "gbrain": "./dist/index.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client.d.ts",
+      "require": "./dist/client.js"
+    },
+    "./sdk": {
+      "require": "./dist/sdk.js",
+      "types": "./dist/sdk.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "serve": "node dist/index.js",
+    "start": "node dist/index.js",
+    "dev": "node --loader ts-node/esm src/index.ts",
+    "test": "NODE_OPTIONS=\"--localstorage-file=/tmp/jest-ls.json\" jest",
+    "test:watch": "NODE_OPTIONS=\"--localstorage-file=/tmp/jest-ls.json\" jest --watch",
+    "test:coverage": "NODE_OPTIONS=\"--localstorage-file=/tmp/jest-ls.json\" jest --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.0.0",
+    "express": "^4.18.2",
+    "uuid": "^10.0.0",
+    "zod": "^3.22.0",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/better-sqlite3": "^7.6.8",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^10.0.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.0",
+    "@sentry/types": "^7.77.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

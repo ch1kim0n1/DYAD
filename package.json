@@ -1,9 +1,17 @@
 {
   "name": "dyad",
   "version": "1.0.0",
+  "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "shared",
+    "gbrain",
+    "gorchestrator",
+    "gmirror",
+    "GToM",
+    "glearn",
+    "gagent"
   ],
   "scripts": {
     "dev:mac": "bun run --cwd apps/mac dev",
@@ -12,10 +20,12 @@
     "test:shared": "bun test packages/shared",
     "test:ingestion": "bun test packages/ingestion",
     "test:engine": "bun test packages/engine",
+    "test:dyad": "bun test packages/engine packages/ingestion packages/shared apps/mac",
     "typecheck": "tsc --noEmit",
-    "lexicons:build": "node packages/lexicons/scripts/build-nrc-lexicon.mjs",
-    "carecircle:seed-gbrain": "bun run scripts/seed-carecircle-gbrain.ts",
-    "carecircle:sync-calendar": "bun run scripts/sync-calendar-gbrain.ts"
+    "typecheck:shared": "tsc --noEmit -p packages/shared/tsconfig.json",
+    "typecheck:engine": "tsc --noEmit -p packages/engine/tsconfig.json",
+    "typecheck:mac": "tsc --noEmit -p apps/mac/tsconfig.json",
+    "lexicons:build": "node packages/lexicons/scripts/build-nrc-lexicon.mjs"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -23,6 +33,7 @@
     "typescript": "^5.0.0"
   },
   "engines": {
+    "node": ">=18.0.0",
     "bun": ">=1.0.0"
   }
 }

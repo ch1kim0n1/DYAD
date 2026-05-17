@@ -1,0 +1,23 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'gbrain'
+    static_configs:
+      - targets: ['gbrain:3000']
+  - job_name: 'gmirror'
+    static_configs:
+      - targets: ['gmirror:3002']
+  - job_name: 'gorchestrator'
+    static_configs:
+      - targets: ['gorchestrator:3001']
+  - job_name: 'gtom'
+    static_configs:
+      - targets: ['gtom:3003']
+  - job_name: 'glearn'
+    static_configs:
+      - targets: ['glearn:3004']
+  - job_name: 'gagent'
+    static_configs:
+      - targets: ['gagent:3005']

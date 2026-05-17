@@ -1,0 +1,8 @@
+{
+  "page_id": "page-001",
+  "title": "Code Generation Task - Fibonacci",
+  "content": "Implement a function to generate Fibonacci numbers up to n. The function should handle edge cases and include error handling.",
+  "tags": ["code", "algorithm", "fibonacci"],
+  "created_at": "2026-05-13T00:00:00Z",
+  "updated_at": "2026-05-13T00:00:00Z"
+}

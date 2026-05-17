@@ -1,0 +1,39 @@
+{
+  "name": "code-generation",
+  "description": "Code generation tasks for cross-tool comparison",
+  "tasks": [
+    {
+      "id": "cg-001",
+      "task": "Implement a function to generate Fibonacci numbers up to n",
+      "type": "code_generation",
+      "language": "javascript",
+      "expected_output": "A function that returns an array of Fibonacci numbers",
+      "metadata": {
+        "complexity": "easy",
+        "estimated_tokens": 500
+      }
+    },
+    {
+      "id": "cg-002",
+      "task": "Create a REST API endpoint for user authentication",
+      "type": "code_generation",
+      "language": "typescript",
+      "expected_output": "Express.js route with JWT authentication",
+      "metadata": {
+        "complexity": "medium",
+        "estimated_tokens": 1500
+      }
+    },
+    {
+      "id": "cg-003",
+      "task": "Implement a binary search algorithm",
+      "type": "code_generation",
+      "language": "python",
+      "expected_output": "Binary search function with O(log n) complexity",
+      "metadata": {
+        "complexity": "easy",
+        "estimated_tokens": 400
+      }
+    }
+  ]
+}

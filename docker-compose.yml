@@ -1,0 +1,269 @@
+version: '3.8'
+
+services:
+  # gbrain Service
+  gbrain:
+    build:
+      context: ./gbrain
+      dockerfile: Dockerfile
+    container_name: gbrain
+    ports:
+      - "${GBRAIN_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=${GBRAIN_PORT:-3000}
+      - GBRAIN_STORAGE_PATH=${GBRAIN_STORAGE_PATH:-/app/data}
+      - GBRAIN_RATE_LIMIT_RPM=${GBRAIN_RATE_LIMIT_RPM:-60}
+    volumes:
+      - gbrain-data:/app/data
+    command: npm run start
+    networks:
+      - gstack-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # gorchestrator Service
+  gorchestrator:
+    build:
+      context: ./gorchestrator
+      dockerfile: Dockerfile
+    container_name: gorchestrator
+    ports:
+      - "${GORCHESTRATOR_PORT:-3001}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - GBRAIN_ENDPOINT=${GBRAIN_ENDPOINT:-http://gbrain:3000}
+      - GMIRROR_ENDPOINT=${GMIRROR_ENDPOINT:-http://gmirror:3002}
+      - GTOM_ENDPOINT=${GTOM_ENDPOINT:-http://gtom:3003}
+      - POSTGRES_URL=${POSTGRES_URL}
+    volumes:
+      - gorchestrator-data:/app/data
+    networks:
+      - gstack-network
+    depends_on:
+      - gbrain
+      - gmirror
+      - gtom
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # gmirror Service
+  gmirror:
+    build:
+      context: ./gmirror
+      dockerfile: Dockerfile
+    container_name: gmirror
+    ports:
+      - "${GMIRROR_PORT:-3002}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - POSTGRES_URL=${POSTGRES_URL}
+    volumes:
+      - gmirror-data:/app/data
+    networks:
+      - gstack-network
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # GToM Service
+  gtom:
+    build:
+      context: ./GToM
+      dockerfile: Dockerfile
+    container_name: gtom
+    ports:
+      - "${GTOM_PORT:-3003}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - POSTGRES_URL=${POSTGRES_URL}
+    volumes:
+      - gtom-data:/app/data
+    networks:
+      - gstack-network
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # gagent Service
+  gagent:
+    build:
+      context: ./gagent
+      dockerfile: Dockerfile
+    container_name: gagent
+    ports:
+      - "${GAGENT_PORT:-3004}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - GBRAIN_ENDPOINT=${GBRAIN_ENDPOINT:-http://gbrain:3000}
+      - POSTGRES_URL=${POSTGRES_URL}
+    volumes:
+      - gagent-data:/app/data
+    networks:
+      - gstack-network
+    depends_on:
+      - gbrain
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # glearn Service
+  glearn:
+    build:
+      context: ./glearn
+      dockerfile: Dockerfile
+    container_name: glearn
+    ports:
+      - "${GLEARN_PORT:-3005}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - GBRAIN_ENDPOINT=${GBRAIN_ENDPOINT:-http://gbrain:3000}
+      - POSTGRES_URL=${POSTGRES_URL}
+    volumes:
+      - glearn-data:/app/data
+    networks:
+      - gstack-network
+    depends_on:
+      - gbrain
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/live"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # PostgreSQL Database (for persistence)
+  postgres:
+    image: postgres:15-alpine
+    container_name: gstack-postgres
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-gstack}
+      - POSTGRES_USER=${POSTGRES_USER:-gstack}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - gstack-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gstack}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Redis (for caching and rate limiting)
+  redis:
+    image: redis:7-alpine
+    container_name: gstack-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-default_password}
+    volumes:
+      - redis-data:/data
+    networks:
+      - gstack-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-default_password}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # MinIO (for object storage)
+  minio:
+    image: minio/minio:latest
+    container_name: gstack-minio
+    ports:
+      - "${MINIO_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - gstack-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+
+  # Prometheus (for metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: gstack-prometheus
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - gstack-network
+    restart: unless-stopped
+
+  # Grafana (for visualization)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: gstack-grafana
+    ports:
+      - "${GRAFANA_PORT:-3001}:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=${GF_USERS_ALLOW_SIGN_UP:-false}
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - gstack-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+volumes:
+  gbrain-data:
+  postgres-data:
+  redis-data:
+  minio-data:
+  prometheus-data:
+  grafana-data:
+  gorchestrator-data:
+  gmirror-data:
+  gtom-data:
+  gagent-data:
+  glearn-data:
+
+networks:
+  gstack-network:
+    driver: bridge

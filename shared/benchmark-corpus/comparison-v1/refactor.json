@@ -1,0 +1,39 @@
+{
+  "name": "refactor",
+  "description": "Code refactoring tasks for cross-tool comparison",
+  "tasks": [
+    {
+      "id": "rf-001",
+      "task": "Refactor this function to use async/await instead of callbacks",
+      "type": "refactor",
+      "language": "javascript",
+      "expected_output": "Refactored function using async/await pattern",
+      "metadata": {
+        "complexity": "medium",
+        "estimated_tokens": 800
+      }
+    },
+    {
+      "id": "rf-002",
+      "task": "Extract common logic into a reusable utility function",
+      "type": "refactor",
+      "language": "typescript",
+      "expected_output": "Extracted utility function with proper typing",
+      "metadata": {
+        "complexity": "easy",
+        "estimated_tokens": 600
+      }
+    },
+    {
+      "id": "rf-003",
+      "task": "Convert class-based component to functional component with hooks",
+      "type": "refactor",
+      "language": "react",
+      "expected_output": "Functional component using React hooks",
+      "metadata": {
+        "complexity": "medium",
+        "estimated_tokens": 1200
+      }
+    }
+  ]
+}

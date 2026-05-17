@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gbrain
+  namespace: gstack
+  labels:
+    app: gbrain
+    component: gstack
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gbrain
+  template:
+    metadata:
+      labels:
+        app: gbrain
+        component: gstack
+    spec:
+      containers:
+      - name: gbrain
+        image: ghcr.io/gstack/gbrain:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: GBRAIN_DB_PATH
+          value: "/data/gbrain.db"
+        envFrom:
+        - configMapRef:
+            name: gstack-config
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: gbrain-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gbrain-svc
+  namespace: gstack
+  labels:
+    app: gbrain
+    component: gstack
+spec:
+  type: ClusterIP
+  ports:
+  - port: 3000
+    targetPort: 3000
+    protocol: TCP
+    name: http
+  selector:
+    app: gbrain
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gbrain-pvc
+  namespace: gstack
+  labels:
+    app: gbrain
+    component: gstack
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi

@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gstack-config
+  namespace: gstack
+  labels:
+    component: gstack
+data:
+  NODE_ENV: "production"
+  LOG_LEVEL: "info"
+  GBRAIN_URL: "http://gbrain-svc:3000"
+  GMIRROR_URL: "http://gmirror-svc:3002"
+  GTOM_URL: "http://gtom-svc:3003"
+  GAGENT_URL: "http://gagent-svc:3001"
+  GLEARN_URL: "http://glearn-svc:3004"
+  REDIS_URL: "redis://redis-svc:6379"

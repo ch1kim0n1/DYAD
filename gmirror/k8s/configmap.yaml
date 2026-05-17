@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gmirror-config
+  labels:
+    app: gmirror
+    component: gstack
+data:
+  population-size: "1000"
+  scenario-set-size: "100"
+  red-team-set-size: "50"
+  scoring-profile: "default"
+  panel-size: "10"
+  log-level: "info"

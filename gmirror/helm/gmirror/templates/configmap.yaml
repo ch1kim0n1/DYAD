@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gmirror.fullname" . }}-config
+  labels:
+    {{- include "gmirror.labels" . | nindent 4 }}
+data:
+  population-size: {{ .Values.config.populationSize | quote }}
+  scenario-set-size: {{ .Values.config.scenarioSetSize | quote }}
+  red-team-set-size: {{ .Values.config.redTeamSetSize | quote }}
+  scoring-profile: {{ .Values.config.scoringProfile | quote }}
+  panel-size: {{ .Values.config.panelSize | quote }}
+  log-level: {{ .Values.config.logLevel | quote }}

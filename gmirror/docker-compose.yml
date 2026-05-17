@@ -1,0 +1,46 @@
+version: '3.8'
+
+# GMirror standalone compose.
+# Optional: set ENABLE_GBRAIN=true to start the gbrain dependency.
+
+services:
+  gmirror:
+    build: .
+    ports:
+      - '3002:8080'
+    environment:
+      - NODE_ENV=production
+      - GMIRROR_PORT=8080
+      - GBRAIN_ENDPOINT=http://gbrain:3000
+    depends_on:
+      gbrain:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:8080/health/live']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # Optional GBrain dependency — comment out if using a remote GBrain instance.
+  gbrain:
+    image: ghcr.io/gstack/gbrain:latest
+    build:
+      context: ./gbrain
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - GBRAIN_DB_PATH=/data/gbrain.db
+    volumes:
+      - gbrain-data:/data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/health']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  gbrain-data:

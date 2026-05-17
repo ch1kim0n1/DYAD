@@ -1,0 +1,33 @@
+[Unit]
+Description=GMirror - Scoring service for G-Stack
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=gmirror
+Group=gmirror
+WorkingDirectory=/opt/gmirror
+Environment=NODE_ENV=production
+Environment=PORT=3002
+Environment=HEALTH_PORT=8080
+EnvironmentFile=/etc/gmirror/gmirror.env
+ExecStart=/usr/bin/node /opt/gmirror/dist/serve.js
+Restart=on-failure
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=gmirror
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/gmirror /var/log/gmirror
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
