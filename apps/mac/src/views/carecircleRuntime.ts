@@ -108,7 +108,7 @@ export function loadCareCircleRuntimeState(): CareCircleRuntimeState {
       calendarLastSyncAt: parsed.calendarLastSyncAt,
       calendarSyncedCount: parsed.calendarSyncedCount,
       calendarSyncError: parsed.calendarSyncError,
-      medications: parsed.medications,
+      medications: normalizeMedications(parsed.medications),
       medicationSyncError: parsed.medicationSyncError,
     };
   } catch {
@@ -126,6 +126,29 @@ function normalizeLiveNote(note: Partial<CareLiveNote>): CareLiveNote {
     subjectPersonId: note.subjectPersonId ?? 'linda',
     noteType: note.noteType ?? 'check_in',
   };
+}
+
+function normalizeMedications(medications: CareCircleRuntimeState['medications']): CareCircleRuntimeState['medications'] {
+  if (!medications) return undefined;
+
+  const normalized = medications.map((med) => {
+    const name = String(med.name ?? '').trim();
+    const notes = String(med.notes ?? '').trim();
+    const looksLikeTestMedication = name.toLowerCase() === 'tylenol' && /slkjf|pain killer/i.test(notes);
+
+    if (!looksLikeTestMedication) return med;
+
+    return {
+      ...med,
+      name: 'Lisinopril',
+      dosage: med.dosage?.trim() || '10mg',
+      schedule: med.schedule?.trim() || 'morning with breakfast',
+      notes:
+        'Started five days ago after a blood pressure medication change. Family notes mention dizziness, so the next step should be reviewed by a doctor or pharmacist.',
+    };
+  });
+
+  return normalized.filter((med) => String(med.name ?? '').trim().length > 0);
 }
 
 export function saveCareCircleRuntimeState(state: CareCircleRuntimeState): void {

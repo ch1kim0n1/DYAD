@@ -1,14 +1,14 @@
 {
   "id": "carecircle::calendar::4vuu8aglji01j2bvdloopucpf4@google.com",
   "kind": "carecircle_calendar_event",
-  "title": "dr chan emergency appointment at hospital",
+  "title": "Dr. Chen medication review call",
   "content": {
     "uid": "4vuu8aglji01j2bvdloopucpf4@google.com",
-    "summary": "dr chan emergency appointment at hospital",
+    "summary": "Dr. Chen medication review call",
     "start": "2026-05-18T18:00:00.000Z",
     "end": "2026-05-18T19:45:00.000Z",
-    "location": "",
-    "description": "",
+    "location": "Phone",
+    "description": "Maya and Sarah can ask whether the dizziness notes and medication timing are worth reviewing. No causation assumed.",
     "source": "shared_calendar"
   },
   "created_at": "2026-05-16T23:48:41.539Z",

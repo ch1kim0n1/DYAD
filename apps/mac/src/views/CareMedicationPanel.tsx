@@ -127,17 +127,17 @@ export function CareMedicationPanel({
     >
       <div className="medication-gbrain-header">
         <div>
-          <p className="care-kicker">GBrain · medications</p>
+          <p className="care-kicker">Care memory · medications</p>
           <h2>Medicine list</h2>
         </div>
         <span
           className={`provider-context-badge ${scanning ? 'checking' : medications.length ? 'ready' : 'idle'}`}
         >
-          {scanning ? 'Scanning' : medications.length ? `${medications.length} in GBrain` : 'Add meds'}
+          {scanning ? 'Scanning' : medications.length ? `${medications.length} saved` : 'Add meds'}
         </span>
       </div>
       <p className="medication-gbrain-lead">
-        Add what {personName('linda')} is taking. Each entry is saved to GBrain, then CareCircle scans all indexed
+        Add what {personName('linda')} is taking. Each entry is saved to care memory, then Snoopie scans all indexed
         family context for pharmacy alerts, medication notes, and related mentions.
       </p>
 
@@ -185,7 +185,7 @@ export function CareMedicationPanel({
           />
         </label>
         <button className="care-card-button gbrain-retrieval-button" type="submit" disabled={saving || !name.trim()}>
-          {saving ? 'Saving…' : 'Add to GBrain'}
+          {saving ? 'Saving…' : 'Save medication'}
         </button>
       </form>
 
@@ -196,7 +196,7 @@ export function CareMedicationPanel({
           onClick={() => void handleScan()}
           disabled={scanning || loading}
         >
-          {scanning ? 'Traversing GBrain…' : 'Scan GBrain for medication context'}
+          {scanning ? 'Checking memory…' : 'Find related context'}
         </button>
       </div>
 
@@ -226,7 +226,7 @@ export function CareMedicationPanel({
                     {[med.dosage, med.schedule].filter(Boolean).join(' · ') || 'No dosage or schedule recorded'}
                   </p>
                   {med.notes ? <p className="medication-note">{med.notes}</p> : null}
-                  <span className="dashboard-recent-event-source">manual entry · GBrain</span>
+                  <span className="dashboard-recent-event-source">manual entry · saved</span>
                 </li>
               ))}
             </ul>
@@ -234,18 +234,15 @@ export function CareMedicationPanel({
 
           {snapshot && snapshot.gbrainMatches.length > 0 && (
             <>
-              <h3 className="medication-matches-heading">From GBrain context</h3>
+              <h3 className="medication-matches-heading">Context I found</h3>
               <ul className="medication-gbrain-matches">
-                {snapshot.gbrainMatches.map((hit) => (
+                {snapshot.gbrainMatches.slice(0, 3).map((hit) => (
                   <li key={hit.pageId}>
                     <div className="medication-manual-top">
                       <strong>{hit.title}</strong>
                       <span className="medication-score">{hit.source}</span>
                     </div>
                     <p>{hit.text}</p>
-                    {hit.matchedTerms.length > 0 && (
-                      <span className="medication-match-terms">matched: {hit.matchedTerms.join(', ')}</span>
-                    )}
                   </li>
                 ))}
               </ul>

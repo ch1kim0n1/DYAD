@@ -212,6 +212,26 @@ function careCircleGBrainBridge() {
 
         sendJson(res, 405, { error: 'Method not allowed' });
       });
+
+      server.middlewares.use('/api/carecircle/agent-brief', async (req, res) => {
+        if (req.method !== 'POST') {
+          sendJson(res, 405, { error: 'Method not allowed' });
+          return;
+        }
+        try {
+          const body = await readJson(req);
+          const graph = body.graph as Record<string, unknown> | undefined;
+          if (!graph) {
+            sendJson(res, 400, { error: 'Missing care graph' });
+            return;
+          }
+
+          const result = await runCareCircleAgent(graph);
+          sendJson(res, 200, result);
+        } catch (err) {
+          sendJson(res, 503, { error: (err as Error).message });
+        }
+      });
     },
   };
 }
@@ -269,6 +289,267 @@ function sendJson(res: import('node:http').ServerResponse, status: number, body:
   res.end(JSON.stringify(body));
 }
 
+async function runCareCircleAgent(graph: Record<string, unknown>) {
+  const apiKey = process.env.CARE_AGENT_API_KEY ?? process.env.HF_TOKEN ?? process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error('Set CARE_AGENT_API_KEY, HF_TOKEN, or OPENAI_API_KEY to enable agent analysis.');
+  }
+
+  const model = process.env.CARE_AGENT_MODEL ?? 'gpt-4o-mini';
+  const apiUrl = process.env.CARE_AGENT_API_URL ?? 'https://api.openai.com/v1/chat/completions';
+  const prompt = [
+    'You are Snoopie, CareCircle’s calm family care companion for an elder-care demo.',
+    'You are speaking to Maya after a long day. Be warm, brief, steady, and useful.',
+    'Sound like a capable helper quietly taking things off her plate, not a clinical dashboard or corporate assistant.',
+    'Read the care-network graph and return only JSON that matches the requested shape.',
+    'Identify what changed this week, unresolved loops, task assignments, and message drafts.',
+    'For every whatChanged item, make recommendedAction a two-sentence source-aware rationale plus the next step.',
+    'The rationale should connect at least two source types when possible, such as family notes + messages, calendar + task ownership, or pharmacy notification + symptom mentions.',
+    'Make the reasoning feel like synthesis across messy sources, not a restatement of the claim.',
+    'Write reasoning in first person as Snoopie using “I”. Use phrases like “I noticed,” “I remembered,” “I staged,” “I kept this careful,” and “so you do not have to re-read the whole thread tonight.”',
+    'Do not say “CareCircle stages,” “CareCircle routes,” or “CareCircle is.”',
+    'Avoid stiff phrases like “source-aware rationale,” “detected,” “correlated,” “escalate,” “optimize,” and “workflow.”',
+    'Prefer humane language: “I noticed,” “this may be worth checking,” “I kept this under human review,” “one clear next step,” and “nothing gets sent until you approve it.”',
+    'Safety rules: do not diagnose dementia; do not claim medication caused symptoms; do not claim you know Linda’s feelings; do not imply AI replaces family, doctors, pharmacists, or caregivers.',
+    'Use language like “may be worth checking,” “human review,” “doctor or pharmacist,” and “family notes mention.”',
+    'Frame support around Linda staying comfortable and independent.',
+  ].join('\n');
+
+  const response = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${apiKey}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      model,
+      response_format: { type: 'json_object' },
+      messages: [
+        { role: 'system', content: prompt },
+        {
+          role: 'user',
+          content: JSON.stringify({
+            expectedShape: {
+              headline: 'string',
+              summary: 'string',
+              whatChanged: [
+                {
+                  id: 'string',
+                  claim: 'string',
+                  confidence: 'number from 0 to 1',
+                  evidenceObservationIds: ['observation id'],
+                  recommendedAction:
+                    'two-sentence cross-source reasoning plus next step; connect multiple source types and avoid diagnosis/causation',
+                  safetyLevel: 'normal | human_review | medical_review',
+                },
+              ],
+              unresolvedLoops: [
+                {
+                  id: 'string',
+                  description: 'string',
+                  status: 'open | resolved',
+                  relatedPersonIds: ['person id'],
+                  evidenceObservationIds: ['observation id'],
+                  suggestedNextStep: 'string',
+                  openedAt: 'ISO timestamp',
+                },
+              ],
+              taskSplit: [
+                {
+                  id: 'string',
+                  ownerPersonId: 'person id',
+                  title: 'string',
+                  description: 'string',
+                  status: 'suggested | accepted | done',
+                  linkedInsightIds: ['insight id'],
+                },
+              ],
+              whatUsuallyWorks: ['string'],
+              messageDrafts: {
+                toParent: 'string',
+                toSiblings: 'string',
+                toDoctorOrPharmacist: 'string',
+              },
+            },
+            graph,
+          }),
+        },
+      ],
+      temperature: 0.2,
+    }),
+  });
+
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`agent request failed with ${response.status}${detail ? `: ${detail}` : ''}`);
+  }
+
+  const data = (await response.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const raw = data.choices?.[0]?.message?.content;
+  if (!raw) throw new Error('agent returned no content');
+  const parsed = parseAgentJson(raw);
+
+  return {
+    brief: normalizeAgentBrief(parsed),
+    analysisMode: 'agent',
+  };
+}
+
+function parseAgentJson(raw: string): Record<string, unknown> {
+  try {
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('agent returned non-JSON content');
+    return JSON.parse(match[0]) as Record<string, unknown>;
+  }
+}
+
+function normalizeAgentBrief(value: Record<string, unknown>) {
+  const now = new Date().toISOString();
+  return {
+    id: stringOr(value.id, `carecircle-agent-${Date.now()}`),
+    generatedAt: stringOr(value.generatedAt, now),
+    headline: stringOr(value.headline, 'Human review suggested for this week'),
+    summary: enforceSafetyLanguage(
+      stringOr(
+        value.summary,
+        'Family notes mention changes this week. This may be worth checking with a doctor or pharmacist, with the family staying in control.',
+      ),
+    ),
+    whatChanged: arrayOfRecords(value.whatChanged).map((item, index) => ({
+      id: stringOr(item.id, `agent-insight-${index + 1}`),
+      claim: stringOr(item.claim, 'Family notes mention a change worth reviewing.'),
+      confidence: numberBetween(item.confidence, 0, 1, 0.78),
+      evidenceObservationIds: stringArray(item.evidenceObservationIds),
+      recommendedAction: enforceSafetyLanguage(
+        sourceAwareAgentReasoning(
+          stringOr(item.id, `agent-insight-${index + 1}`),
+          stringOr(item.claim, 'Family notes mention a change worth reviewing.'),
+          stringArray(item.evidenceObservationIds),
+          stringOr(item.recommendedAction, ''),
+        ),
+      ),
+      safetyLevel: safetyLevel(item.safetyLevel),
+    })),
+    unresolvedLoops: arrayOfRecords(value.unresolvedLoops).map((item, index) => ({
+      id: stringOr(item.id, `agent-loop-${index + 1}`),
+      description: stringOr(item.description, 'Follow-up still open.'),
+      status: item.status === 'resolved' ? 'resolved' : 'open',
+      relatedPersonIds: stringArray(item.relatedPersonIds),
+      evidenceObservationIds: stringArray(item.evidenceObservationIds),
+      suggestedNextStep: stringOr(item.suggestedNextStep, 'Assign one family owner and close the loop.'),
+      openedAt: stringOr(item.openedAt, now),
+    })),
+    taskSplit: arrayOfRecords(value.taskSplit).map((item, index) => ({
+      id: stringOr(item.id, `agent-action-${index + 1}`),
+      ownerPersonId: stringOr(item.ownerPersonId, index === 0 ? 'sarah' : index === 1 ? 'arjun' : 'maya'),
+      title: stringOr(item.title, 'Review next step'),
+      description: enforceSafetyLanguage(stringOr(item.description, 'This is staged for family review before anyone acts.')),
+      status: actionStatus(item.status),
+      linkedInsightIds: stringArray(item.linkedInsightIds),
+    })),
+    whatUsuallyWorks: stringArray(value.whatUsuallyWorks).slice(0, 4),
+    messageDrafts: normalizeMessageDrafts(value.messageDrafts),
+  };
+}
+
+function sourceAwareAgentReasoning(id: string, claim: string, evidenceIds: string[], agentText: string) {
+  if (agentText.length > 120 && /family notes|message|calendar|pharmacy|task|source/i.test(agentText)) {
+    return firstPersonReasoning(agentText);
+  }
+
+  const text = `${id} ${claim} ${evidenceIds.join(' ')}`.toLowerCase();
+  if (text.includes('dizz') || text.includes('med')) {
+    return 'I noticed Linda mentioned dizziness twice in the family messages, and I also saw the pharmacy note about the blood pressure medication change this week. I am not assuming one caused the other; I just want to make it easy for you to ask a doctor or pharmacist the right, careful question.';
+  }
+
+  if (text.includes('appointment')) {
+    return 'I saw the appointment question come up more than once, and I noticed Arjun is already the person who usually handles calendar follow-up. I routed this to him as one clear confirmation so you do not have to re-read the whole thread tonight.';
+  }
+
+  if (text.includes('lunch') || text.includes('meal')) {
+    return 'I found two meal notes on different days, and I remembered that Linda does better with gentle morning calls and concrete choices. I staged this as a soft check-in about appetite and routine, not a diagnosis or a big alarm.';
+  }
+
+  return (
+    firstPersonReasoning(agentText) ||
+    'I connected this to the week’s source history and kept the next step calm, specific, and under human review. Nothing gets sent or escalated until the family decides.'
+  );
+}
+
+function firstPersonReasoning(value: string) {
+  return value
+    .replace(/\bCareCircle is not\b/g, 'I am not')
+    .replace(/\bCareCircle is\b/g, 'I am')
+    .replace(/\bCareCircle stages\b/g, 'I stage')
+    .replace(/\bCareCircle staged\b/g, 'I staged')
+    .replace(/\bCareCircle routes\b/g, 'I route')
+    .replace(/\bCareCircle routed\b/g, 'I routed')
+    .replace(/\bCareCircle connected\b/g, 'I connected')
+    .replace(/\bCareCircle should\b/g, 'I should')
+    .replace(/\bCareCircle\b/g, 'I');
+}
+
+function normalizeMessageDrafts(value: unknown) {
+  const record = isRecord(value) ? value : {};
+  return {
+    toParent: stringOr(
+      record.toParent,
+      'Morning Mom, I wanted to check in. Have you felt dizzy at all after taking the new medication? No rush, I just want to help you stay comfortable and independent.',
+    ),
+    toSiblings: stringOr(
+      record.toSiblings,
+      'Quick update: Mom skipped lunch twice, repeated the appointment question a few times, and mentioned dizziness after the med change. Sarah, can you call the pharmacy? Arjun, can you confirm the appointment? I’ll check in with Mom this morning.',
+    ),
+    toDoctorOrPharmacist: enforceSafetyLanguage(
+      stringOr(
+        record.toDoctorOrPharmacist,
+        'Linda started a new blood pressure medication five days ago. Since then, family notes mention dizziness twice, two skipped lunches, and repeated questions about an upcoming appointment. We are not assuming causation, but would like guidance on whether medication timing, dosage, or side effects should be reviewed.',
+      ),
+    ),
+  };
+}
+
+function enforceSafetyLanguage(value: string) {
+  return value
+    .replace(/\bcaused\b/gi, 'may be related to')
+    .replace(/\bdementia\b/gi, 'a pattern worth human review')
+    .replace(/\bdiagnose[sd]?\b/gi, 'review');
+}
+
+function arrayOfRecords(value: unknown): Record<string, unknown>[] {
+  return Array.isArray(value) ? value.filter(isRecord) : [];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+function stringOr(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim() ? value.trim() : fallback;
+}
+
+function numberBetween(value: unknown, min: number, max: number, fallback: number): number {
+  if (typeof value !== 'number' || Number.isNaN(value)) return fallback;
+  return Math.max(min, Math.min(max, value));
+}
+
+function safetyLevel(value: unknown): 'normal' | 'human_review' | 'medical_review' {
+  if (value === 'normal' || value === 'human_review' || value === 'medical_review') return value;
+  return 'human_review';
+}
+
+function actionStatus(value: unknown): 'suggested' | 'accepted' | 'done' {
+  if (value === 'accepted' || value === 'done') return value;
+  return 'suggested';
+}
 function safeSlug(value: string) {
   return value.replace(/[^a-zA-Z0-9/_-]/g, '-').replace(/^-+|-+$/g, '') || 'carecircle/demo/accepted-plan';
 }

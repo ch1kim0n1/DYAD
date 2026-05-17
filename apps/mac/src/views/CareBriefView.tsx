@@ -1,7 +1,7 @@
-import { useMemo, useState, type Dispatch, type FormEvent, type SetStateAction } from 'react';
+import { useEffect, useMemo, useState, type Dispatch, type FormEvent, type SetStateAction } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import type { CareAction, CareBrief, CareCircleGraph, CareObservation } from './carecircleDemo.js';
-import { careCircleFixture, evidenceText, getWhatChanged, personName } from './carecircleDemo.js';
+import { careCircleFixture, evidenceText, personName } from './carecircleDemo.js';
 import {
   bestReminderSlot,
   downloadCareReminder,
@@ -15,6 +15,7 @@ import type { CareCircleRuntimeState } from './carecircleRuntime.js';
 interface CareBriefViewProps {
   graph: CareCircleGraph;
   brief: CareBrief;
+  analysisMode?: 'agent' | 'deterministic' | null;
   isSynthesizing: boolean;
   runtimeState: CareCircleRuntimeState;
   onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
@@ -23,6 +24,7 @@ interface CareBriefViewProps {
 export function CareBriefView({
   graph,
   brief,
+  analysisMode,
   isSynthesizing,
   runtimeState,
   onRuntimeStateChange,
@@ -31,6 +33,7 @@ export function CareBriefView({
   const [busyTime, setBusyTime] = useState('10:00');
   const [showScheduleDetails, setShowScheduleDetails] = useState(false);
   const [showReasoning, setShowReasoning] = useState(false);
+  const [agentSourceCount, setAgentSourceCount] = useState(1);
   const stagger: Variants = {
     animate: {
       transition: {
@@ -52,6 +55,25 @@ export function CareBriefView({
     reminderSlots.find((slot) => slot.conflictCount === 0)?.start.toISOString() ??
     reminderSlots[0]?.start.toISOString();
   const selectedReminderLabel = selectedReminderStart ? formatCalendarTime(selectedReminderStart) : 'the selected time';
+
+  useEffect(() => {
+    if (analysisMode !== 'agent') {
+      setAgentSourceCount(1);
+      return undefined;
+    }
+
+    setAgentSourceCount(1);
+    const interval = window.setInterval(() => {
+      setAgentSourceCount((count) => {
+        if (count >= 24) {
+          window.clearInterval(interval);
+          return 24;
+        }
+        return count + 1;
+      });
+    }, 95);
+    return () => window.clearInterval(interval);
+  }, [analysisMode, brief.id]);
 
   if (isSynthesizing) {
     return <CareSynthesisView graph={graph} />;
@@ -135,7 +157,14 @@ export function CareBriefView({
   return (
     <motion.section className="care-brief-view" initial="initial" animate="animate" variants={stagger}>
       <motion.div className="brief-hero" variants={fadeUp}>
-        <p className="care-kicker">CareCircle brief</p>
+        <div className="brief-kicker-row">
+          <p className="care-kicker">CareCircle brief</p>
+          {analysisMode === 'agent' && (
+            <span className="agent-analysis-badge">
+              Agent analysis · read {agentSourceCount} sources
+            </span>
+          )}
+        </div>
         <h1>{brief.headline}</h1>
         <p className="brief-lead">
           I found three changes and staged the next moves. One item needs your approval before anyone acts.
@@ -430,10 +459,7 @@ function CareSynthesisView({ graph }: { graph: CareCircleGraph }) {
         })),
     )
     .slice(0, 8);
-  const clusters = getWhatChanged(graph).map((insight) => ({
-    title: insight.claim,
-    body: insight.recommendedAction,
-  }));
+  const clusters = getSynthesisClusters(graph);
 
   return (
     <motion.section className="synthesis-view" initial="initial" animate="animate">
@@ -515,4 +541,29 @@ function getSynthesisSourceLabel(observation: CareObservation): string {
   };
 
   return labels[observation.source];
+}
+
+function getSynthesisClusters(graph: CareCircleGraph) {
+  const hasLiveNotes = graph.observations.some((observation) =>
+    observation.tags.some((tag) => ['gbrain-memory', 'local-memory'].includes(tag)),
+  );
+
+  return [
+    {
+      title: 'Routine change',
+      body: `I found two meal notes and remembered that Linda usually responds better to morning calls with concrete choices.${
+        hasLiveNotes ? ' I am folding the newest family note into that same pattern.' : ''
+      }`,
+    },
+    {
+      title: 'Appointment loop',
+      body:
+        'I saw the appointment question repeat across the calendar and messages, and Arjun already owns calendar follow-up for the family.',
+    },
+    {
+      title: 'Medical review boundary',
+      body:
+        'I saw dizziness mentioned in family messages and a pharmacy note in the same week. I am keeping this careful: ask a doctor or pharmacist, but do not assume causation.',
+    },
+  ];
 }

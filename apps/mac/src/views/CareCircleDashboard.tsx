@@ -1,22 +1,13 @@
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import type { CareBrief, CareCircleGraph } from './carecircleDemo.js';
 import type { CareCircleRuntimeState } from './carecircleRuntime.js';
-import {
-  fetchCalendarFromGBrain,
-  formatCalendarWhen,
-  gbrainBlocksToCareBlocks,
-  syncCalendarToGBrain,
-  type CalendarListResponse,
-} from '../lib/carecircle-calendar-client.js';
-import { CareMedicationPanel } from './CareMedicationPanel.js';
 
 interface CareCircleDashboardProps {
   graph: CareCircleGraph;
   brief: CareBrief | null;
   runtimeState: CareCircleRuntimeState;
-  onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
   onAnalyze: () => void;
+  onPersonShortcut: (personId: string) => void;
 }
 
 const personPulse: Record<string, string> = {
@@ -39,73 +30,10 @@ export function CareCircleDashboard({
   graph,
   brief,
   runtimeState,
-  onRuntimeStateChange,
   onAnalyze,
+  onPersonShortcut,
 }: CareCircleDashboardProps) {
   const dashboardPeople = graph.people.filter((person) => person.id !== 'pharmacy');
-  const [icsInput, setIcsInput] = useState(runtimeState.calendarIcsUrl ?? '');
-  const [calendarView, setCalendarView] = useState<CalendarListResponse | null>(null);
-  const [calendarLoading, setCalendarLoading] = useState(false);
-  const [calendarSyncing, setCalendarSyncing] = useState(false);
-
-  const loadCalendarFromGBrain = useCallback(async () => {
-    setCalendarLoading(true);
-    try {
-      const data = await fetchCalendarFromGBrain();
-      setCalendarView(data);
-    } catch {
-      setCalendarView(null);
-    } finally {
-      setCalendarLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void loadCalendarFromGBrain();
-  }, [loadCalendarFromGBrain]);
-
-  const handleCalendarSync = async () => {
-    const url = icsInput.trim();
-    if (!url) {
-      onRuntimeStateChange((s) => ({
-        ...s,
-        calendarSyncError: 'Paste your secret ICS link first.',
-      }));
-      return;
-    }
-
-    setCalendarSyncing(true);
-    onRuntimeStateChange((s) => ({ ...s, calendarSyncError: undefined }));
-
-    try {
-      const result = await syncCalendarToGBrain(url);
-      const manualBlocks = runtimeState.calendarBlocks.filter((b) => !b.id.startsWith('gbrain-cal-'));
-      const imported = gbrainBlocksToCareBlocks(result.upcoming);
-
-      onRuntimeStateChange((s) => ({
-        ...s,
-        calendarIcsUrl: url,
-        calendarLastSyncAt: result.lastSyncAt,
-        calendarSyncedCount: result.synced,
-        calendarSyncError: undefined,
-        calendarBlocks: [...manualBlocks, ...imported],
-      }));
-
-      setCalendarView({
-        upcoming: result.upcoming,
-        past: result.past,
-        lastSyncAt: result.lastSyncAt,
-        source: 'gbrain',
-      });
-    } catch (err) {
-      onRuntimeStateChange((s) => ({
-        ...s,
-        calendarSyncError: (err as Error).message,
-      }));
-    } finally {
-      setCalendarSyncing(false);
-    }
-  };
 
   const stagger: Variants = {
     animate: {
@@ -125,7 +53,7 @@ export function CareCircleDashboard({
     <motion.section className="care-dashboard" initial="initial" animate="animate" variants={stagger}>
       <motion.div className="care-hero-panel" variants={fadeUp}>
         <motion.div>
-          <p className="care-kicker">CareCircle is watching the care load</p>
+          <p className="care-kicker">I'm keeping an eye on the care load</p>
           <h1>{brief ? "You're caught up. The next moves are staged." : 'Come home, check once, and feel caught up.'}</h1>
           <p>
             {runtimeState.gbrainMemory
@@ -142,100 +70,16 @@ export function CareCircleDashboard({
         </button>
       </motion.div>
 
-      <motion.section className="care-panel calendar-gbrain-panel" variants={fadeUp} aria-label="Calendar GBrain sync">
-        <div className="calendar-gbrain-header">
-          <div>
-            <p className="care-kicker">GBrain · shared calendar</p>
-            <h2>Connect a calendar feed</h2>
-          </div>
-          <span className={`provider-context-badge ${calendarSyncing ? 'checking' : calendarView?.lastSyncAt ? 'ready' : 'idle'}`}>
-            {calendarSyncing ? 'Syncing' : calendarView?.lastSyncAt ? 'In GBrain' : 'Not synced'}
-          </span>
-        </div>
-        <p className="calendar-gbrain-lead">
-          Paste the secret ICS link from Google Calendar, Outlook, or Apple (Settings → integrate calendar → secret
-          address). CareCircle fetches events server-side and stores them in GBrain only — the URL stays on this device.
-        </p>
-        <div className="calendar-gbrain-form">
-          <label className="calendar-ics-field">
-            <span>ICS link</span>
-            <input
-              type="url"
-              value={icsInput}
-              onChange={(e) => setIcsInput(e.target.value)}
-              placeholder="https://calendar.google.com/calendar/ical/.../basic.ics"
-              autoComplete="off"
-              spellCheck={false}
-            />
-          </label>
-          <button
-            className="care-card-button gbrain-retrieval-button"
-            type="button"
-            onClick={() => void handleCalendarSync()}
-            disabled={calendarSyncing}
-          >
-            {calendarSyncing ? 'Fetching calendar…' : 'Sync to GBrain'}
-          </button>
-        </div>
-        {runtimeState.calendarSyncError && (
-          <p className="calendar-gbrain-error" role="alert">
-            {runtimeState.calendarSyncError}
-          </p>
-        )}
-        {runtimeState.calendarLastSyncAt && (
-          <p className="calendar-gbrain-meta">
-            Last sync {formatCalendarWhen(runtimeState.calendarLastSyncAt)}
-            {runtimeState.calendarSyncedCount != null
-              ? ` · ${runtimeState.calendarSyncedCount} events in GBrain`
-              : ''}
-          </p>
-        )}
-        {calendarLoading ? (
-          <p className="calendar-gbrain-meta">Loading events from GBrain…</p>
-        ) : calendarView && calendarView.upcoming.length > 0 ? (
-          <ul className="calendar-gbrain-events">
-            {calendarView.upcoming.slice(0, 8).map((event) => (
-              <li key={event.id}>
-                <div className="calendar-gbrain-event-top">
-                  <strong>{event.title}</strong>
-                  <span>{formatCalendarWhen(event.start)}</span>
-                </div>
-                {event.location ? <p>{event.location}</p> : null}
-                <span className="dashboard-recent-event-source">shared calendar · GBrain</span>
-              </li>
-            ))}
-          </ul>
-        ) : calendarView?.lastSyncAt ? (
-          <p className="calendar-gbrain-meta">No upcoming events in the synced window.</p>
-        ) : null}
-      </motion.section>
-
-      <CareMedicationPanel
-        runtimeState={runtimeState}
-        onRuntimeStateChange={onRuntimeStateChange}
-        variants={fadeUp}
-      />
-
-      {brief && (
-        <motion.section className="assistant-status dashboard-status" aria-label="CareCircle status" variants={fadeUp}>
-          <div>
-            <span className={`status-dot ${runtimeState.gbrainMemory ? 'ready' : 'waiting'}`} />
-            <p>{runtimeState.gbrainMemory ? 'Saved care memory' : 'GBrain memory ready'}</p>
-          </div>
-          <div>
-            <span className="status-dot ready" />
-            <p>Prepared appointment confirmation</p>
-          </div>
-          <div>
-            <span className="status-dot waiting" />
-            <p>Paused pharmacy call for human review</p>
-          </div>
-        </motion.section>
-      )}
-
       <motion.div className="family-grid" aria-label="Family circle" variants={stagger}>
         {dashboardPeople.map((person) => (
-          <motion.article className="family-card" key={person.id} variants={fadeUp}>
+          <motion.button
+            aria-label={`Open ${person.name}'s care context`}
+            className="family-card"
+            key={person.id}
+            onClick={() => onPersonShortcut(person.id)}
+            type="button"
+            variants={fadeUp}
+          >
             <div className="family-card-top">
               <div className="avatar-mark" aria-hidden="true">
                 {person.name.slice(0, 1)}
@@ -256,9 +100,10 @@ export function CareCircleDashboard({
                 {person.responsibilities?.slice(0, 1).join('') ?? person.relationshipLabel}
               </span>
             </div>
-          </motion.article>
+          </motion.button>
         ))}
       </motion.div>
+
     </motion.section>
   );
 }

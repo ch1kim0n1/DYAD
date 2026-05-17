@@ -6,11 +6,11 @@
     "medications": [
       {
         "id": "med-1778975009907",
-        "name": "tylenol",
+        "name": "Lisinopril",
         "dosage": "10mg",
-        "schedule": "morning",
+        "schedule": "morning with breakfast",
         "personId": "linda",
-        "notes": "slkjf",
+        "notes": "Started after the blood pressure medication change. Family notes mention dizziness, so timing and side effects should stay under doctor or pharmacist review.",
         "addedAt": "2026-05-16T23:43:29.907Z"
       }
     ],

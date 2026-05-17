@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type SetStateAction } from 'react';
+import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { AnimatePresence, motion, type Variants } from 'framer-motion';
 import type { CareBrief } from './carecircleDemo.js';
 import { careCircleFixture, generateMessageDrafts } from './carecircleDemo.js';
@@ -8,12 +8,14 @@ import type { CareCircleRuntimeState } from './carecircleRuntime.js';
 
 interface CareMessageComposerProps {
   brief: CareBrief;
+  focusDraftTitle?: string | null;
   runtimeState: CareCircleRuntimeState;
   onRuntimeStateChange: Dispatch<SetStateAction<CareCircleRuntimeState>>;
 }
 
 export function CareMessageComposer({
   brief,
+  focusDraftTitle,
   runtimeState,
   onRuntimeStateChange,
 }: CareMessageComposerProps) {
@@ -62,6 +64,12 @@ export function CareMessageComposer({
       ],
     },
   ];
+
+  useEffect(() => {
+    if (focusDraftTitle && draftCards.some((card) => card.title === focusDraftTitle)) {
+      setSelectedTitle(focusDraftTitle);
+    }
+  }, [focusDraftTitle]);
 
   const selectedDraft = draftCards.find((card) => card.title === selectedTitle) ?? null;
 

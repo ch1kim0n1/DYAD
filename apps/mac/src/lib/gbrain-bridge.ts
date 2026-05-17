@@ -10,6 +10,8 @@
  * for fallback when the sidecar is unavailable.
  */
 import type {
+  CareEvent,
+  CareObservation,
   FeatureVector,
   NormalizedMessage,
   OrchestratorResult,
@@ -186,4 +188,31 @@ export async function requestReframe(
   }
   
   return reframe;
+}
+
+export interface GmailStatus {
+  connected: boolean;
+  email?: string;
+  lastSyncAt?: string;
+  error?: string;
+}
+
+export interface CareEventsResponse {
+  gmail_connected: boolean;
+  events: CareEvent[];
+  observations: CareObservation[];
+  upcoming: CareEvent[];
+  past: CareEvent[];
+}
+
+export async function getGmailStatus(): Promise<GmailStatus> {
+  return { connected: false };
+}
+
+export async function fetchCareEvents(): Promise<CareEventsResponse | null> {
+  return null;
+}
+
+export async function syncGmail(): Promise<{ ok?: boolean; error?: string } | null> {
+  return { ok: false, error: 'Gmail sync is not connected in this CareCircle demo build.' };
 }
