@@ -1,0 +1,162 @@
+{
+  "dashboard": {
+    "title": "G-Stack Overview",
+    "tags": ["gstack", "production"],
+    "timezone": "browser",
+    "refresh": "30s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "GOrchestrator - Active Sandboxes",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "gorchestrator_sandbox_count",
+            "legendFormat": "{{backend}}"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "GOrchestrator - Task Execution Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 0},
+        "targets": [
+          {
+            "expr": "rate(gorchestrator_task_execution_total[5m])",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "GOrchestrator - Task Duration (95th percentile)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(gorchestrator_task_execution_duration_seconds_bucket[5m]))",
+            "legendFormat": "95th percentile"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "GAgent - Pipeline Execution Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(gagent_pipeline_execution_total[5m])",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "GLearn - Proposals Generated",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "glearn_proposals_generated_total",
+            "legendFormat": "Total"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "GLearn - Proposal Confidence",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 6, "y": 12},
+        "targets": [
+          {
+            "expr": "avg(glearn_proposal_confidence)",
+            "legendFormat": "Average"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "GMirror - Evaluation Score",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "targets": [
+          {
+            "expr": "avg(gmirror_verdict_score)",
+            "legendFormat": "{{rubric}}"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "GMirror - Failure Modes",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "targets": [
+          {
+            "expr": "rate(gmirror_failure_modes_detected_total[5m])",
+            "legendFormat": "{{severity}}"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "System - Memory Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 20},
+        "targets": [
+          {
+            "expr": "memory_usage_bytes{type=\"heap_used\"} / 1024 / 1024 / 1024",
+            "legendFormat": "Heap Used (GB)"
+          },
+          {
+            "expr": "memory_usage_bytes{type=\"heap_total\"} / 1024 / 1024 / 1024",
+            "legendFormat": "Heap Total (GB)"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "System - CPU Usage",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 20},
+        "targets": [
+          {
+            "expr": "cpu_usage_percent",
+            "legendFormat": "CPU %"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "HTTP - Request Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 28},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total[5m])",
+            "legendFormat": "{{method}} {{route}}"
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "HTTP - Error Rate",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 28},
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{status_code=~\"5..\"}[5m])",
+            "legendFormat": "5xx"
+          },
+          {
+            "expr": "rate(http_requests_total{status_code=~\"4..\"}[5m])",
+            "legendFormat": "4xx"
+          }
+        ]
+      }
+    ]
+  }
+}

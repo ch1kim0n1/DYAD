@@ -5,6 +5,7 @@ import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
+import { z } from 'zod';
 import { GMirror } from '../core/gmirror.js';
 import { LocalAuditLogger } from '../core/observability.js';
 import { createAuthMiddleware, type AuthConfig, type AuthToken } from '@gstack/shared/core';
@@ -380,13 +381,38 @@ class GMirrorMCPServer {
     };
   }
 
+  private static readonly GetReceiptsArgsSchema = z.object({
+    limit: z.number().int().positive().max(1000).optional(),
+    offset: z.number().int().nonnegative().max(10000).optional(),
+    startDate: z.string().datetime().optional(),
+    endDate: z.string().datetime().optional(),
+  });
+
+  private static readonly GetDriftArgsSchema = z.object({
+    metricName: z.string().optional(),
+  });
+
+  private static readonly GetTrendArgsSchema = z.object({
+    windowDays: z.number().int().positive().max(365).optional(),
+  });
+
+  private static readonly ScoreArgsSchema = z.object({
+    payload: z.any(),
+    panelSize: z.number().int().positive().max(100).optional(),
+    mode: z.string().optional(),
+  });
+
   private async handleGetReceipts(args: {
     limit?: number;
     offset?: number;
     startDate?: string;
     endDate?: string;
   } = {}) {
-    const receipts = await this.gmirror.getReceipts(args);
+    const parsed = GMirrorMCPServer.GetReceiptsArgsSchema.safeParse(args);
+    if (!parsed.success) {
+      return this.errorResponse(`Invalid request: ${JSON.stringify(parsed.error.flatten())}`);
+    }
+    const receipts = await this.gmirror.getReceipts(parsed.data);
     return {
       content: [
         {
@@ -400,7 +426,11 @@ class GMirrorMCPServer {
   private async handleGetDrift(args: {
     metricName?: string;
   } = {}) {
-    const drift = await this.gmirror.getDrift(args.metricName);
+    const parsed = GMirrorMCPServer.GetDriftArgsSchema.safeParse(args);
+    if (!parsed.success) {
+      return this.errorResponse(`Invalid request: ${JSON.stringify(parsed.error.flatten())}`);
+    }
+    const drift = await this.gmirror.getDrift(parsed.data.metricName);
     return {
       content: [
         {
@@ -414,7 +444,11 @@ class GMirrorMCPServer {
   private async handleGetTrend(args: {
     windowDays?: number;
   } = {}) {
-    const windowDays = Number.isFinite(args.windowDays) && args.windowDays! > 0 ? args.windowDays! : 7;
+    const parsed = GMirrorMCPServer.GetTrendArgsSchema.safeParse(args);
+    if (!parsed.success) {
+      return this.errorResponse(`Invalid request: ${JSON.stringify(parsed.error.flatten())}`);
+    }
+    const windowDays = parsed.data.windowDays || 7;
     const end = new Date();
     const start = new Date(end.getTime() - windowDays * 24 * 60 * 60 * 1000);
     const receipts = await this.gmirror.getReceipts({
@@ -474,15 +508,20 @@ class GMirrorMCPServer {
     panelSize?: number;
     mode?: string;
   }) {
+    const parsed = GMirrorMCPServer.ScoreArgsSchema.safeParse(args);
+    if (!parsed.success) {
+      return this.errorResponse(`Invalid request: ${JSON.stringify(parsed.error.flatten())}`);
+    }
     const request = {
       request_id: crypto.randomUUID(),
-      mode: 'change' as const,
-      payload: args.payload,
+      payload: parsed.data.payload,
+      panel_size: parsed.data.panelSize || 5,
+      mode: (parsed.data.mode || 'standard') as 'change' | 'pre_build' | 'shadow',
       context: {},
       budget: {
         max_cost_usd: 10,
         max_latency_ms: 60000,
-        max_panel_size: args.panelSize || 10,
+        max_panel_size: parsed.data.panelSize || 10,
       },
       caller: {
         source: 'mcp',

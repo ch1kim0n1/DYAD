@@ -11,6 +11,7 @@ export interface StreamingOptions {
   maxTokens?: number;
   temperature?: number;
   apiKey?: string;
+  timeoutMs?: number;
   onToken?: (token: string) => void;
   onComplete?: (response: string) => void;
   onError?: (error: Error) => void;
@@ -35,81 +36,90 @@ export class StreamingLLMClient {
       throw new Error('Anthropic API key not found');
     }
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: options.model,
-        max_tokens: options.maxTokens || 4096,
-        messages: [{ role: 'user', content: options.prompt }],
-        stream: true,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`Anthropic API error: ${response.statusText}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('Response body is not readable');
-    }
-
-    const decoder = new TextDecoder();
-    let fullResponse = '';
-    let outputTokens = 0;
+    const timeoutMs = options.timeoutMs || 120000; // 2 minutes default
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiKey,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: options.model,
+          max_tokens: options.maxTokens || 4096,
+          messages: [{ role: 'user', content: options.prompt }],
+          stream: true,
+        }),
+        signal: controller.signal,
+      });
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+      if (!response.ok) {
+        throw new Error(`Anthropic API error: ${response.statusText}`);
+      }
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Response body is not readable');
+      }
 
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
-                const token = parsed.delta.text;
-                fullResponse += token;
-                outputTokens++;
-                if (options.onToken) {
-                  options.onToken(token);
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      let outputTokens = 0;
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.type === 'content_block_delta' && parsed.delta?.text) {
+                  const token = parsed.delta.text;
+                  fullResponse += token;
+                  outputTokens++;
+                  if (options.onToken) {
+                    options.onToken(token);
+                  }
                 }
+              } catch {
+                // Skip invalid JSON
               }
-            } catch {
-              // Skip invalid JSON
             }
           }
         }
+      } finally {
+        reader.releaseLock();
       }
+
+      if (options.onComplete) {
+        options.onComplete(fullResponse);
+      }
+
+      // Calculate cost
+      const inputTokens = this.estimateTokens(options.prompt);
+      const costUsd = this.calculateCost('anthropic', options.model, inputTokens, outputTokens);
+
+      return {
+        response: fullResponse,
+        inputTokens,
+        outputTokens,
+        costUsd,
+      };
     } finally {
-      reader.releaseLock();
+      clearTimeout(timeoutId);
     }
-
-    if (options.onComplete) {
-      options.onComplete(fullResponse);
-    }
-
-    // Calculate cost
-    const inputTokens = this.estimateTokens(options.prompt);
-    const costUsd = this.calculateCost('anthropic', options.model, inputTokens, outputTokens);
-
-    return {
-      response: fullResponse,
-      inputTokens,
-      outputTokens,
-      costUsd,
-    };
   }
 
   /**
@@ -121,81 +131,90 @@ export class StreamingLLMClient {
       throw new Error('OpenAI API key not found');
     }
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: options.model,
-        messages: [{ role: 'user', content: options.prompt }],
-        max_tokens: options.maxTokens || 4096,
-        temperature: options.temperature || 0.7,
-        stream: true,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.statusText}`);
-    }
-
-    const reader = response.body?.getReader();
-    if (!reader) {
-      throw new Error('Response body is not readable');
-    }
-
-    const decoder = new TextDecoder();
-    let fullResponse = '';
-    let outputTokens = 0;
+    const timeoutMs = options.timeoutMs || 120000; // 2 minutes default
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: options.model,
+          messages: [{ role: 'user', content: options.prompt }],
+          max_tokens: options.maxTokens || 4096,
+          temperature: options.temperature || 0.7,
+          stream: true,
+        }),
+        signal: controller.signal,
+      });
 
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split('\n');
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.statusText}`);
+      }
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            if (data === '[DONE]') continue;
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('Response body is not readable');
+      }
 
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.choices?.[0]?.delta?.content) {
-                const token = parsed.choices[0].delta.content;
-                fullResponse += token;
-                outputTokens++;
-                if (options.onToken) {
-                  options.onToken(token);
+      const decoder = new TextDecoder();
+      let fullResponse = '';
+      let outputTokens = 0;
+
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.choices?.[0]?.delta?.content) {
+                  const token = parsed.choices[0].delta.content;
+                  fullResponse += token;
+                  outputTokens++;
+                  if (options.onToken) {
+                    options.onToken(token);
+                  }
                 }
+              } catch {
+                // Skip invalid JSON
               }
-            } catch {
-              // Skip invalid JSON
             }
           }
         }
+      } finally {
+        reader.releaseLock();
       }
+
+      if (options.onComplete) {
+        options.onComplete(fullResponse);
+      }
+
+      // Calculate cost
+      const inputTokens = this.estimateTokens(options.prompt);
+      const costUsd = this.calculateCost('openai', options.model, inputTokens, outputTokens);
+
+      return {
+        response: fullResponse,
+        inputTokens,
+        outputTokens,
+        costUsd,
+      };
     } finally {
-      reader.releaseLock();
+      clearTimeout(timeoutId);
     }
-
-    if (options.onComplete) {
-      options.onComplete(fullResponse);
-    }
-
-    // Calculate cost
-    const inputTokens = this.estimateTokens(options.prompt);
-    const costUsd = this.calculateCost('openai', options.model, inputTokens, outputTokens);
-
-    return {
-      response: fullResponse,
-      inputTokens,
-      outputTokens,
-      costUsd,
-    };
   }
 
   /**

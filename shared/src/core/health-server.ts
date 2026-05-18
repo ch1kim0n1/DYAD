@@ -30,16 +30,25 @@ export class HealthServer {
   private isShuttingDown = false;
   private shutdownTimeout: number;
   private shutdownHandlers: Array<() => Promise<void>> = [];
+  private maxRequestSize: number;
+  private requestTimeout: number;
+  private allowedOrigins: string[];
 
   constructor(
     livenessCheck: HealthCheckFn,
     readinessCheck: ReadinessCheckFn,
     private port: number = 8080,
-    shutdownTimeout: number = 30000
+    shutdownTimeout: number = 30000,
+    maxRequestSize: number = 1024 * 1024, // 1MB default
+    requestTimeout: number = 30000, // 30 seconds default
+    allowedOrigins: string[] = ['http://localhost:3000']
   ) {
     this.livenessCheck = livenessCheck;
     this.readinessCheck = readinessCheck;
     this.shutdownTimeout = shutdownTimeout;
+    this.maxRequestSize = maxRequestSize;
+    this.requestTimeout = requestTimeout;
+    this.allowedOrigins = allowedOrigins;
   }
 
   /**
@@ -85,12 +94,16 @@ export class HealthServer {
    * Handle incoming HTTP requests
    */
   private async handleRequest(req: any, res: any): Promise<void> {
-    const { method, url } = req;
+    const { method, url, headers } = req;
 
-    // Enable CORS
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    // Enable CORS with origin validation
+    const origin = headers['origin'];
+    if (origin && this.allowedOrigins.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    }
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Credentials', 'false');
 
     if (method === 'OPTIONS') {
       res.writeHead(204);
@@ -98,13 +111,38 @@ export class HealthServer {
       return;
     }
 
+    // Validate Content-Type for POST requests
+    if (method === 'POST' && headers['content-type'] && headers['content-type'] !== 'application/json') {
+      res.writeHead(415);
+      res.end(JSON.stringify({ error: 'Unsupported Media Type' }));
+      return;
+    }
+
+    // Check Content-Length for request size limiting
+    const contentLength = parseInt(headers['content-length'] || '0', 10);
+    if (contentLength > this.maxRequestSize) {
+      res.writeHead(413);
+      res.end(JSON.stringify({ error: 'Payload Too Large' }));
+      return;
+    }
+
+    // Set request timeout
+    const timeout = setTimeout(() => {
+      if (!res.writableEnded) {
+        res.writeHead(408);
+        res.end(JSON.stringify({ error: 'Request Timeout' }));
+      }
+    }, this.requestTimeout);
+
+    res.on('finish', () => clearTimeout(timeout));
+
     try {
       if (url === '/health/live' && method === 'GET') {
         await this.handleLiveness(res);
       } else if (url === '/health/ready' && method === 'GET') {
         await this.handleReadiness(res);
       } else if (url === '/health/shutdown' && method === 'POST') {
-        await this.handleShutdown(res);
+        await this.handleShutdown(req, res);
       } else {
         res.writeHead(404);
         res.end(JSON.stringify({ error: 'Not found' }));
@@ -153,10 +191,10 @@ export class HealthServer {
   /**
    * Handle graceful shutdown trigger
    */
-  private async handleShutdown(res: ServerResponse): Promise<void> {
+  private async handleShutdown(req: IncomingMessage, res: ServerResponse): Promise<void> {
     res.writeHead(202, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ status: 'shutdown_initiated' }));
-    
+
     // Trigger graceful shutdown asynchronously
     this.shutdown().catch(err => {
       console.error('[HealthServer] Shutdown error:', err);

@@ -1,0 +1,170 @@
+# G-Stack Alerting Rules
+
+groups:
+  - name: gorchestrator
+    interval: 30s
+    rules:
+      - alert: HighSandboxCount
+        expr: gorchestrator_sandbox_count > 40
+        for: 5m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "High sandbox count detected"
+          description: "Sandbox count is {{ $value }} which is above threshold of 40"
+
+      - alert: TaskExecutionFailureRate
+        expr: rate(gorchestrator_task_execution_total{status="failed"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: orchestrator
+        annotations:
+          summary: "High task execution failure rate"
+          description: "Task execution failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: SandboxProvisionTimeout
+        expr: rate(gorchestrator_sandbox_provision_duration_seconds_bucket{le="30"}[5m]) < 0.95
+        for: 10m
+        labels:
+          severity: critical
+          component: orchestrator
+        annotations:
+          summary: "Sandbox provisioning timeouts"
+          description: "Less than 95% of sandbox provisions complete within 30s"
+
+  - name: gagent
+    interval: 30s
+    rules:
+      - alert: PipelineExecutionFailureRate
+        expr: rate(gagent_pipeline_execution_total{status="failed"}[5m]) > 0.15
+        for: 5m
+        labels:
+          severity: warning
+          component: agent
+        annotations:
+          summary: "High pipeline execution failure rate"
+          description: "Pipeline execution failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: BrainSearchLatency
+        expr: histogram_quantile(0.95, rate(gagent_brain_search_duration_seconds_bucket[5m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          component: agent
+        annotations:
+          summary: "High GBrain search latency"
+          description: "95th percentile GBrain search latency is {{ $value }}s"
+
+  - name: glearn
+    interval: 30s
+    rules:
+      - alert: PatternMiningFailure
+        expr: rate(glearn_pattern_mining_duration_seconds_count{status="failed"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: learn
+        annotations:
+          summary: "Pattern mining failures"
+          description: "Pattern mining failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: LowProposalConfidence
+        expr: avg(glearn_proposal_confidence) < 0.6
+        for: 15m
+        labels:
+          severity: info
+          component: learn
+        annotations:
+          summary: "Low proposal confidence"
+          description: "Average proposal confidence is {{ $value }}"
+
+  - name: gmirror
+    interval: 30s
+    rules:
+      - alert: EvaluationFailureRate
+        expr: rate(gmirror_evaluation_total{status="failed"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: mirror
+        annotations:
+          summary: "High evaluation failure rate"
+          description: "Evaluation failure rate is {{ $value | humanizePercentage }}"
+
+      - alert: LowVerdictScores
+        expr: avg(gmirror_verdict_score) < 0.5
+        for: 15m
+        labels:
+          severity: warning
+          component: mirror
+        annotations:
+          summary: "Low verdict scores"
+          description: "Average verdict score is {{ $value }}"
+
+  - name: system
+    interval: 30s
+    rules:
+      - alert: HighMemoryUsage
+        expr: memory_usage_bytes{type="heap_used"} / memory_usage_bytes{type="heap_total"} > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value | humanizePercentage }}"
+
+      - alert: HighCPUUsage
+        expr: cpu_usage_percent > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}%"
+
+      - alert: HighDiskUsage
+        expr: disk_usage_bytes / disk_usage_bytes{mount="/"} > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High disk usage"
+          description: "Disk usage is {{ $value | humanizePercentage }}"
+
+  - name: http
+    interval: 30s
+    rules:
+      - alert: HighHTTP5xxRate
+        expr: rate(http_requests_total{status_code=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: http
+        annotations:
+          summary: "High HTTP 5xx error rate"
+          description: "HTTP 5xx error rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighHTTP4xxRate
+        expr: rate(http_requests_total{status_code=~"4.."}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: http
+        annotations:
+          summary: "High HTTP 4xx error rate"
+          description: "HTTP 4xx error rate is {{ $value | humanizePercentage }}"
+
+      - alert: HighHTTPLatency
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 2
+        for: 10m
+        labels:
+          severity: warning
+          component: http
+        annotations:
+          summary: "High HTTP latency"
+          description: "95th percentile HTTP latency is {{ $value }}s"

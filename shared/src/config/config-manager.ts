@@ -3,10 +3,73 @@
  * 
  * Provides unified configuration management across all g-stack tools.
  * Supports environment variables, config files, and runtime overrides.
+ * Uses Zod for schema validation and type safety.
  */
 
-import * as fs from 'fs/promises';
+import * as fs from 'fs';
+import * as fsp from 'fs/promises';
 import * as path from 'path';
+import { z } from 'zod';
+
+// Zod schemas for configuration validation
+export const CommonConfigSchema = z.object({
+  // Environment
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
+  
+  // Logging
+  log_level: z.enum(['DEBUG', 'INFO', 'WARN', 'ERROR']).default('INFO'),
+  log_format: z.enum(['json', 'text']).default('json'),
+  
+  // API
+  API_PORT: z.coerce.number().min(1).max(65535).optional(),
+  API_HOST: z.string().optional(),
+  
+  // Timeouts
+  gbrain_timeout_ms: z.coerce.number().min(100).max(300000).optional(),
+  sandbox_timeout_ms: z.coerce.number().min(1000).max(600000).optional(),
+  
+  // Security
+  secret_backend: z.enum(['env', 'file', 'keyring']).default('env'),
+});
+
+export const GOrchestratorConfigSchema = CommonConfigSchema.extend({
+  TOOL_NAME: z.literal('gorchestrator'),
+  SANDBOX_BACKEND: z.enum(['docker', 'e2b', 'modal', 'daytona', 'firecracker', 'inprocess']).default('docker'),
+  SANDBOX_MAX_CONCURRENCY: z.coerce.number().min(1).max(50).default(5),
+  MOCK_SANDBOX: z.coerce.boolean().default(false),
+  GORCHESTRATOR_MCP_TOKEN: z.string().optional(),
+  GORCHESTRATOR_SECRET_DIR: z.string().default('~/.gorchestrator/secrets'),
+  GORCHESTRATOR_AUDIT_DIR: z.string().default('~/.gorchestrator/audit'),
+});
+
+export const GAgentConfigSchema = CommonConfigSchema.extend({
+  TOOL_NAME: z.literal('gagent'),
+  PIPELINE_MAX_PARALLEL: z.coerce.number().min(1).max(20).default(3),
+  GAGENT_MCP_TOKEN: z.string().optional(),
+  GAGENT_SECRET_DIR: z.string().default('~/.gagent/secrets'),
+  GAGENT_AUDIT_DIR: z.string().default('~/.gagent/audit'),
+});
+
+export const GLearnConfigSchema = CommonConfigSchema.extend({
+  TOOL_NAME: z.literal('glearn'),
+  LEARNING_ENABLED: z.coerce.boolean().default(true),
+  GLEARN_MCP_TOKEN: z.string().optional(),
+  GLEARN_SECRET_DIR: z.string().default('~/.glearn/secrets'),
+  GLEARN_AUDIT_DIR: z.string().default('~/.glearn/audit'),
+});
+
+export const GMirrorConfigSchema = CommonConfigSchema.extend({
+  TOOL_NAME: z.literal('gmirror'),
+  EVALUATION_MODE: z.enum(['strict', 'lenient', 'balanced']).default('balanced'),
+  GMIRROR_MCP_TOKEN: z.string().optional(),
+  GMIRROR_SECRET_DIR: z.string().default('~/.gmirror/secrets'),
+  GMIRROR_AUDIT_DIR: z.string().default('~/.gmirror/audit'),
+});
+
+export type GOrchestratorConfig = z.infer<typeof GOrchestratorConfigSchema>;
+export type GAgentConfig = z.infer<typeof GAgentConfigSchema>;
+export type GLearnConfig = z.infer<typeof GLearnConfigSchema>;
+export type GMirrorConfig = z.infer<typeof GMirrorConfigSchema>;
 
 export interface ConfigSchema {
   // LLM Configuration
@@ -55,6 +118,8 @@ export class ConfigManager {
   private config: ConfigSchema;
   private configPath: string;
   private validationRules: ConfigValidationRule[];
+  private watchers: fs.FSWatcher | null = null;
+  private onReloadCallbacks: Array<(config: ConfigSchema) => void> = [];
 
   constructor(configPath?: string) {
     this.configPath = configPath || path.join(process.cwd(), '.gstack', 'config.json');
@@ -105,7 +170,7 @@ export class ConfigManager {
    */
   private async loadFromFile(): Promise<void> {
     try {
-      const content = await fs.readFile(this.configPath, 'utf8');
+      const content = await fsp.readFile(this.configPath, 'utf8');
       const fileConfig = JSON.parse(content) as Partial<ConfigSchema>;
       this.config = { ...this.config, ...fileConfig };
     } catch (error) {
@@ -244,8 +309,8 @@ export class ConfigManager {
    */
   async save(): Promise<void> {
     const dir = path.dirname(this.configPath);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
+    await fsp.mkdir(dir, { recursive: true });
+    await fsp.writeFile(this.configPath, JSON.stringify(this.config, null, 2), 'utf8');
   }
 
   /**
@@ -294,6 +359,123 @@ export class ConfigManager {
       }
     }
     return envVars;
+  }
+
+  /**
+   * Validate configuration on startup
+   * Returns validation result with errors if any
+   */
+  validateStartup(toolName?: string): { valid: boolean; errors: string[]; warnings: string[] } {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const nodeEnv = process.env.NODE_ENV || 'development';
+
+    // Re-run validation
+    try {
+      this.validate();
+    } catch (error) {
+      if (error instanceof Error) {
+        errors.push(error.message);
+      }
+    }
+
+    // Check for required secrets in production
+    if (nodeEnv === 'production') {
+      const config = this.config as any;
+      if (toolName === 'gorchestrator' && !config.GORCHESTRATOR_MCP_TOKEN) {
+        errors.push('GORCHESTRATOR_MCP_TOKEN is required in production');
+      }
+      if (toolName === 'gagent' && !config.GAGENT_MCP_TOKEN) {
+        errors.push('GAGENT_MCP_TOKEN is required in production');
+      }
+      if (toolName === 'glearn' && !config.GLEARN_MCP_TOKEN) {
+        errors.push('GLEARN_MCP_TOKEN is required in production');
+      }
+      if (toolName === 'gmirror' && !config.GMIRROR_MCP_TOKEN) {
+        errors.push('GMIRROR_MCP_TOKEN is required in production');
+      }
+    }
+
+    // Warn about missing optional but recommended configs
+    if (!this.config.anthropic_api_key && !this.config.openai_api_key) {
+      warnings.push('No LLM API keys configured. LLM features will not work.');
+    }
+
+    if (this.config.cost_tracking_enabled && !this.config.budget_usd) {
+      warnings.push('Cost tracking enabled but no budget set. Set GSTACK_BUDGET_USD.');
+    }
+
+    return {
+      valid: errors.length === 0,
+      errors,
+      warnings,
+    };
+  }
+
+  /**
+   * Export configuration for debugging (with secrets redacted)
+   */
+  exportSafe(): Record<string, unknown> {
+    const config = { ...this.config };
+    const secretKeys = ['TOKEN', 'SECRET', 'PASSWORD', 'KEY', 'api_key'];
+    
+    for (const key in config) {
+      if (secretKeys.some(secret => key.toLowerCase().includes(secret.toLowerCase()))) {
+        (config as any)[key] = '[REDACTED]';
+      }
+    }
+
+    return config;
+  }
+
+  /**
+   * Enable hot-reload of configuration file
+   */
+  enableHotReload(): void {
+    if (this.watchers) {
+      return; // Already watching
+    }
+
+    try {
+      this.watchers = fs.watch(this.configPath, async (eventType) => {
+        if (eventType === 'change') {
+          try {
+            await this.load();
+            for (const callback of this.onReloadCallbacks) {
+              callback(this.config);
+            }
+          } catch (error) {
+            console.error('Failed to reload configuration:', error);
+          }
+        }
+      });
+    } catch (error) {
+      console.warn('Failed to enable hot-reload:', error);
+    }
+  }
+
+  /**
+   * Disable hot-reload of configuration file
+   */
+  disableHotReload(): void {
+    if (this.watchers) {
+      this.watchers.close();
+      this.watchers = null;
+    }
+  }
+
+  /**
+   * Register a callback to be called when configuration is reloaded
+   */
+  onReload(callback: (config: ConfigSchema) => void): void {
+    this.onReloadCallbacks.push(callback);
+  }
+
+  /**
+   * Reload configuration from file and environment variables
+   */
+  async reload(): Promise<void> {
+    await this.load();
   }
 }
 

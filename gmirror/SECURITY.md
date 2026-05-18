@@ -21,3 +21,28 @@ npm run verify
 ```
 
 Before release, run `npm run ci:local` to include build and CLI smoke checks.
+
+## Secret Rotation
+
+Rotate secrets regularly using the CLI:
+
+```bash
+# Rotate auth secret used for JWT token signing
+gmirror secrets rotate gmirror_auth_secret
+
+# Rotate MCP bootstrap token
+gmirror secrets rotate gmirror_mcp_token
+
+# Rotate health shutdown token
+gmirror secrets rotate health_shutdown_token
+
+# List all secrets
+gmirror secrets list
+```
+
+Secrets are stored in `GMIRROR_SECRET_DIR` (default: `~/.gmirror/secrets/`). Each rotation increments the version and records the timestamp. Rotate auth secrets:
+- Immediately if compromised or suspected compromise
+- On a regular schedule (e.g., quarterly) for production deployments
+- Before deploying to new environments
+
+After rotating `gmirror_auth_secret`, restart the MCP server to use the new signing key. After rotating `gmirror_mcp_token`, update any clients using the bootstrap token.

@@ -25,6 +25,9 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
 
   # gorchestrator Service
   gorchestrator:
@@ -55,6 +58,9 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
+    mem_limit: 768m
+    mem_reservation: 384m
+    cpus: 1.5
 
   # gmirror Service
   gmirror:
@@ -79,6 +85,9 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
 
   # GToM Service
   gtom:
@@ -103,6 +112,9 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
 
   # gagent Service
   gagent:
@@ -129,6 +141,9 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
 
   # glearn Service
   glearn:
@@ -155,6 +170,9 @@ services:
       timeout: 10s
       retries: 3
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
+    cpus: 1.0
 
   # PostgreSQL Database (for persistence)
   postgres:
@@ -176,6 +194,9 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    mem_limit: 1g
+    mem_reservation: 512m
+    cpus: 2.0
 
   # Redis (for caching and rate limiting)
   redis:
@@ -194,6 +215,9 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 128m
+    cpus: 0.5
 
   # MinIO (for object storage)
   minio:
